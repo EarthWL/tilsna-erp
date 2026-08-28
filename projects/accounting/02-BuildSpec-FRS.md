@@ -29,7 +29,7 @@
 | เขียนค่าลง alias `status` ของ AC_VOUCHER | **alias จริงคือ `status1`** | ใช้ `status1` หรือ field id `6a86016b1049edca1eed028a` |
 | สร้าง worksheet / field / optionset ซ้ำ | ของมีแล้ว 34 ตาราง + 30 optionset | เช็ก §1.2 และ §1.3 ก่อนทุกครั้ง |
 | สรุปจาก `get_workflow_list` ว่างว่า "ไม่มี workflow" | tool คืนเฉพาะ PBP — ยืนยันแล้วเป็นจุดบอด | เปิดหน้า **Automated Workflow** หรือดู log `user-workflow` |
-| สรุปว่า "workflow ทำงานแล้ว" จาก operator `user-api` | นั่นคือเขียนมือ | ต้องเห็น operator **`user-workflow`** ใน `get_record_logs` |
+| สรุปว่า "workflow ทำงานแล้ว" จาก operator `user-api` | นั่นคือเขียนมือ | ต้องเห็น `_createdBy`/`_updatedBy` = **`user-workflow`** ผ่าน `get_record_details(includeSystemFields:true)` — ⚠️ **ห้ามใช้ operator ใน `get_record_logs`** ให้ผลลบลวง (คืน `user-api` แม้ workflow เป็นคนเขียนจริง ยืนยัน 28 ส.ค. 2569) |
 | ใช้ Trigger Condition อ้างฟิลด์ SingleSelect | field-cache bug → Publish error "1 nodes with abnormal" | ใช้ **Trigger Field** แล้วทำเงื่อนไขใน Branch node แรก |
 | แปลง Number → Formula ตรง ๆ | แพลตฟอร์มไม่รองรับ | ลบแล้วสร้างใหม่ (field ID เปลี่ยน — อัปเดต §1) |
 | ใช้ Formula field เพิ่ม | dialog ไม่เสถียร สูตรหาย | Number field + node `Function calculation` ให้ workflow เขียน |
@@ -950,7 +950,7 @@
 
 | ต้องรู้ | เรียก | ผลที่คาด |
 |---|---|---|
-| WF-AC-01 ทำงาน | `get_record_logs(ac_voucher, <rowid>)` | มีบรรทัดเขียน `status1` operator = **`user-workflow`** |
+| WF-AC-01 ทำงาน | `get_record_details(ac_voucher, <rowid>, includeSystemFields:true)` | `_updatedBy` = **`user-workflow`** หลังเขียน `status1` — ⚠️ ห้ามใช้ operator จาก `get_record_logs` (ผลลบลวง) |
 | approval ถูกส่งจริง | `get_approval_list_by_row(ac_voucher, <rowid>)` | มี instance พร้อมผู้รับผิดชอบ |
 | WF-AC-02 สร้าง GL | `get_record_list(ac_gl, filter voucher_row_id = <rowid>, includeTotalCount)` | จำนวน = จำนวนบรรทัดของใบสำคัญ |
 | ไม่ผ่านรายการซ้ำ | ยิง `update_record` ซ้ำ แล้วนับใหม่ | จำนวนเท่าเดิม |
@@ -1074,7 +1074,7 @@
 | Draft / Pending approval | Cancelled `60a0ca22-…` | ปุ่ม "ยกเลิก" |
 
 **DoD:** ตั้งหนี้ที่มีบรรทัดอัตราปกติ + ศูนย์ + ยกเว้นปนกัน แยกฐานถูกต้องและคิด VAT เฉพาะฐานที่ต้องเสีย (TC-16) · เอกสารเดียวกันแบบราคารวมภาษีให้ยอด GL เท่ากับแบบแยกภาษี (TC-17) · กรณีผู้จ่ายออกภาษีแทน ฐานถูก gross-up และใบรับรองตรงกับ GL (TC-18) · ใบแจ้งหนี้ซ้ำถูกเตือนและบังคับให้ระบุเหตุผล (TC-09)
-**วิธี verify:** `create_record(ac_ap)` + 3 บรรทัดต่างอัตรา → อ่าน `taxable_base`, `non_taxable_base`, `vat_amount` กลับ และ `get_record_logs` ต้องขึ้น `user-workflow`
+**วิธี verify:** `create_record(ac_ap)` + 3 บรรทัดต่างอัตรา → อ่าน `taxable_base`, `non_taxable_base`, `vat_amount` กลับ และ `get_record_details(includeSystemFields:true)._updatedBy` ต้องขึ้น `user-workflow` (⚠️ ไม่ใช่ operator จาก `get_record_logs` — ให้ผลลบลวง)
 **Gap:** 🔴 ต้องสร้าง **17 ฟิลด์บน AC_AP + 7 ฟิลด์บน AC_AP_LINE** ก่อนเริ่ม workflow ใด ๆ ของ FR-07
 
 ---
@@ -2016,7 +2016,7 @@
 |---|---|---|---|
 | NFR-01 ความปลอดภัย/สิทธิ์ | ⚠️ | role ครบ 8 ตัวมี ID แล้ว · permission ยังไม่ยืนยัน · ไม่มีสมาชิก | `get_role_details` + Role Debugging |
 | NFR-02 PDPA | ⬜ | ซ่อนฟิลด์ `tax_id`, `AC_PARTNER_BANK.account_no` ที่ระดับ role (ตั้งใน UI) | Role Debugging เป็น AC-R6 |
-| NFR-03 audit trail | ✅ | `get_record_logs` ให้ผู้กระทำ เวลา ค่าก่อน–หลังครบ · **Application Logs** ใน org console ให้ "ใครดู/พิมพ์/ดาวน์โหลด" — ไม่ต้องสร้างตาราง log เอง | `get_record_logs(ac_voucher, <rowid>)` (TC-15) |
+| NFR-03 audit trail | ✅ | `get_record_logs` ให้เวลาและค่าก่อน–หลังครบ · ⚠️ **ฟิลด์ operator สะท้อนผู้จุดชนวน ไม่ใช่ตัวการที่เขียนจริง** — ถ้าต้องพิสูจน์ว่า workflow เป็นคนเขียน ใช้ `_updatedBy` จาก `get_record_details(includeSystemFields:true)` แทน · **Application Logs** ใน org console ให้ "ใครดู/พิมพ์/ดาวน์โหลด" — ไม่ต้องสร้างตาราง log เอง | `get_record_logs(ac_voucher, <rowid>)` (TC-15) — ดูค่าก่อน-หลัง ไม่ใช่ operator |
 | NFR-04 ความถูกต้องของตัวเลข | 🔶 | ฟิลด์จำนวนเงินเป็น Number precision 2 · `total_debit`/`total_credit` เป็น Rollup ✅ · **แต่ยอดบน AC_AP/AC_PAY ยังไม่มีฟิลด์** 🔴 | `get_worksheet_structure` ตรวจ precision |
 | NFR-05 ความต่อเนื่องของลำดับ | ⚠️ | `AC_GL.movement_seq` เป็น AutoNumber ✅ · การตรวจเลขขาดหายอยู่ใน WF-AC-12 ข้อ 5 ⬜ | เทียบ max(`movement_seq`) กับจำนวนแถว |
 | NFR-06 SLA | ⬜ | WF-AC-12 แจ้งเตือนเมื่อค้างเกิน 1 วันทำการ | Workflow History |
@@ -2049,8 +2049,8 @@
 
 | ต้องตรวจ | เรียก | ผลที่คาด |
 |---|---|---|
-| workflow ยิงจริง | `get_record_logs(<ws>, <rowId>)` | มีบรรทัด operator = **`user-workflow`** |
-| การกดปุ่มทำงาน | `get_record_logs` | บรรทัด `user-self` เปลี่ยนสถานะ **ตามด้วย** บรรทัด `user-workflow` |
+| workflow ยิงจริง | `get_record_details(<ws>, <rowId>, includeSystemFields:true)` | `_updatedBy` = **`user-workflow`** — ⚠️ **ห้ามใช้ operator จาก `get_record_logs`** ให้ผลลบลวง (คืน `user-api` แม้ workflow เขียนจริง) |
+| การกดปุ่มทำงาน | `get_record_details(includeSystemFields:true)` เทียบ 2 จังหวะ (ก่อน/หลัง publish node ถัดไป) | `_updatedBy` เปลี่ยนจาก `user-self` (ตอนกดปุ่ม) เป็น `user-workflow` (ตอน node ถัดไปเขียน) — ⚠️ ห้ามอ่านลำดับนี้จาก `get_record_logs` operator เพราะสะท้อนผู้จุดชนวนไม่ใช่ตัวการจริง |
 | approval ถูกส่ง | `get_approval_list_by_row(<ws>, <rowId>)` | มี instance + ผู้รับผิดชอบ |
 | ผลการอนุมัติ | `get_approval_detail(<processId>)` | สถานะเปลี่ยน + Data Update เขียนค่าแล้ว |
 | มี workflow อยู่จริงไหม | **หน้า Automated Workflow ใน Browser** | ❌ **ห้ามใช้ `get_workflow_list`** — คืนเฉพาะ PBP |
@@ -2084,7 +2084,7 @@
 | TC-12 | งบทดลอง / งบแสดงฐานะการเงิน | RPT-AC-01 / 04 | FR-16 |
 | TC-13 | ใบรับรองหัก ณ ที่จ่าย | WF-AC-06 + print template | FR-09 |
 | TC-14 | ผู้ตรวจสอบภายในอ่านอย่างเดียว | role AC-R5 | FR-19 |
-| TC-15 | ประวัติการแก้ไข | `get_record_logs` | NFR-03 |
+| TC-15 | ประวัติการแก้ไข (เวลา + ค่าก่อน-หลัง) | `get_record_logs` — ดูเวลา/ค่าก่อน-หลัง เท่านั้น ไม่ใช่ operator | NFR-03 |
 | TC-16 | หลายอัตรา VAT ในเอกสารเดียว | `AC_VAT_RATE.is_taxable_base` + WF-AC-03 | FR-05 / FR-07 |
 | TC-17 | ราคารวมภาษี = ราคาแยกภาษี | `AC_AP.price_basis` 🆕 + WF-AC-03 | FR-07 |
 | TC-18 | ผู้จ่ายออกภาษีแทน (gross-up) | `wht_borne_by` 🆕 + WF-AC-06 | FR-07 / FR-09 |

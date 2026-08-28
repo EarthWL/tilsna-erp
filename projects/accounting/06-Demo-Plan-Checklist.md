@@ -20,7 +20,7 @@ workflow ที่จะโชว์สด (ต้องผ่าน Test recipe
 | WF-AC-15 | ลงทะเบียนใบกำกับภาษีซื้อ → กำหนดงวดเครดิตให้เอง | `claim_period` ถูกเติมโดยระบบ |
 | WF-AC-09 | ปิดงวดขณะมีใบสำคัญค้าง → ระบบปฏิเสธพร้อมรายชื่อ | ข้อความบอกว่ามีเอกสารใดค้างบ้าง |
 
-> **จุดขายที่ต้องพูดให้ชัด:** เปิด `get_record_logs` ให้เห็นว่าใครแก้อะไร — บรรทัด `user-self` (คนกดปุ่ม) ตามด้วย `user-workflow` (ระบบทำงานต่อ) คือหลักฐานว่าระบบทำงานเอง ไม่ใช่คนคีย์
+> **จุดขายที่ต้องพูดให้ชัด:** เปิด `get_record_details(includeSystemFields:true)` เทียบ 2 จังหวะ ให้เห็น `_updatedBy` เปลี่ยนจาก `user-self` (คนกดปุ่ม) เป็น `user-workflow` (ระบบทำงานต่อ) คือหลักฐานว่าระบบทำงานเอง ไม่ใช่คนคีย์ — ⚠️ **ห้ามใช้ `get_record_logs` โชว์ตรงนี้ในดีโม** operator ในนั้นให้ผลลบลวง (สะท้อนผู้จุดชนวน ไม่ใช่ workflow) อาจโชว์ผิดต่อหน้าลูกค้าได้
 
 ### Phase D2 — จัดชุดข้อมูลโชว์ 🔴
 
@@ -86,7 +86,7 @@ workflow ที่จะโชว์สด (ต้องผ่าน Test recipe
 
 | ☐ | รายการ | วิธีตรวจ | ผลที่ต้องได้ |
 |---|---|---|---|
-| ☐ | WF-AC-01 ยิงจริง | `get_record_logs(ac_voucher, <rowid>)` | มีบรรทัด operator `user-workflow` |
+| ☐ | WF-AC-01 ยิงจริง | `get_record_details(ac_voucher, <rowid>, includeSystemFields:true)` | `_updatedBy` = `user-workflow` — ⚠️ ห้ามใช้ operator จาก `get_record_logs` (ผลลบลวง) |
 | ☐ | approval เข้า To-do จริง | `get_approval_list_by_row` | มี instance พร้อมผู้รับผิดชอบ |
 | ☐ | WF-AC-02 สร้าง GL ครบ | `get_record_list(ac_gl, filter voucher_row_id, includeTotalCount)` | จำนวน = จำนวนบรรทัดใบสำคัญ |
 | ☐ | ผ่านรายการซ้ำไม่เกิด GL ซ้ำ | ยิง `update_record` เป็น Approved อีกครั้ง | จำนวน AC_GL เท่าเดิม |
