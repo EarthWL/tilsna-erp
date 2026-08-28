@@ -18,8 +18,13 @@ fi
 
 for attempt in 1 2 3; do
   sync_repo || exit 1
-  echo "$LINE" >> "$LOG"; git add -A >/dev/null; git commit -qm "close($AGENT): $TASK"
-  push_or_retry && { echo "POSTFLIGHT OK: ${MODE#--} $TASK"; exit 0; }
+  echo "$LINE" >> "$LOG"; git add -A >/dev/null
+  if ! git commit -qm "close($AGENT): $TASK"; then
+    echo "POSTFLIGHT FAIL: commit ไม่สำเร็จ — ใบจองยังไม่ถูกปิด"; exit 1
+  fi
+  if push_or_retry && [ "$(git rev-parse HEAD)" = "$(git ls-remote "$REMOTE" "$(cur_branch)" 2>/dev/null | cut -f1)" ]; then
+    echo "POSTFLIGHT OK: ${MODE#--} $TASK"; exit 0
+  fi
   git reset -q --hard HEAD~1
 done
 echo "POSTFLIGHT FAIL"; exit 1

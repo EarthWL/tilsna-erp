@@ -33,8 +33,13 @@ for attempt in 1 2 3; do
 
   # จอง แล้วให้ remote ตัดสิน
   echo "CLAIM $(now_iso) $APP $TASK $OBJS" >> "$LOG"
-  git add "$ROOT/shared/claims" >/dev/null; git commit -qm "claim($AGENT): $TASK"
-  if push_or_retry; then echo "PREFLIGHT OK: $AGENT ถือ $TASK"; exit 0; fi
+  git add "$ROOT/shared/claims" >/dev/null
+  if ! git commit -qm "claim($AGENT): $TASK"; then
+    echo "PREFLIGHT FAIL: commit ใบจองไม่สำเร็จ — ยังไม่ได้ถือสิทธิ์ ห้ามแตะแอป"; exit 1
+  fi
+  if push_or_retry && claim_landed "$AGENT" "$TASK"; then
+    echo "PREFLIGHT OK: $AGENT ถือ $TASK"; exit 0
+  fi
   echo "PREFLIGHT RETRY $attempt: มีคนpushก่อน — ตรวจใหม่"
   git reset -q --hard HEAD~1
 done
