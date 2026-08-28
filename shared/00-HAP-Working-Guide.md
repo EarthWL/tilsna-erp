@@ -143,6 +143,15 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 - `get_role_list` คืนเฉพาะ **org role** ไม่คืน application custom role (แต่บาง tenant คืนครบ — ตรวจก่อนสรุปทุกครั้ง)
 - `get_record_pivot_data` ต้องมี `viewId` (`430028`) แต่ **dimension ไม่จำเป็น**
 - **`find_member` / `find_department` / `get_regions` ถูกถอดออกแล้ว** (มี 24 ส.ค. หาย 26 ส.ค.)
+- 🔴 **[V] 28 ส.ค. 2569 — `get_record_logs` แบ่ง operator เป็น 2 ชนิด ห้ามใช้ตัดสินว่า workflow ทำงานหรือไม่** · รายการที่เขียน **ฟิลด์กรอบอนุมัติ** (`wfstatus`/`wfcuaids`/`wfname`) → operator `user-workflow` ✅ แต่รายการที่เขียน **ฟิลด์ธุรกิจจาก node ของเราเอง** (`update_record` ใน workflow) → operator **`user-api`** ❌ ⇒ **ยิ่งเป็น node ที่เราเขียน ยิ่งถูกรายงานเป็น `user-api`** คนที่ตรวจว่า "node ฉันทำงานไหม" โดยหา `user-workflow` ใน log จะได้ผลลบลวงเสมอ · **ใช้ `get_record_details(includeSystemFields:true)` → `_updatedBy`/`_createdBy` แทน** (คืน `user-workflow` ถูกต้อง และมี `_processName`/`_processStatus` ให้ด้วยเมื่อเข้าสายอนุมัติ) · `get_record_logs` ยังดีสำหรับดู "ฟิลด์ไหนเปลี่ยนจากอะไรเป็นอะไรเมื่อไร" เท่านั้น
+  - *พิสูจน์ซ้ำ:* ยิง workflow ที่มี `update_record` node ให้สำเร็จ 1 ครั้ง แล้วเรียก `get_record_logs` กับ `get_record_details(includeSystemFields:true)` บน rowid เดียวกัน เทียบ operator ของรายการที่เขียนฟิลด์ธุรกิจ กับ `_updatedBy`
+- 🔴 **[V] 28 ส.ค. 2569 — `delete_process` เป็น soft-delete ไม่ใช่ลบถาวร** · หลังลบ `workflow get` คืน `deleted:true, enabled:false` และหายจาก `workflow list` แต่ object ยังดึงด้วย id ได้ ⇒ ใช้งานไม่ได้แล้วจริง แต่อย่าเขียนว่า "ลบถาวร"
+- 🔴 **[V] 28 ส.ค. 2569 — `delete_process_node` ที่ลบ node ชนิด `sub_process` ทิ้ง inner process ไว้เป็น orphan เสมอ** (ไม่ cascade เหมือน `delete_process`) ⇒ **ต้องลบ inner processId ด้วยมือทุกครั้ง** · เจอค้างจริง 9 ตัวจากการ revert งานเดียว (ลองแก้ 3 รอบ)
+- 🔴 **[V] 28 ส.ค. 2569 — คีย์ที่อ้าง inner process ต่างกันตามเครื่องมือ** · MCP `get_workflow_structure` → `config.process.processId` · hap CLI `workflow structure` → `flowNodeMap.<nodeId>.subProcessId` · ส่วน **approval sub-flow ผูกผ่าน `triggerId` (`appType:9`) ไม่ใช่ทั้งสองตัว** ⇒ สคริปต์หา orphan ต้อง **grep แบบ full-text ทั้ง output** อย่าเจาะจงคีย์ (จับผิดคีย์รอบแรกได้ผลลวงว่า "ทุก inner เป็น orphan") · และ workflow ที่ชื่อคล้ายกันและ `enabled` พร้อมกันอาจไม่ใช่ตัวซ้ำ — เช็ค `appType`/`triggerId` ก่อนสรุป
+
+**จุดบอดของ hap CLI**
+- 🔴 **[V] 28 ส.ค. 2569 — `hap workflow list <app>` ให้ผลไม่คงที่และไม่ครบ** · เรียก 3 ครั้งติดกันได้ 50 / 37 / 36 รายการ · inner ของ workflow ที่ใช้งานอยู่จริงไม่ปรากฏในการเรียกครั้งแรกเลย ⇒ **ผลจาก list ไม่ใช่หลักฐานว่า "ไม่มี"**
+- 🔴 **[V] 28 ส.ค. 2569 — `hap workflow structure <id>` คืนโครงสร้างเต็มแม้ process ถูกลบไปแล้ว** ไม่มีอะไรบอกความต่างจากตัวที่ยังใช้งานอยู่เลย ⇒ **ใช้ยืนยันการมีอยู่ไม่ได้** · ตัวเดียวที่เชื่อถือได้คือ **`hap workflow get <id>` แล้วดูฟิลด์ `deleted`** (เกือบสรุปผิดว่า `delete_process` ไม่ทำงาน เพราะเช็คด้วย `structure`)
 
 **ฝั่ง Browser (จากโปรเจกต์ WFH)**
 - **Field cache bug** → ใช้ **Trigger Field** แทน Trigger Condition ไม่งั้น publish แล้ว error `1 nodes with abnormal at action selection` · **[?]** ยังไม่รู้ว่ากระทบสาย MCP ไหม
