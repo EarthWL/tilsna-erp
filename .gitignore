@@ -1,0 +1,18 @@
+# credentials — ห้ามขึ้น repo เด็ดขาด
+.hap-cli/
+*.token
+*.pem
+.env
+
+# ผลลัพธ์ที่ regenerate ได้
+*.ids.json
+snapshots/**/*.json
+
+# ข้อมูลจริงที่ export ออกมา
+**/export-*.csv
+**/export-*.xlsx
+
+.DS_Store
+
+# ไฟล์ต้นทางที่แตกลง repo แล้ว — ไม่ต้อง commit ซ้ำ
+tilsna-erp.zip
