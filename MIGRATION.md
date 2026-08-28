@@ -24,9 +24,13 @@ _28 ส.ค. 2569 · รอบนี้ทำเฉพาะ **โครงส�
 
 | ที่ | ปัญหา | แก้เป็น |
 |---|---|---|
-| `accounting/02-BuildSpec-FRS.md` บรรทัด 32, 953, 1077 | สั่งพิสูจน์ workflow ด้วย `get_record_logs` → operator `user-workflow` — **ให้ผลลบลวง** (ยืนยัน 28 ส.ค.: log คืน `user-api` แม้ `_createdBy` เป็น `user-workflow`) | `get_record_details(includeSystemFields:true)` → `_createdBy`/`_updatedBy` |
+| `accounting/02-BuildSpec-FRS.md` บรรทัด 32, 953, 1077 | สั่งพิสูจน์ workflow ด้วย `get_record_logs` → operator `user-workflow` — **ให้ผลลบลวง** (ยืนยัน 28 ส.ค.: log คืน `user-api` แม้ `_createdBy` เป็น `user-workflow`) | ✅ **แก้แล้ว 29 ส.ค. 2569 (agent-ac)** — เป็น `get_record_details(includeSystemFields:true)` → `_createdBy`/`_updatedBy` |
 | ไฟล์เดียวกัน บรรทัด 46 | **เขียนถูกอยู่แล้ว** — ทีมค้นพบก่อนแล้วแต่ไม่ได้ตามไปแก้จุดอื่น | ใช้เป็นต้นแบบ |
-| `hr/*` | ตรวจแบบเดียวกัน ยังไม่ได้ไล่ | — |
+| `hr/*` | ตรวจแบบเดียวกัน ยังไม่ได้ไล่ | — (ขอบเขตของ agent-hr ตาม object split `projects/hr/*`) |
+
+**สถานะฝั่ง accounting (agent-ac, claim `AC/MIGRATION-A`, ปิดแล้ว 29 ส.ค. 2569):** แก้ครบ 10 จุดจริง (มากกว่า 3 บรรทัดที่ระบุไว้เดิม — ไล่เจอเพิ่มใน `03-RTM-Status.md` บรรทัด 55 (BR-18) และ `06-Demo-Plan-Checklist.md` 2 จุด) ครอบคลุมเฉพาะ `projects/accounting/*` ตามการแบ่งงานกับ agent-hr ไม่แตะ `projects/hr/*`
+
+⚠️ **บันทึกไว้เป็นบทเรียน**: รอบแรกที่ส่งไฟล์แก้ไขผ่าน device bridge ด้วยการ base64-encode แล้ว copy เข้า `device_bash` heredoc เกิด **ตัวอักษรไทยเพี้ยนแบบเงียบ** 3 จุด (ไม่มี error ใดๆ) — "ตัว"→"ตัง", "ค่า"→"คจา", และคำว่า "เวลา/" หายไปทั้งคำในอีกจุดหนึ่ง ตรวจพบด้วยการ `device_stage_files` ดึงไฟล์จริงมาเทียบ byte-ต่อ-byte กับต้นฉบับที่พิมพ์ตรงในเครื่องมือ (ไม่ผ่าน relay) แทนที่จะเชื่อ output ของสคริปต์ที่รันบน device เอง (ซึ่งรายงานว่า "OK" ทั้งที่ replacement text เพี้ยนไปแล้ว) แก้ไขและ verify ครบ 10/10 แล้วก่อน commit กลับ — **agent รุ่นหลังที่ต้องส่งข้อความไทยยาวๆ ผ่าน bridge ควรใช้ `device_stage_files`/`device_commit_files` โดยตรง ไม่ควร relay ผ่าน base64 ใน heredoc**
 
 ### B. ยกความรู้ขึ้นชั้นบน
 
