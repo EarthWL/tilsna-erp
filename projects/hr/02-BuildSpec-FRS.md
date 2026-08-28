@@ -762,7 +762,7 @@
 
 **Custom Actions ที่ผูก:** `<TBD-CA-01>` ส่งคำขอ · `<TBD-CA-02>` ยกเลิกใบลา (§1.9)
 **Workflow ที่ผูก:** WF-HR-01 (อนุมัติ) · WF-HR-02 (ตัดสิทธิ) · WF-HR-03 (คืนสิทธิ) · WF-HR-05 (เชื่อมกับบันทึกลงเวลา) · WF-HR-06 (เตือน SLA)
-**Definition of Done:** AC-01 AC-02 AC-03 ผ่านครบ · `get_record_logs` แสดง `user-self` (กดปุ่ม) ตามด้วย `user-workflow` (WF เขียน) · `get_approval_list_by_row` มี instance ทั้ง 2 ขั้น
+**Definition of Done:** AC-01 AC-02 AC-03 ผ่านครบ · `get_record_details(includeSystemFields:true)` → `_updatedBy` = `user-workflow` (และ `_processName`/`_processStatus` มีค่าเมื่อเข้าสายอนุมัติ) · `get_approval_list_by_row` มี instance ทั้ง 2 ขั้น · 🔴 **ห้ามใช้ operator ใน `get_record_logs` เป็นเกณฑ์ผ่าน — ให้ผลลบลวง** เพราะการเขียนฟิลด์ธุรกิจโดย node ของ workflow ถูกบันทึกเป็น `user-api` ([V] 28 ส.ค. 2569 — ดู Known Issues ใน `04-CLAUDE-memory.md`)
 **Pitfall:** 🔴 อย่าใส่ `filter` ใน trigger ของ WF-HR-01 — ใช้ `triggerFields = [leave_status]` แล้วเช็กเงื่อนไขใน branch node แรก
 
 ---
