@@ -57,13 +57,14 @@ check_locks() {
   return 1
 }
 
+# exit code: 0 ok · 2 lock ค้าง · 3 ไม่มี remote · 4 commit WIP ล้ม · 1 pull ล้ม
 sync_repo() {   # มี WIP ค้างก็ไม่ล้ม — commit ก่อนแล้วค่อย rebase
-  check_locks || return 1
+  check_locks || return 2
   git add -A >/dev/null 2>&1
   if ! git diff --cached --quiet; then
-    git commit -qm "wip: autosave ก่อน preflight" || { echo "  🔴 commit WIP ล้มเหลว" >&2; return 1; }
+    git commit -qm "wip: autosave ก่อน preflight" || { echo "  🔴 commit WIP ล้มเหลว" >&2; return 4; }
   fi
-  has_remote || { echo "  (ไม่มี remote '$REMOTE' — การจองใช้ไม่ได้ ดู tools/check-repo.sh)" >&2; return 1; }
+  has_remote || { echo "  (ไม่มี remote '$REMOTE' — การจองใช้ไม่ได้ ดู tools/check-repo.sh)" >&2; return 3; }
   git pull -q --rebase "$REMOTE" "$(cur_branch)" 2>/dev/null || return 1
 }
 
@@ -79,4 +80,13 @@ claim_landed() {   # <agent> <task>
   [ -n "$R" ] && [ "$L" = "$R" ] || {
     echo "  🔴 remote ยังไม่มี commit นี้ (local=$L remote=${R:-ไม่ทราบ}) — อีกฝ่ายมองไม่เห็นใบจอง" >&2; return 1; }
   return 0
+}
+
+sync_reason() {   # แปลง exit code ของ sync_repo เป็นสาเหตุที่อ่านรู้เรื่อง
+  case "$1" in
+    2) echo "มี lock ค้างใน .git — git เขียนไม่ได้" ;;
+    3) echo "ไม่มี remote '$REMOTE' ให้ตัดสินการชิงสิทธิ์" ;;
+    4) echo "commit งานค้าง (WIP) ไม่สำเร็จ" ;;
+    *) echo "pull/rebase ไม่สำเร็จ (เน็ต · สิทธิ์ · หรือ branch ไม่ตรงกับ remote)" ;;
+  esac
 }

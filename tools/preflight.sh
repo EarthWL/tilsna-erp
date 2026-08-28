@@ -7,7 +7,7 @@ AGENT="$1"; TASK="$2"; APP="$3"; OBJS="$4"; ROOT="$(repo_root)"
 LOG="$ROOT/shared/claims/$AGENT.log"; mkdir -p "$(dirname "$LOG")"; touch "$LOG"
 
 for attempt in 1 2 3; do
-  sync_repo || { echo "PREFLIGHT FAIL: pull ไม่สำเร็จ"; exit 1; }
+  sync_repo; rc=$?; [ $rc -eq 0 ] || { echo "PREFLIGHT FAIL: $(sync_reason $rc)"; exit 1; }
 
   # TTL: ปลด CLAIM ที่ค้างเกิน TTL_HOURS (B2)
   while IFS='|' read -r ag iso app task objs; do

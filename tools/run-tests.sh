@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # ชุดทดสอบ: จำลอง agent สองตัวชนกันจริงผ่าน git remote
 set -uo pipefail
+SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # โฟลเดอร์ที่สคริปต์ชุดนี้อยู่ — ต้องอ่านก่อน cd
+[ -f "$SRC/preflight.sh" ] || { echo "หาไฟล์สคริปต์ไม่เจอที่ $SRC"; exit 1; }
 W=/tmp/proto; rm -rf $W; mkdir -p $W; cd $W
 PASS=0; FAIL=0
 ok(){ if eval "$2"; then echo "  ✅ $1"; PASS=$((PASS+1)); else echo "  ❌ $1"; FAIL=$((FAIL+1)); fi; }
@@ -8,7 +10,7 @@ ok(){ if eval "$2"; then echo "  ✅ $1"; PASS=$((PASS+1)); else echo "  ❌ $1"
 git init -q --bare origin.git
 git clone -q origin.git seed && cd seed
 git config user.email s@x; git config user.name seed
-mkdir -p shared/claims handoff tools; cp /home/claude/work/proto/tools/*.sh tools/; chmod +x tools/*
+mkdir -p shared/claims handoff tools; cp "$SRC"/*.sh tools/; chmod +x tools/*
 echo "# repo" > README.md; git add -A; git commit -qm init; git push -q origin HEAD:master; cd ..
 
 for a in hr ac; do
