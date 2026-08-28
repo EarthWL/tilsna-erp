@@ -1,0 +1,11 @@
+# ห้าม git แปลงบรรทัดเอง — เก็บตามที่ commit ไว้ทุกไบต์
+#
+# ทำไม: Git for Windows ตั้ง core.autocrlf=true ไว้ที่ระดับ system
+# (C:/Program Files/Git/etc/gitconfig) ⇒ clone ใหม่บน Windows จะได้ working tree
+# เป็น CRLF ทั้งที่ blob เป็น LF ⇒ ทุกไฟล์ขึ้น modified ทันทีที่ clone เสร็จ
+# และเพราะ sync_repo() ใน tools/claimlib.sh ทำ `git add -A` + commit อัตโนมัติ
+# ⇒ preflight ครั้งแรกจะ commit การเขียนบรรทัดใหม่ทับทั้ง repo
+# ยืนยัน 29 ส.ค. 2569 🟢 — เกิดจริงตอนแตก clone ac/hr ครั้งแรก
+#
+# ผลข้างเคียงที่ต้องการอีกอย่าง: tools/*.sh คง LF ⇒ รันบน Linux ได้ ไม่ติด 
+* -text

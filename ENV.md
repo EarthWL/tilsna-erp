@@ -3,7 +3,7 @@
 ```yaml
 docs_vcs: git
 workspace_mode: cowork
-commit_by: human           # git identity ตั้งแล้ว (agent-ac, ยืนยัน 29 ส.ค. 2569) — แต่ push ยังทดสอบไม่ได้ (remote ต่อไม่ติด รอ credential) จึงยังไม่เปลี่ยนเป็น agent
+commit_by: agent           # ยืนยัน 29 ส.ค. 2569 🟢 — agent commit+push เข้า hub (Documents/TILSNA/origin.git) ได้จริง ทดสอบชิงสิทธิ์สองสายพร้อมกัน ผ่าน 4/4 · push ขึ้น GitHub ยังเป็นงานคน ไม่มี hook อัตโนมัติ
 cli_available: split-by-machine   # ⚠️ ไม่ใช่ yes/no เดียว — ดูหมายเหตุด้านล่าง มี 3 สภาพแวดล้อมที่แยกกัน
 project_publisher: []      # ระบุผู้อัปเข้า Claude Project (หลัก, สำรอง) ถ้ายังใช้ Project คู่ขนาน
 
