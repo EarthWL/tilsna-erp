@@ -13,12 +13,14 @@
 | `01-BRD.md` | ผู้บริหาร · ผู้ตรวจรับ | ตกลงขอบเขต · ตรวจรับตามเกณฑ์ §12 |
 | `02-BuildSpec-FRS.md` | **build agent** | 🔴 **เปิดทุกครั้งก่อนแตะ object ใด ๆ** — ID Registry · field ทุกตัว · workflow ทุก node · Test recipe |
 | `03-RTM-Status.md` | PM · QA | สอบทานว่าความต้องการข้อไหนทำแล้ว/ยัง · ดู Gap ที่ยังบล็อกอยู่ |
-| `04-CLAUDE-memory.md` | **build agent** | 🔴 **โหลดทุก session ก่อนเริ่มงาน** — ข้อกำหนด · ID สำคัญ · กับดัก · สถานะงาน |
+| `04-CLAUDE-memory.md` | **build agent** | 🔴 **โหลดทุก session ก่อนเริ่มงาน** — ข้อกำหนด · กับดักเฉพาะแอปนี้ · pointer ไปไฟล์อื่น (~13k tokens) |
+| `15-Investigations-D13-D17.md` · `16-D19-Empty-Flag-Branch.md` | build agent | เปิดเมื่อเจออาการเดิมซ้ำ — บันทึกการสอบสวนเต็มของ D-13/D-15/D-17/D-19 |
+| `17-ID-Registry-HR.md` | **build agent** | 🔴 **เปิดเมื่อจะแตะ object จริง** — ws / view / workflow ID · ตารางบัญชีที่ HR เขียนถึง · option key ที่ใช้บ่อย (แยกออกจาก memory 30 ส.ค. 2569) |
 | `05-Roadmap-Tracker.md` | PM · build agent | 🔴 **living doc** — อัปเดตทุกครั้งที่เริ่ม/ปิดงาน |
 | `06-Demo-Plan-Checklist.md` | ผู้สาธิต · QA | เตรียมเดโมและตรวจความครบถ้วนก่อนส่งมอบ |
 
 ## เริ่มงานอย่างไร (build agent)
-1. โหลด `04-CLAUDE-memory.md` ให้จบ
+1. โหลด `04-CLAUDE-memory.md` ให้จบ · ความรู้แพลตฟอร์ม (ไม่ผูกกับแอปนี้) อยู่ที่ `shared/00-HAP-Working-Guide.md` · ID ระดับ object อยู่ที่ `17-ID-Registry-HR.md`
 2. เปิด `02-BuildSpec-FRS.md` §0 (DO/DON'T) และ §1 (ID Registry)
 3. **ข้าม Phase 1 Interview ของ `nocoly-hybrid-builder-v2`** — สรุป checklist จาก spec ให้ผู้ใช้ยืนยัน แล้วเริ่ม Phase 3
 4. ทำตามลำดับใน `05-Roadmap-Tracker.md` เริ่มที่ **P0** (ปลด blocker ก่อน)
