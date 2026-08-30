@@ -244,3 +244,26 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 - โปรเจกต์ `tilsna-hr` — WF-HR-01 ยิงจริง 27 ส.ค. 2569 (get_single relation lookup, cascade delete, node-ref staleness) · WF-HR-02/WF-HR-03 ยิงจริง 27 ส.ค. 2569 (compute/get_single live re-evaluation, `kind:"record"` relation-write garbage) · P3-7/P3-8 ยิงจริง 27 ส.ค. 2569 (Business Rules + Dynamic Default relation-field limitation, Unique Index tooltip risk, Role Debugging workflow, ghost-object-after-reject, Dynamic Value/Escape UI quirks)
 - `github.com/mingdaocom/hap-skills` commit `9d4ea6b` — 8 สกิล ~1.2 MB
 - สกิล `nocoly-hybrid-builder-v2` v2.4.2 — `references/workflow-authoring-mcp.md`
+## เงื่อนไขและ operator ในเงื่อนไข workflow (`operateCondition` / `filters`) — ยืนยันจากการยิงจริง 30 ส.ค. 2569
+
+`[V]` **`conditionId` เป็น enum ที่ความหมายขึ้นกับชนิดฟิลด์ และ schema กลางของ skill ตีความผิดสำหรับฟิลด์ตัวเลข/ตัวเลือก/สมาชิก** — schema `operate-condition.schema.json` เขียนว่า `"7"=is empty · "8"=is not empty · "9"=> · "10"=>=` แต่การอ่านโครงจริงของ WF-HR-01…06 เทียบกับชื่อ branch และผลการยิงจริง ให้ผลตรงข้าม/ต่างออกไป:
+
+| conditionId | ความหมายจริงที่ยืนยันแล้ว | หลักฐาน |
+|---|---|---|
+| `7` | **ไม่ว่าง (is not empty)** | branch `เป็นวันหยุด` (ฟิลด์ชื่อวันหยุด type 2) · `มีผู้อนุมัติ` (type 26) |
+| `8` | **ว่าง (is empty)** | branch `ไม่มีเวลาเข้า` (type 16) · `ไม่พบข้อมูลสิทธิ` (rowid) · `ไม่พบผู้บังคับบัญชา` (type 26) |
+| `9` | **เท่ากับ (=)** | branch `Approved…` (option type 11 = key ของ Approved) · `เคยตัด` (number type 6 = "1") |
+| `10` | **ไม่เท่ากับ (≠)** | branch `…ยังไม่ตัดสิทธิ` (number = "1") — ยิงจริงแล้วเป็นจริงเมื่อค่า `0` |
+| `33` | **เท่ากับ record ที่อ้างจาก node อื่น** (relation type 29) | filter ของ search node `ค้นหาสิทธิและยอดคงเหลือการลา` |
+
+⇒ **ห้ามเดา `conditionId` จาก schema** — อ่านของจริงด้วย `hap --json workflow node get <pid> <nodeId>` แล้วลอกรูปมาเสมอ
+
+`[V]` 🔴 **`≠` (conditionId `10`) ประเมินเป็น FALSE เมื่อฟิลด์เป็นค่าว่าง — ค่าว่างไม่เท่ากับ 0** — พิสูจน์ด้วย A/B controlled test บน WF-HR-02 (record เหมือนกันทุกฟิลด์ ต่างแค่ flag `""` vs `"0"`): ตัวที่ `"0"` ทำงานครบทั้งสาย ตัวที่ `""` ตกไป branch catch-all **เงียบสนิท ไม่มี error ไม่มีร่องรอยบน record** ⇒ เวลาออกแบบ gate ที่ต้องทนค่าว่าง ให้ใช้ `flag eq "1"` → เส้น no-op แล้วให้ catch-all เป็นเส้นทำงาน หรือเพิ่ม OR group `is empty` (`conditionId 8`) เข้าไป
+
+`[V]` **`workflow structure` ไม่คืน `filters`/`operateCondition` ของ node ชนิด search (typeId 7)** — คืนแค่ `appId`/`executeType` ⇒ ต้องใช้ `hap workflow node get <pid> <nodeId>` ถึงจะเห็นเงื่อนไขค้นหาจริง
+
+## กับดักของ `hap worksheet record` — ยืนยัน 30 ส.ค. 2569
+
+`[V]` 🔴 **`record update <ws_id> <ROW_ID>` ต้องใช้ `rowId` แบบ UUID ไม่ใช่ `_id` แบบ 24-hex** — ถ้าใส่ `_id` จะได้ `{"resultCode": 4}` **โดยไม่มีข้อความ error ใด ๆ** และ record ไม่ถูกแก้ · `record list` คืนทั้งสองคีย์ (`_id` = 24-hex, `rowId` = UUID) จึงหยิบผิดได้ง่ายมาก · `record create` คืน `rowid` (UUID) มาให้ใช้ต่อได้เลย · **กฎ: เจอ `resultCode: 4` ให้สงสัยรูปแบบ id ก่อนสงสัย permission/business rule**
+
+`[V]` **`record create/update --no-workflow` ถูกปฏิเสธ ไม่ใช่ถูกเพิกเฉย** — CLI ตอบเป็น `ValueError` พร้อมบอกให้ปิด workflow ก่อน (`hap workflow publish <id> --disable`) แล้วค่อยแก้ · ต่างจาก MCP `triggerWorkflow:false` ที่รับพารามิเตอร์ไปเงียบ ๆ
