@@ -28,7 +28,7 @@
 |---|---|---|
 | เขียนค่าลง alias `status` ของ AC_VOUCHER | **alias จริงคือ `status1`** | ใช้ `status1` หรือ field id `6a86016b1049edca1eed028a` |
 | สร้าง worksheet / field / optionset ซ้ำ | ของมีแล้ว 34 ตาราง + 30 optionset | เช็ก §1.2 และ §1.3 ก่อนทุกครั้ง |
-| สรุปจาก `get_workflow_list` ว่างว่า "ไม่มี workflow" | tool คืนเฉพาะ PBP — ยืนยันแล้วเป็นจุดบอด | เปิดหน้า **Automated Workflow** หรือดู log `user-workflow` |
+| สรุปจาก `get_workflow_list` ว่างว่า "ไม่มี workflow" | tool คืนเฉพาะ PBP — ยืนยันแล้วเป็นจุดบอด | **`hap workflow list <appId>`** (เห็น draft/disabled/orphan ด้วย) — ⚠️ **แต่ผลไม่คงที่ 50/37/36 จาก 3 ครั้งติด (หลักฐาน agent-hr 28 ส.ค.) ⇒ ใช้เป็นหลักฐาน "ไม่มี" ไม่ได้** · ยืนยันการมีอยู่จริงของตัวใดตัวหนึ่ง = **`hap workflow get <id>` แล้วดูฟิลด์ `deleted`** (`workflow structure` คืนค่าแม้ถูกลบแล้ว ใช้ไม่ได้) · Browser เป็นทางสุดท้าย |
 | สรุปว่า "workflow ทำงานแล้ว" จาก operator `user-api` | นั่นคือเขียนมือ | ต้องเห็น `_createdBy`/`_updatedBy` = **`user-workflow`** ผ่าน `get_record_details(includeSystemFields:true)` — ⚠️ **ห้ามใช้ operator ใน `get_record_logs`** ให้ผลลบลวง (คืน `user-api` แม้ workflow เป็นคนเขียนจริง ยืนยัน 28 ส.ค. 2569) |
 | ใช้ Trigger Condition อ้างฟิลด์ SingleSelect | field-cache bug → Publish error "1 nodes with abnormal" | ใช้ **Trigger Field** แล้วทำเงื่อนไขใน Branch node แรก |
 | แปลง Number → Formula ตรง ๆ | แพลตฟอร์มไม่รองรับ | ลบแล้วสร้างใหม่ (field ID เปลี่ยน — อัปเดต §1) |
@@ -59,12 +59,13 @@
 | Organization | `9680d433-5b6d-45d7-b6df-d05d3095f82f` |
 | **MCP connector (ชื่อที่ใช้เรียก)** | **`ERP_-_TILSNA`** — ⚠️ session นี้มี connector อื่นชี้เซิร์ฟเวอร์เดียวกัน (`API-Lab`, `MCP-ASM`, `-_WFA_System`, `hap-mcp-Demo_-`) **ยืนยันด้วย `get_app_info` ก่อน write แรกเสมอ** |
 | Host | `https://www.nocoly.com` |
-| สถานะโครงการ | **Brownfield** — 39 worksheet (34 เดิม + 5 ใหม่ 27 ส.ค. 2569) · 30 optionset · 8 custom role สร้างแล้ว · 2 workflow publish แล้ว |
+| สถานะโครงการ | **Brownfield** — 39 worksheet (34 เดิม + 5 ใหม่ 27 ส.ค. 2569) · 30 optionset · 8 custom role สร้างแล้ว · **7 workflow publish แล้ว** (✅ ครบ 5: WF-AC-02/08/09/11/12 · ✅ WF-AC-10 ปิดครบแต่แถว §1.5 เคยตกหล่น · 🔶 WF-AC-01 เหลือทดสอบการกดอนุมัติจริง) **· Custom Action 5 ปุ่ม** — แก้ 30 ส.ค. 2569 เดิมเขียน "2 workflow" ตกรุ่นไปหลายรอบ · ความคืบหน้าจริงดูที่ `05-Roadmap-Tracker.md` เท่านั้น |
 | Surface R (org-auth API กดอนุมัติแทนคน) | ❌ **ไม่ใช้** (ข้อสมมติ A-15) — ผู้อนุมัติต้องกดใน To-do เอง |
 
 > **workflow สร้างผ่าน MCP ได้แล้ว** (ยืนยันด้วยการยิงจริง 26 ส.ค. 2569): `create_process` → `batch_create_process_nodes` → `validate_process` → `publish_process` และ **publish = เปิดใช้งานทันที ไม่มีขั้น Enable**
 > 🔑 **ยืนยันซ้ำ 27 ส.ค. 2569:** วิธีแก้บั๊ก `create_worksheet` (ดู §1.2c) ที่ค้นพบครั้งแรกในโปรเจกต์ `tilsna-hr` ใช้ได้กับ connector `ERP_-_TILSNA` ของโปรเจกต์นี้เช่นกัน — ยืนยันข้าม app/connector ไม่ใช่เรื่องเฉพาะ tenant เดียว
-> ⚠️ **view / custom action / chart / app section มี tool แต่ยังไม่เคยเรียกสำเร็จที่ไหน** — Surface เขียนเป็น `MCP (unverified)` และ **ทุก DoD ต้องมีขั้นเปิดหน้าจอดูว่า object โผล่จริง**
+> ✅ **แก้ 30 ส.ค. 2569 — `create_custom_actions` พิสูจน์แล้ว ไม่ใช่ unverified อีกต่อไป** (ยิงจริงสำเร็จครั้งแรก 27 ส.ค. ที่งาน 2.2 — ปุ่ม "ส่งอนุมัติ" `6a8f380b1378964f99849bfe` + "ยกเลิกใบสำคัญ" `6a8f380bae2a0e3743a0bedb`) · ⚠️ **แต่ปุ่มจะลง Scope = "Unassigned View" เสมอ และไม่โผล่ที่ไหนเลยจนกว่าจะเข้า Browser ตั้ง Scope → "All Records"** (กับดักข้อ 20 — ยืนยันซ้ำแล้วทั้งกับปุ่ม "กลับรายการ" 27 ส.ค.) การตั้ง Scope **ไม่มี API ทั้ง MCP และ CLI ⇒ Browser เท่านั้น**
+> ⚠️ **`create_view` / `create_chart` / `create_chatbot` / `update_custom_page` ยังไม่เคยเรียกสำเร็จที่ไหน** — Surface เขียนเป็น `MCP (unverified)` และ **ทุก DoD ต้องมีขั้นเปิดหน้าจอดูว่า object โผล่จริง**
 
 ### §1.2 Worksheets + View — **ของจริงบนเซิร์ฟเวอร์ (39 ตาราง)**
 
@@ -181,7 +182,8 @@
 4. `update_worksheet` อีกครั้งด้วยพารามิเตอร์ `addRecordButtonName` (ไม่มีในเอกสาร แต่ใช้ได้จริง) เพื่อตั้งชื่อไทยของปุ่ม/Data Name
 
 **ชนิดฟิลด์ที่ยืนยันว่าสร้างผ่าน `addFields` ได้:** Text, Number, SingleSelect, MultipleSelect, Date, DateTime, Collaborator, Relation, Checkbox, Role
-**ยังไม่ยืนยัน/ต้องใช้ Browser:** Department, SubTable, Formula, AutoNumber, Location, Rollup · Dropdown ที่ผูกกับ **shared optionset** (ไม่ใช่ inline options) ยังสร้างผ่าน API ไม่ได้ — ต้องทำใน Browser
+**ยังไม่ยืนยัน/ต้องใช้ Browser หรือ CLI:** Department, SubTable, Formula, AutoNumber, Location, Rollup — MCP สร้างไม่ได้ · **ลอง `hap worksheet add-fields` (Surface C) ก่อนเข้า Browser** [S] ยังไม่เคยยิงกับ tenant นี้
+> ✅ **แก้ 30 ส.ค. 2569 — ประโยคเดิมที่ว่า Dropdown ผูก shared optionset "ต้องทำใน Browser" ผิดและขัดกับ §1.3 ของเอกสารนี้เอง** (ดูบรรทัด "ข้อค้นพบ 26 ส.ค." และ "`create_optionset` สร้าง optionset ได้") — **ผูกผ่าน API ได้จริง** ส่ง `dataSource` = optionset id บนฟิลด์ชนิด `Dropdown` ยิงจริงสำเร็จ 26 ส.ค. 2569
 
 ### §1.3 Optionsets (shared) — 30 ชุด
 
@@ -304,7 +306,7 @@
 | WF-AC-07 คิดและผ่านรายการค่าเสื่อมรายเดือน | `schedule` | MCP | `<TBD>` | ⬜ | FR-13 |
 | WF-AC-08 กระทบยอดธนาคาร | `worksheet_event` (add) | MCP | `6a8ff2c0fdab77a41c543108` | ✅ **สร้าง publish และทดสอบผ่านครบ 27 ส.ค. 2569 (รอบเย็น) v3** | FR-14 |
 | WF-AC-09 ปิดงวด | Custom Action → `worksheet_event` | MCP | **`6a903ec05f8564a68c3f7d7d`** | ✅ **สร้าง publish (v1) และทดสอบผ่านครบทั้ง 2 เส้นทาง 27 ส.ค. 2569 (รอบเย็น ต่ออีกครั้ง) — 16 nodes + trigger** | FR-15 |
-| WF-AC-10 กลับรายการใบสำคัญ | Custom Action → `worksheet_event` | MCP | `<TBD>` | ⬜ | FR-06 |
+| WF-AC-10 กลับรายการใบสำคัญ | Custom Action → `worksheet_event` | MCP | **`6a8f49b8730d20c5b764f302`** (published v4) | ✅ **แก้ 30 ส.ค. 2569 — แถวนี้เคยเขียน `<TBD>` / ⬜ ทั้งที่สร้างและทดสอบเสร็จ 100% ตั้งแต่ 27 ส.ค.** (logic 2 path + UI Scope + data integrity ปิดครบ — ดู `11-Workflow-Engine-Blocked-27Aug.md` และ Change Log ของ `05-Roadmap-Tracker.md`) ⚠️ **ID หายจาก Registry แปลว่า agent รอบถัดไปเสี่ยงสร้างซ้ำทั้งตัว** | FR-06 |
 | WF-AC-11 ปิดปีและยกยอด | Custom Action → `worksheet_event` | MCP | **`6a90ef69fdab77a41c5b514f`** | ✅ **สร้าง publish (v1) และทดสอบผ่านครบทั้ง 2 เส้นทาง 28 ส.ค. 2569 — 56 nodes + trigger + 4 inner sub-process** | FR-15 |
 | WF-AC-12 แจ้งเตือนความผิดปกติทางบัญชี | `schedule` (ทุกเช้าวันทำการ) | MCP | `6a9032d3fdab77a41c56420b` | ✅ | FR-18 |
 | WF-AC-13 รับเอกสารจากการสแกน | `worksheet_event` (create) + AI node | **Browser** (AI node นอก 17 ชนิดที่ MCP สร้างได้) | `<TBD>` | ⬜ | FR-18 |
@@ -321,7 +323,9 @@
 > **Surface default = MCP** · เขียน **Browser** เฉพาะ workflow ที่ใช้ trigger นอก 4 ชนิด (`worksheet_event` / `schedule` / `date_field` / `webhook`) หรือ node นอก 17 ชนิดที่ MCP สร้างได้ (Loop, Terminate, Send API Request, JSON Parsing, Print Record, AI nodes …) — และเมื่อเป็นแบบนั้นให้ทำ **ทั้ง workflow** ใน Browser ห้ามแบ่งกราฟเดียวข้าม surface
 > ⚠️ **WF-AC-02 ใช้ node Loop** ซึ่ง MCP สร้างไม่ได้ → ดูทางเลี่ยงใน §3 WF-AC-02
 
-### §1.6 Custom Actions (ปุ่มบน record) — ยังไม่มีสักปุ่ม
+### §1.6 Custom Actions (ปุ่มบน record) — สร้างแล้ว 5 ปุ่ม (แก้ 30 ส.ค. 2569)
+
+> ⚠️ **หัวข้อเดิมเขียนว่า "ยังไม่มีสักปุ่ม" ซึ่งขัดกับตารางของตัวเอง** — ตอนนี้มีปุ่มจริงบนเซิร์ฟเวอร์แล้วอย่างน้อย 5 ปุ่ม: บน `ac_voucher` 3 ปุ่ม (ส่งอนุมัติ `6a8f380b1378964f99849bfe` · ยกเลิกใบสำคัญ `6a8f380bae2a0e3743a0bedb` · กลับรายการ — งาน 2.2 ครบ 3/3) และบน `ac_period` 2 ปุ่ม (ปิดงวด `6a903eb89762533b5b71c4b2` · ปิดปีและยกยอด `6a90f50e1378964f9984df83`) · แถวที่ยังเป็น `<TBD>` ด้านล่างคือปุ่มที่**ยังไม่ได้สร้าง** ไม่ใช่ว่าไม่มีปุ่มเลย
 
 | ปุ่ม | Worksheet · scope | ชนิด | ทำอะไร | เปิดใช้เมื่อ (`enableWhen`) | Role ที่เห็น | ยืนยัน | ID | Surface |
 |---|---|---|---|---|---|---|---|---|
@@ -336,7 +340,7 @@
 | แปลงเป็นใบกำกับภาษี | `ac_bl` `<ยังไม่มีตาราง>` | `triggerWorkflow` → WF-AC-18 | สร้าง AC_INV จากใบแจ้งหนี้ | สถานะ = Recognised | R1 | ✓ | `<TBD>` | MCP (unverified) |
 | ยื่นแบบภาษี | `ac_tax_filing` | `updateCurrentRecord` | `filing_status` = Filed `746ab42c-…` + `filing_date` | `filing_status` equals Approved `f8c0a410-…` | R3 | ✓ | `<TBD>` | MCP (unverified) |
 
-> 🔴 **สร้างปุ่มก่อน `create_view`** แล้วอ้าง `actionId` ที่คืนมาใน view config · **ไม่มี update tool** — แก้ปุ่มหลังสร้างต้องเข้า Browser
+> 🔴 **สร้างปุ่มก่อน `create_view`** แล้วอ้าง `actionId` ที่คืนมาใน view config · **MCP ไม่มี update tool** — แต่ **CLI มี**: `hap worksheet create-custom-action --btn-id <id>` แก้ปุ่มหลังสร้างได้ [S] ยังไม่เคยยิง ⇒ ลอง CLI ก่อน ถ้าไม่ผ่านค่อยเข้า Browser · ⚠️ **ยกเว้นการตั้ง Scope → "All Records" ที่ไม่มี API ทั้งสองทาง — Browser เท่านั้น** (กับดักข้อ 20)
 > ปุ่มชนิด `triggerWorkflow` จะ auto-gen workflow ที่ **ไม่โผล่ใน `get_workflow_list`** — บันทึก ID จาก URL ลง §1.5
 
 ### §1.7 Views / Custom Pages / Charts — ยังไม่มี (ทุกตารางมีแต่ view `全部` ที่ระบบสร้างให้)
@@ -457,7 +461,9 @@
 > `event_code` 10 ค่าครอบคลุมทุกเหตุการณ์ที่ workflow ต้องใช้ — WF ทุกตัวที่สร้างใบสำคัญ **ต้องอ่านคู่บัญชีจากตารางนี้** ห้าม hard-code รหัสบัญชีใน node
 > `condition` เป็น Text อิสระ ⇒ ต้องกำหนดไวยากรณ์ให้ตายตัวก่อนใช้ (ข้อเสนอ: `field=value` คั่นด้วย `;`) — **ยังไม่ตกลง 🔴**
 
-**Form rules (ทำใน Browser — ไม่ใช่ workflow)**
+**Form rules (ไม่ใช่ workflow — ลอง CLI ก่อน แล้วค่อย Browser)**
+
+> ✅ **แก้ 30 ส.ค. 2569** — Business Rule มีคำสั่ง CLI แล้ว: `hap worksheet rules <ws>` **อ่านได้จริง [V]** · `hap worksheet save-rule --type 0|1|2 --check-type 0|1` เขียน **[S] ยังไม่เคยยิง** ⇒ อ่านของเดิมด้วย CLI ได้เลย ส่วนการเขียนให้ลอง CLI ก่อน ถ้าไม่ผ่านค่อยเข้า Browser · ตรวจผลด้วย **Role Debugging** เสมอ (ไม่ใช่ `get_record_logs`)
 
 | # | ชนิด | เงื่อนไข | การกระทำ |
 |---|---|---|---|
@@ -562,8 +568,8 @@
 | `is_active` | `6a85590b055f2288c5b743bb` | Checkbox (subType 0) |  |
 
 > `parent_account` / `child_accounts` เป็นคู่ self-relation ⇒ ลำดับชั้นใช้ได้แล้ว
-> `is_postable` เป็น **Checkbox** ซึ่ง **API สร้างไม่ได้** — ถ้าต้องเพิ่ม checkbox ใหม่ต้องทำใน Browser แล้วอ่าน ID กลับ
-> ⚠️ `account_type`, `account_group`, `normal_balance` ทั้งสามตัว `required=False` บนเซิร์ฟเวอร์ แต่ SDS ระบุว่าบังคับ ⇒ **ต้องตั้ง required ใน Browser** (API ตั้ง required/validation ไม่ได้)
+> `is_postable` เป็น **Checkbox** ซึ่ง **MCP สร้างไม่ได้** — ลอง `hap worksheet add-fields` (Surface C) ก่อน [S] ถ้าไม่ผ่านค่อยทำใน Browser แล้วอ่าน ID กลับ
+> ⚠️ `account_type`, `account_group`, `normal_balance` ทั้งสามตัว `required=False` บนเซิร์ฟเวอร์ แต่ SDS ระบุว่าบังคับ ⇒ ต้องตั้ง required เพิ่ม · **MCP ตั้ง required/validation ไม่ได้ แต่ CLI edit-spec `field.update` น่าจะได้ [S]** — ลอง CLI ก่อน ถ้าไม่ผ่านค่อย Browser (แก้ 30 ส.ค. 2569 จากเดิมที่เขียนว่า Browser อย่างเดียว)
 
 #### FR-03.2 หน่วยงาน / ศูนย์ต้นทุน — **Worksheet `AC_COST_CENTER`** · ws `6a85452b9b6999a714d26720` · alias `ac_cost_center` · view `6a85452b9b6999a714d26725`
 
@@ -2053,7 +2059,7 @@
 | การกดปุ่มทำงาน | `get_record_details(includeSystemFields:true)` เทียบ 2 จังหวะ (ก่อน/หลัง publish node ถัดไป) | `_updatedBy` เปลี่ยนจาก `user-self` (ตอนกดปุ่ม) เป็น `user-workflow` (ตอน node ถัดไปเขียน) — ⚠️ ห้ามอ่านลำดับนี้จาก `get_record_logs` operator เพราะสะท้อนผู้จุดชนวนไม่ใช่ตัวการจริง |
 | approval ถูกส่ง | `get_approval_list_by_row(<ws>, <rowId>)` | มี instance + ผู้รับผิดชอบ |
 | ผลการอนุมัติ | `get_approval_detail(<processId>)` | สถานะเปลี่ยน + Data Update เขียนค่าแล้ว |
-| มี workflow อยู่จริงไหม | **หน้า Automated Workflow ใน Browser** | ❌ **ห้ามใช้ `get_workflow_list`** — คืนเฉพาะ PBP |
+| มี workflow อยู่จริงไหม | **`hap workflow get <id>` → ดูฟิลด์ `deleted`** (ตัวเดียวที่เชื่อได้) · สำรวจทั้งแอปใช้ `hap workflow list <appId>` · Browser เป็นทางสุดท้าย | ❌ **ห้ามใช้ `get_workflow_list`** — คืนเฉพาะ PBP · ⚠️ **และห้ามใช้ `workflow list` หรือ `workflow structure` เป็นหลักฐานว่า "ไม่มี"** — list ให้ผลไม่คงที่, structure คืนค่าแม้ลบแล้ว (หลักฐาน agent-hr 28 ส.ค.) |
 
 ### §5.3 วิธียิงตามชนิด trigger (ห้ามสลับ)
 

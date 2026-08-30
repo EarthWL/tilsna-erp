@@ -25,7 +25,7 @@ _เวอร์ชัน 1.2 · อัปเดต 27 ส.ค. 2569 (เพิ�
 | **สร้าง workflow + node + validate + publish** | **MCP** | **[V] 26 ส.ค.** |
 | **เปิดใช้งาน workflow** | ไม่มีขั้นตอนนี้ — `publish_process` = ทำงานทันที | **[V] 26 ส.ค.** |
 | View / Custom Action / Chart / Chatbot / custom page | MCP (ลองก่อน) → Browser ถ้าพัง | **[?] ยังไม่เคยเรียก** |
-| **แก้** view / custom action หลังสร้าง | Browser | [V] — MCP มีแต่ `create_*` ไม่มี `update_*` |
+| **แก้** view / custom action หลังสร้าง | **hap CLI** — `hap worksheet view update <ws> <view> --name …` · `create-custom-action --btn-id …` | **[V] 28 ส.ค. — view update ยิงจริงสำเร็จ 5 ครั้ง** (MCP ไม่มี `update_*` ยังถูกต้อง แต่ **ไม่ต้องไป Browser แล้ว**) · แก้ปุ่มยัง [S] |
 | trigger นอก 4 ชนิด (Personnel / External User / PBP / Subprocess / Custom Action) | Browser | [S] |
 | node นอก 17 ชนิด (Loop / Terminate / Send API Request / JSON Parsing / Print / AI / SMS …) | Browser | [S] |
 | bind ฟิลด์กับ shared optionset · print template · external portal · field default/validation | Browser | [V] จากโปรเจกต์ WFH |
@@ -33,7 +33,10 @@ _เวอร์ชัน 1.2 · อัปเดต 27 ส.ค. 2569 (เพิ�
 | กด approve / reject / recall | Browser (To-do) หรือ org-auth API (gated) | [V] |
 | หา `userId` / `departmentId` จาก**ชื่อคน** | UI หรือ org-auth API | **[V] — `find_member` ถูกถอดออกจาก connector แล้ว** |
 | สร้าง**แอปใหม่** | UI หรือ org-auth API | [V] — connector ไม่มี `create_app` |
-| แชท · ปฏิทิน · โพสต์ · อัปโหลดไฟล์ · ไล่จากข้อความไปหาเรคอร์ด | **hap-cli เท่านั้น** | [S] — ต้องติดตั้งก่อน (ดู §6) |
+| แชท · ปฏิทิน · โพสต์ · อัปโหลดไฟล์ · ไล่จากข้อความไปหาเรคอร์ด | **hap-cli เท่านั้น** | [S] — **CLI ติดตั้งแล้วใช้ได้ ยืนยัน 30 ส.ค. (ดู §6)** ตัวคำสั่งกลุ่มนี้ยังไม่เคยยิง |
+| **ดู workflow ทั้งแอป** (MCP `get_workflow_list` เห็นแค่ PBP) | `hap workflow list <appId>` — แต่ **ใช้เป็นหลักฐาน "ไม่มี" ไม่ได้** | 🔴 **[V] 28 ส.ค. — ผลไม่คงที่ 50/37/36 จาก 3 ครั้งติด** · ยืนยันการมีอยู่ต้อง `hap workflow get <id>` แล้วดู `deleted` |
+| **หา `userId` / `departmentId` จากชื่อคน** | `hap contact search --keyword` · `hap department` | [S] — แทน `find_member` ที่ถูกถอดออก ไม่ต้องใช้ org-auth API แล้ว |
+| **กด approve / reject / recall** | `hap approval todo` · `approve` · `reject` | [S] ⚠️ **ทำงานในนามบัญชีที่ล็อกอินอยู่** — ใช้กับแอปทดสอบ หรือเมื่อผู้อนุมัติยินยอมชัดเจนเท่านั้น (นโยบายเดียวกับ org-auth API) |
 
 **กฎการแบ่ง:** ถ้า workflow ตัวหนึ่งต้องใช้ trigger/node ที่ MCP สร้างไม่ได้ → **ทำทั้งตัวใน Browser** ห้ามแบ่งกราฟเดียวข้าม surface
 
@@ -195,7 +198,16 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 
 ---
 
-## 6. hap-cli — ช่องทางที่สาม (ยังไม่ได้ติดตั้ง)
+## 6. hap-cli — ช่องทางที่สาม (✅ ติดตั้งแล้ว ใช้งานได้จริง)
+
+> ✅ **[V] 30 ส.ค. 2569 (agent-ac) — availability gate ผ่านครบ 3 ข้อ ไม่ต้องติดตั้งอะไรเพิ่ม**
+> ```
+> hap --version        → hap 0.8.21
+> hap auth whoami      → Wanadtapong.l · org VBix · host https://www.nocoly.com
+> hap app list-managed → *  deca7391-1761-424b-9af3-c8d043004ad3  ERP - TILSNA  69
+> ```
+> เครื่องหมาย `*` แปลว่าแอปนี้ถูก select อยู่แล้ว ⇒ **Surface C เปิดใช้ได้ทันที** ข้อความเดิมที่ว่า "ยังไม่ได้ติดตั้ง" ทำให้ agent หลายรอบเลี่ยงไปใช้ Browser ทั้งที่ไม่จำเป็น
+> ⚠️ ถ้ารันแล้วพัง **ให้แยกสาเหตุก่อนสรุปว่า "ไม่มี CLI"**: ยังไม่ล็อกอิน · org ปิดสวิตช์ "CLI access" (แอดมินต้องเปิด) · encoding (Windows ต้อง `$env:PYTHONUTF8="1"` ไม่งั้นชื่อไทยทำคำสั่งพังแบบดูเหมือน CLI เสีย) · `--token` รับ session cookie `md_pss_id` **ไม่ใช่ PAT**
 
 `pip install hap-cli` แล้ว `hap auth login` — ให้ความสามารถที่ **MCP ไม่มีเลย**
 
