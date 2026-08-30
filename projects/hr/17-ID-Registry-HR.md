@@ -115,6 +115,25 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 
 **🆕 ทดสอบยิงจริง 3 เคส (เก็บไว้เป็นหลักฐาน ไม่ลบ):** `OT-TEST-HOLIDAY-01` (rowid `079c9d4d-439b-4536-9670-4d753d2af47f`, 4h ณ Holiday outside hours → `applied_multiplier`=3.0) · `OT-TEST-WORKDAY-01` (rowid `6384d1bc-dfb0-40b5-af86-e5b399725ec0`, 2.5h ณ Working day → ×1.5) · `OT-TEST-FRACTIONAL-01` (rowid `ecfa8e8f-b65e-4e60-ab5b-1dded2d3761a`, 2.5h → ยืนยัน `hr_ot_hours`="2.50" ถูกต้องหลังแก้บั๊ก precision) — ทั้ง 3 มี `_updatedBy`=`user-workflow` และ To-do จริงถึง Wanadtapong.l (`get_approval_list_by_row`) ✅ **AC-19 ส่วนแรกผ่าน** (`applied_multiplier` ดึงจากตาราง `hr_ot_rate` จริง ไม่ hardcode — ยืนยันจาก 2 ค่าต่างกันตาม day_type)
 
+### 🆕 ID Workflow WF-HR-05 / WF-HR-06 (P4-4 / P4-6 — สร้าง+publish 28 ส.ค. 2569 · **เพิ่มเข้า Registry ย้อนหลัง 30 ส.ค. 2569**)
+
+> 🔴 **ทำไมเพิ่มย้อนหลัง:** ฝั่งบัญชีส่งเรื่องมาใน `handoff/AC-DOC-SLIM.md` §4 ว่าเขาเจอ `WF-AC-10` publish แล้วแต่ตกหล่นจาก Registry (agent รอบหน้าเสี่ยงสร้างซ้ำทั้งตัว) และแนะนำให้ HR ไล่เช็คบ้าง — **ตรวจแล้วเป็นจริง: WF-HR-05 และ WF-HR-06 ไม่เคยถูกบันทึกลง Registry เลยตั้งแต่สร้าง** ทั้งที่ `enabled=true` ใช้งานอยู่
+
+| Process | processId | publish version | โครงสร้าง |
+|---|---|---|---|
+| **Main** WF-HR-05 สรุปเวลาทำงานรายวัน | `6a910184730d20c5b7710fa8` | **v3** (v1 สร้าง 28 ส.ค. · **v3 = แก้ D-19 เมื่อ 30 ส.ค.**) | 9 node · trigger = schedule (`frequency:0`) · `คำนวณวันที่เมื่อวาน`(compute actionId 101) → `หาบันทึกลงเวลาที่ยังไม่สรุป`(**get_multiple actionId 400** บน `hr_attendance`) → `สรุปสถานะทีละรายการ`(sub_process) |
+| **Inner** WF-HR-05 สรุปต่อ 1 เรคอร์ด | `6a910197730d20c5b7711028` | v1 | 22 node · branch `เป็นวันหยุด`(cond 7) / `ไม่มีเวลาเข้า`(cond 8) / `มีใบลาอนุมัติ`(cond 7) |
+| **Main** WF-HR-06 เตือนคำขอค้างอนุมัติเกิน SLA | `6a910222730d20c5b77115e5` | v1 | 9 node · trigger = schedule (`frequency:0`) · → `แจ้งเตือนทีละใบ`(sub_process) |
+| **Inner** WF-HR-06 แจ้งเตือนต่อ 1 ใบ | `6a9102345f8564a68c449ee7` | v1 | 9 node · branch `มีผู้อนุมัติ`(cond 7 บนฟิลด์ type 26) |
+
+🔴 **node ที่ต้องระวัง — `หาบันทึกลงเวลาที่ยังไม่สรุป` (`6a91018d730d20c5b7710fdc`)** filter = `สรุปแล้ว`(`6a8fcd7f353e1b0e4a507d4f`) **`≠ "1"` OR `is empty`** · OR group ที่สองเพิ่มเมื่อ 30 ส.ค. เพื่อแก้ D-19 — **ถ้าแก้ node นี้ต้องส่ง config ครบทั้งก้อนผ่าน `hap workflow node save --type 13` ห้ามใช้ `save-get-more --condition` เพราะมันทิ้ง OR group ที่สองเงียบ ๆ** (ไกด์ §2 ข้อ 23/24)
+
+⚠️ **ทั้ง WF-HR-05 และ WF-HR-06 ยังไม่เคย live-fire test** — เป็น schedule และ `hap workflow trigger` ไม่รัน flow จริง (ไกด์ §2 ข้อ 25) ต้องดู Workflow History บนเบราว์เซอร์ · fixture ที่เตรียมไว้: `hr_attendance` → `TEST-ATT-D19-01` (rowid `0a91bd5e-9b1b-4221-a113-739212564ca7`)
+
+⚠️ **WF-HR-06 v1 จำกัดขอบเขตเหลือแค่ `hr_leave_request`** — ตัด `hr_ot_request` ออกเพราะ D-18 (`hr_ot_request` ไม่มีฟิลด์ `submitted_at`)
+
+**สรุป workflow ที่มีอยู่จริงในแอปตอนนี้ = WF-HR-01…06 เท่านั้น** (main 6 + inner 6 = 12 process) · **WF-HR-07…13 ยังไม่มีอยู่จริง** ID ในเอกสารส่วนอื่นเป็น target/`<TBD>`
+
 ### 🔴 ตารางของบัญชีที่ HR ต้องเขียนถึง (ID ดึงจริงแล้ว — ใช้ได้เลย ห้ามแก้โครงสร้าง)
 
 | ตาราง | ws ID | HR ใช้ทำอะไร |
