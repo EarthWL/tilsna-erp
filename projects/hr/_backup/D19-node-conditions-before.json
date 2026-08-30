@@ -1,0 +1,517 @@
+{
+ "_meta": {
+  "why": "สแนปช็อตเงื่อนไขเดิม (ก่อนแก้ D-19) ของทุก node ที่ถูกแก้ — ใช้กู้คืนได้ด้วย `hap workflow node save <pid> <nodeId> --type <t> -c '{\"<key>\": <ค่าในไฟล์นี้>}'`",
+  "captured": "2026-08-30 (agent-hr, claim HR/D19-B และ HR/D19-C)",
+  "note": "ต้นฉบับของ 4 branch อ่านจาก `hap workflow node get` ก่อนแก้ · ของ WF-HR-05 อ่านก่อนแก้ในรอบ HR/D19-C"
+ },
+ "nodes": [
+  {
+   "workflow": "WF-HR-01",
+   "processId": "6a8f36bc0e97bf440dda64eb",
+   "nodeId": "6a8f36c6730d20c5b7646a9f",
+   "nodeName": "รอหัวหน้างานอนุมัติ (ยังไม่ส่ง)",
+   "saveType": 2,
+   "configKey": "operateCondition",
+   "before": [
+    [
+     {
+      "nodeId": "6a8f36bc0e97bf440dda64e8",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b92",
+      "filedValue": "สถานะใบลา",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"6122e254-2ae3-488e-82d8-2272af05b830\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 11,
+      "enumDefault": 0,
+      "conditionId": "9",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": {
+         "key": "8ab9022b-5ed7-469c-a2e6-351fbb49ed1e",
+         "value": "Pending supervisor",
+         "isDeleted": false,
+         "score": null,
+         "index": null
+        },
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     },
+     {
+      "nodeId": "6a8f36bc0e97bf440dda64e8",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b9b",
+      "filedValue": "ส่งอนุมัติแล้ว",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "thousandth": "0",
+       "numshow": "0",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 6,
+      "enumDefault": 0,
+      "conditionId": "10",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": "1",
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     }
+    ]
+   ]
+  },
+  {
+   "workflow": "WF-HR-02",
+   "processId": "6a8fa97cfdab77a41c51cb3f",
+   "nodeId": "6a8fa9a9fdab77a41c51cdac",
+   "nodeName": "Approved และยังไม่ตัดสิทธิ",
+   "saveType": 2,
+   "configKey": "operateCondition",
+   "before": [
+    [
+     {
+      "nodeId": "6a8fa97cfdab77a41c51cb3c",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b92",
+      "filedValue": "สถานะใบลา",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"6122e254-2ae3-488e-82d8-2272af05b830\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 11,
+      "enumDefault": 0,
+      "conditionId": "9",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": {
+         "key": "3642500d-00f7-4533-b9b6-b6996e5ba251",
+         "value": "Approved",
+         "isDeleted": false,
+         "score": null,
+         "index": null
+        },
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     },
+     {
+      "nodeId": "6a8fa97cfdab77a41c51cb3c",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b9c",
+      "filedValue": "ตัดสิทธิแล้ว",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "thousandth": "0",
+       "numshow": "0",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 6,
+      "enumDefault": 0,
+      "conditionId": "10",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": "1",
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     }
+    ]
+   ]
+  },
+  {
+   "workflow": "WF-HR-03",
+   "processId": "6a8fab800e97bf440dddb744",
+   "nodeId": "6a8faba80e97bf440dddb902",
+   "nodeName": "Cancelled + เคยตัด + ยังไม่คืน",
+   "saveType": 2,
+   "configKey": "operateCondition",
+   "before": [
+    [
+     {
+      "nodeId": "6a8fab800e97bf440dddb741",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b92",
+      "filedValue": "สถานะใบลา",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"6122e254-2ae3-488e-82d8-2272af05b830\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 11,
+      "enumDefault": 0,
+      "conditionId": "9",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": {
+         "key": "c30bb57c-c4a3-4d80-8ae2-c049ceabaaf9",
+         "value": "Cancelled",
+         "isDeleted": false,
+         "score": null,
+         "index": null
+        },
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     },
+     {
+      "nodeId": "6a8fab800e97bf440dddb741",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b9c",
+      "filedValue": "ตัดสิทธิแล้ว",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "thousandth": "0",
+       "numshow": "0",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 6,
+      "enumDefault": 0,
+      "conditionId": "9",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": "1",
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     },
+     {
+      "nodeId": "6a8fab800e97bf440dddb741",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8f2e231378964f99849b9d",
+      "filedValue": "คืนสิทธิแล้ว",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "thousandth": "0",
+       "numshow": "0",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 6,
+      "enumDefault": 0,
+      "conditionId": "10",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": "1",
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     }
+    ]
+   ]
+  },
+  {
+   "workflow": "WF-HR-04",
+   "processId": "6a8fd8d35f8564a68c3c1909",
+   "nodeId": "6a8fd9325f8564a68c3c1cdb",
+   "nodeName": "รอหัวหน้างานอนุมัติ (ยังไม่ส่ง)",
+   "saveType": 2,
+   "configKey": "operateCondition",
+   "before": [
+    [
+     {
+      "nodeId": "6a8fd8d35f8564a68c3c1906",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8fccde8b6633ef76f13070",
+      "filedValue": "สถานะใบขอ OT",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"d0c6077e-abe6-4cf4-b603-663e46ea937b\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 11,
+      "enumDefault": 0,
+      "conditionId": "9",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": {
+         "key": "efb5e297-32da-4bb6-b80a-d6027650f746",
+         "value": "Pending supervisor",
+         "isDeleted": false,
+         "score": null,
+         "index": null
+        },
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     },
+     {
+      "nodeId": "6a8fd8d35f8564a68c3c1906",
+      "nodeName": "发起节点",
+      "nodeType": 0,
+      "appType": 1,
+      "actionId": "",
+      "filedId": "6a8fccde8b6633ef76f13075",
+      "filedValue": "สถานะส่งคำขอแล้ว",
+      "sourceType": 0,
+      "advancedSetting": {
+       "sorttype": "zh",
+       "thousandth": "0",
+       "numshow": "0",
+       "showtype": "0",
+       "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+      },
+      "filedTypeId": 6,
+      "enumDefault": 0,
+      "conditionId": "10",
+      "value": null,
+      "conditionValues": [
+       {
+        "nodeId": null,
+        "nodeName": "",
+        "nodeType": null,
+        "appType": null,
+        "actionId": "",
+        "controlId": null,
+        "controlName": "",
+        "sourceType": null,
+        "value": "1",
+        "type": null
+       }
+      ],
+      "ignoreEmpty": 0,
+      "ignoreValueEmpty": 0,
+      "fromValue": null,
+      "toValue": null
+     }
+    ]
+   ]
+  },
+  {
+   "workflow": "WF-HR-05",
+   "processId": "6a910184730d20c5b7710fa8",
+   "nodeId": "6a91018d730d20c5b7710fdc",
+   "nodeName": "หาบันทึกลงเวลาที่ยังไม่สรุป",
+   "saveType": 13,
+   "configKey": "filters",
+   "before": [
+    {
+     "spliceType": 1,
+     "conditions": [
+      [
+       {
+        "nodeId": "6a91018d730d20c5b7710fdc",
+        "nodeName": "หาบันทึกลงเวลาที่ยังไม่สรุป",
+        "nodeType": 13,
+        "appType": 1,
+        "actionId": "400",
+        "filedId": "6a8fcd7f353e1b0e4a507d4f",
+        "filedValue": "สรุปแล้ว",
+        "sourceType": 0,
+        "advancedSetting": {
+         "sorttype": "zh",
+         "thousandth": "0",
+         "numshow": "0",
+         "showtype": "0",
+         "defsource": "[{\"rcid\":null,\"cid\":null,\"staticValue\":\"0\",\"isAsync\":false,\"type\":0}]"
+        },
+        "filedTypeId": 6,
+        "enumDefault": 0,
+        "conditionId": "10",
+        "value": null,
+        "conditionValues": [
+         {
+          "nodeId": null,
+          "nodeName": "",
+          "nodeType": null,
+          "appType": null,
+          "actionId": "",
+          "controlId": null,
+          "controlName": "",
+          "sourceType": null,
+          "value": "1",
+          "type": null
+         }
+        ],
+        "ignoreEmpty": 0,
+        "ignoreValueEmpty": 0,
+        "fromValue": null,
+        "toValue": null
+       },
+       {
+        "nodeId": "6a91018d730d20c5b7710fdc",
+        "nodeName": "หาบันทึกลงเวลาที่ยังไม่สรุป",
+        "nodeType": 13,
+        "appType": 1,
+        "actionId": "400",
+        "filedId": "6a8fcd7f353e1b0e4a507d3f",
+        "filedValue": "วันที่ทำงาน",
+        "sourceType": 0,
+        "advancedSetting": {
+         "sorttype": "zh",
+         "showformat": "1",
+         "showtype": "3"
+        },
+        "filedTypeId": 15,
+        "enumDefault": 3,
+        "conditionId": "42",
+        "value": null,
+        "conditionValues": [
+         {
+          "nodeId": "6a91018d730d20c5b7710fda",
+          "nodeName": "คำนวณวันที่เมื่อวาน",
+          "nodeType": 9,
+          "appType": 11,
+          "actionId": "101",
+          "controlId": "date_fx_id",
+          "controlName": "Result",
+          "sourceType": 0,
+          "value": null,
+          "type": null
+         }
+        ],
+        "ignoreEmpty": 0,
+        "ignoreValueEmpty": 0,
+        "fromValue": null,
+        "toValue": null
+       }
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}
