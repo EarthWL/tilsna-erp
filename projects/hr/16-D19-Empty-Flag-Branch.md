@@ -1,6 +1,6 @@
 # D-19 — เงื่อนไข `<flag> ne "1"` ไม่ผ่านเมื่อฟิลด์ว่าง (ไม่ใช่ 0)
 
-**สถานะ:** 🔴 ยืนยันแล้วด้วย A/B controlled test · 30 ส.ค. 2569 · agent-hr · claim `HR/D19-A`
+**สถานะ:** ✅ **แก้แล้วและยืนยันผลแล้ว 30 ส.ค. 2569** (claim `HR/D19-B`) — พบและพิสูจน์ด้วย A/B controlled test เมื่อ 30 ส.ค. 2569 (claim `HR/D19-A`)
 **ผลกระทบ:** WF-HR-02 **ไม่ตัดสิทธิลา** เมื่อใบลาที่ `deducted_flag` ว่างถูกอนุมัติ — เงียบสนิท ไม่มี error ไม่มีร่องรอยบน record
 **ที่มา:** ต่อยอดจาก D-17 (`15-Investigations-D13-D17.md`) ซึ่งพบอาการเดียวกันบน `submitted_flag` ของ WF-HR-01
 
@@ -38,7 +38,7 @@ _ล้าง test data และคืนยอดสิทธิกลับ u
 
 หมายเหตุ WF-HR-03 มีเงื่อนไข `เคยตัด eq "1"` (`conditionId 9`) ร่วมด้วย — ตัวนั้นไม่ได้รับผลจากค่าว่าง (ว่าง ≠ "1" อยู่แล้ว จึง FALSE ตามเจตนา)
 
-## 4. ทางเลือกในการแก้ (ยังไม่ลงมือ — ต้องขออนุมัติเพราะแตะ workflow ที่ publish แล้ว)
+## 4. ทางเลือกในการแก้ (ผู้ใช้เลือกข้อ 2+3 เมื่อ 30 ส.ค. 2569 — ดำเนินการแล้ว ดู §7)
 
 | # | วิธี | ข้อดี | ข้อเสีย |
 |---|---|---|---|
@@ -48,7 +48,7 @@ _ล้าง test data และคืนยอดสิทธิกลับ u
 
 **ข้อเสนอ:** ทำ **2 + 3** — ①patch record ที่ค้างอยู่ตอนนี้ (กันเคสจริงที่รออนุมัติ) ②แก้เงื่อนไขให้ทน empty ③ค่อยหาทางทำให้ `defaultValue` persist เป็นงานแยก
 
-🔴 **เคสจริงที่ค้างอยู่ตอนนี้:** `TEST-LR-D15-REVERIFY` (`6a90fd5f1378964f9984e14f`) — status `Pending supervisor`, `deducted_flag` = `""`, มี To-do ค้างที่ Wanadtapong.l · **ถ้ากด Approve ตอนนี้ ยอดสิทธิจะไม่ถูกตัด**
+✅ **เคสจริงที่เคยค้าง แก้แล้ว:** `TEST-LR-D15-REVERIFY` (`6a90fd5f1378964f9984e14f`) — `deducted_flag`/`returned_flag` ถูก patch เป็น `0` แล้ว และเงื่อนไข branch ก็ทนค่าว่างแล้ว ⇒ กด Approve ได้ตามปกติ ยอดสิทธิจะถูกตัดจริง
 
 ## 5. เครื่องมือแก้ที่ใช้ได้จริง
 
@@ -61,3 +61,49 @@ _ล้าง test data และคืนยอดสิทธิกลับ u
 node `ค้นหาสิทธิและยอดคงเหลือการลา` (`6a8fa9a9fdab77a41c51cd9e`) กรองด้วย พนักงาน AND ประเภทการลา AND **ปีสิทธิ** — `leave_year` ว่างจึงหาไม่เจอ
 สมมติฐาน `[?]` — search node (typeId 7) อาจ **หยุด flow เมื่อหาไม่พบ** ทำให้ gateway `พบข้อมูลสิทธิหรือไม่` และเส้น `สร้างสิทธิและยอดคงเหลือการลาใหม่` **ไม่เคยถูกเรียก**
 ยังพิสูจน์ไม่ได้จาก CLI/MCP — ต้องเปิด **Workflow History** บนเบราว์เซอร์ (บทเรียน D-17: ห้ามสรุปว่า workflow ไม่ยิงโดยไม่เปิด History)
+## 7. สิ่งที่ทำจริง (30 ส.ค. 2569 · claim `HR/D19-B` · ผู้ใช้อนุมัติ "patch data ก่อน + แก้เงื่อนไข")
+
+### ① patch ข้อมูลที่ค้าง — ตั้งธงว่างเป็น `0` (ไม่เหลือธงว่างในระบบแล้ว)
+
+| record | ที่แก้ |
+|---|---|
+| `TEST-LR-D15-REVERIFY` | `deducted_flag` `""`→`0` · `returned_flag` `""`→`0` |
+| `TEST-LR-DOCOK` | `submitted_flag`/`deducted_flag`/`returned_flag` `""`→`0` |
+| `TEST-LR-BR083` | เหมือนกัน |
+| `TEST-OT-SYSCHK-01` | `hr_paid_flag` `""`→`0` |
+
+### ② เพิ่ม OR group `is empty` เข้าเงื่อนไข branch แล้ว republish ทั้ง 4 workflow
+
+`operateCondition` เป็น array 2 ชั้น (**ชั้นนอก = OR · ชั้นใน = AND**) — วิธีแก้คือ **คัดลอกกลุ่ม AND เดิมทั้งกลุ่ม** แล้วในสำเนาเปลี่ยนเฉพาะเงื่อนไขธงจาก `conditionId "10"` (≠) เป็น `"8"` (ว่าง) พร้อมล้าง `conditionValues` เป็น `[]` — เงื่อนไขอื่นในกลุ่มคงเดิมทุกตัว
+
+```bash
+hap workflow node save <processId> <branchNodeId> --type 2 \
+  -c '{"operateCondition": [<กลุ่มเดิม>, <สำเนาที่เปลี่ยนธงเป็น conditionId 8>]}'
+hap workflow publish <processId>
+```
+
+| workflow | processId | branch nodeId | ผลอ่านกลับ | publish |
+|---|---|---|---|---|
+| WF-HR-01 | `6a8f36bc0e97bf440dda64eb` | `6a8f36c6730d20c5b7646a9f` | `สถานะ:9,ส่งอนุมัติแล้ว:10` \| `สถานะ:9,ส่งอนุมัติแล้ว:8` | ✅ v6 |
+| WF-HR-02 | `6a8fa97cfdab77a41c51cb3f` | `6a8fa9a9fdab77a41c51cdac` | `สถานะ:9,ตัดสิทธิแล้ว:10` \| `สถานะ:9,ตัดสิทธิแล้ว:8` | ✅ v5 |
+| WF-HR-03 | `6a8fab800e97bf440dddb744` | `6a8faba80e97bf440dddb902` | `สถานะ:9,ตัดสิทธิแล้ว:9,คืนสิทธิแล้ว:10` \| `…,คืนสิทธิแล้ว:8` | ✅ v3 |
+| WF-HR-04 | `6a8fd8d35f8564a68c3c1909` | `6a8fd9325f8564a68c3c1cdb` | `สถานะ OT:9,ส่งคำขอแล้ว:10` \| `สถานะ OT:9,ส่งคำขอแล้ว:8` | ✅ v3 |
+
+ทั้ง 4 ตัวยืนยันหลัง publish: `enabled=true, deleted=false` · สำรอง `workflow structure` + `node get` ก่อนแก้ครบทั้ง 4 คู่
+
+### ③ ยืนยันผลด้วยการยิงจริง — เคสเดียวกับที่เคยพัง
+
+| test | ก่อนแก้ | หลังแก้ |
+|---|---|---|
+| **WF-HR-02** — ใบลา `deducted_flag=""` → Approved | ❌ เงียบ ไม่ตัดสิทธิ (record F) | ✅ `deducted_flag`→`"1"` · used 0→1 · remaining 10→9 (record G) |
+| **WF-HR-03** — ใบลาที่ `returned_flag=""` → Cancelled | (ไม่เคยทดสอบ) | ✅ `returned_flag`→`"1"` · used 1→0 · remaining 9→10 (record G) |
+| **WF-HR-01** — ใบลา `submitted_flag=""` → Pending supervisor | ❌ เงียบ (D-17) | ✅ `submitted_flag`→`"1"` · `approval_step`→`1` · `submitted_at` ถูกเขียน (record H) |
+| **WF-HR-04** | — | ⚠️ แก้ + publish + อ่านกลับตรงแล้ว แต่ **ยังไม่ live-fire test** (โครงเหมือน WF-HR-01 ทุกประการ) |
+
+ล้าง test record G/H + ledger 2 แถวเรียบร้อย · ยอดสิทธิ TEST-EMP1-ANNUAL-2026 กลับมา used=0 / remaining=10 ตามเดิม
+
+### ยังเปิดอยู่หลังการแก้นี้
+
+1. **`defaultValue` ยัง persist ไม่ได้** — record ใหม่ยังเกิดมาพร้อมธงว่าง เพียงแต่ตอนนี้ workflow ทนได้แล้ว (งานแยก)
+2. **ยังไม่เคยทดสอบ path ผู้ใช้จริงผ่านฟอร์ม** — record ทดสอบทุกใบสร้างผ่าน API
+3. **§6 ข้อสังเกตค้าง** — เส้น "ไม่พบข้อมูลสิทธิ" ยังไม่ได้พิสูจน์ ต้องเปิด Workflow History
