@@ -23,7 +23,15 @@ apps:
 | device bridge (Linux VM ที่ mount โฟลเดอร์นี้เข้ามาให้ agent ใช้ `device_bash`) | ❌ ไม่มี `hap` ติดตั้ง (`hap: command not found`) | 29 ส.ค. 2569 |
 | cloud sandbox ของ agent เอง (`Bash` ตรง ไม่ผ่าน bridge) | ✅ ใช้ได้เต็ม — `hap 0.8.21`, authenticated เป็น Wanadtapong.l, **current app = deca7391 พอดี** | 29 ส.ค. 2569 (`hap --version && hap auth whoami` — ดู `hap app backup` ที่รันจริงแล้วด้านล่าง) |
 
-### 🔴 สิทธิ์ลบไฟล์ของ device bridge หมดอายุทุก session — ต้องขอใหม่ก่อนแตะ git (พบ 30 ส.ค. 2569)
+**สรุปการใช้งาน:** งาน Surface C (CLI) ที่ agent ต้องทำเอง ให้รันผ่าน **cloud sandbox ของ agent** (แถวที่ 3) — ยืนยันแล้วว่าชี้ไปแอปที่ถูกต้องและไม่ต้องพึ่ง bridge เลย อย่าพยายามรัน `hap` ผ่าน `device_bash` เพราะไม่ได้ติดตั้งไว้ที่นั่น หากต้องการให้ผู้ดูแลรันเอง (เช่น งานที่ต้องยืนยันตัวตนเป็นคนจริง) ให้ใช้แถวที่ 1
+
+หาก agent ตัวใดพบว่า cloud sandbox ของตัวเองใช้ `hap` ไม่ได้ (คนละ container กัน อาจไม่ auth ไว้) ให้รันตรวจสอบใหม่:
+
+```bash
+hap --version && hap auth whoami && hap app list-managed   # ต้องเห็น deca7391… ในรายการ
+```
+
+## 🔴 สิทธิ์ลบไฟล์ของ device bridge หมดอายุทุก session — ต้องขอใหม่ก่อนแตะ git (พบ 30 ส.ค. 2569)
 
 `device_bash` **ลบไฟล์ไม่ได้ตามค่าเริ่มต้น** และ git ต้องลบ `.git/index.lock` ทุกครั้งที่ commit ⇒ lock ค้าง แล้ว **git เขียนอะไรไม่ได้อีกเลยทั้ง repo** (ลามไปถึง bare repo ด้วย ทำให้ push ถูก remote ปฏิเสธ) · สิทธิ์ที่ขอไว้ **หมดอายุพร้อม session** ⇒ ปัญหานี้กลับมาทุกครั้งที่เริ่ม session ใหม่
 
@@ -36,14 +44,6 @@ find ~/mnt/TILSNA -name "*.lock" -o -name "tmp_obj_*" -delete   # ถ้า Oper
 ถ้าลบไม่ได้ ให้ขอสิทธิ์ลบโฟลเดอร์ `TILSNA` จากผู้ใช้ก่อน แล้วค่อยล้าง lock แล้วจึงรัน `preflight.sh`
 
 > `preflight.sh` เวอร์ชันตั้งแต่ 28 ส.ค. 2569 จับเคสนี้ได้เองแล้ว (`check_locks` + ตรวจ exit code ของ commit) จะขึ้น `PREFLIGHT FAIL: มี lock ค้างใน .git` แทนที่จะรายงาน OK ลวง — แต่ยัง**แก้ให้เองไม่ได้** ต้องมีคนกดอนุมัติสิทธิ์
-
-**สรุปการใช้งาน:** งาน Surface C (CLI) ที่ agent ต้องทำเอง ให้รันผ่าน **cloud sandbox ของ agent** (แถวที่ 3) — ยืนยันแล้วว่าชี้ไปแอปที่ถูกต้องและไม่ต้องพึ่ง bridge เลย อย่าพยายามรัน `hap` ผ่าน `device_bash` เพราะไม่ได้ติดตั้งไว้ที่นั่น หากต้องการให้ผู้ดูแลรันเอง (เช่น งานที่ต้องยืนยันตัวตนเป็นคนจริง) ให้ใช้แถวที่ 1
-
-หาก agent ตัวใดพบว่า cloud sandbox ของตัวเองใช้ `hap` ไม่ได้ (คนละ container กัน อาจไม่ auth ไว้) ให้รันตรวจสอบใหม่:
-
-```bash
-hap --version && hap auth whoami && hap app list-managed   # ต้องเห็น deca7391… ในรายการ
-```
 
 ## กติกาที่ผูกกับค่าข้างบน
 
