@@ -12,6 +12,8 @@
 |---|---|---|
 | `01-BRD.md` | ผู้บริหาร · ผู้ตรวจรับ | ตกลงขอบเขต · ตรวจรับตามเกณฑ์ §12 |
 | `02-BuildSpec-FRS.md` | **build agent** | 🔴 **เปิดทุกครั้งก่อนแตะ object ใด ๆ** — ID Registry · field ทุกตัว · workflow ทุก node · Test recipe |
+| `21-FRS-Modules-HR.md` | **build agent** | 🔴 **เปิดเมื่อจะแตะ field/optionset/relation/form rule ของ FR ตัวหนึ่ง** (เดิมคือ `02-` §2 แยกออกมา 31 ส.ค. 2569) |
+| `22-Workflow-Catalog-HR.md` | **build agent** | 🔴 **เปิดเมื่อจะสร้าง/แก้ workflow ตัวหนึ่ง** — node-by-node · Test recipe (เดิมคือ `02-` §3) |
 | `03-RTM-Status.md` | PM · QA | สอบทานว่าความต้องการข้อไหนทำแล้ว/ยัง · ดู Gap ที่ยังบล็อกอยู่ |
 | `04-CLAUDE-memory.md` | **build agent** | 🔴 **โหลดทุก session ก่อนเริ่มงาน** — ข้อกำหนด · กับดักเฉพาะแอปนี้ · pointer ไปไฟล์อื่น (~13k tokens) |
 | `15-Investigations-D13-D17.md` · `16-D19-Empty-Flag-Branch.md` | build agent | เปิดเมื่อเจออาการเดิมซ้ำ — บันทึกการสอบสวนเต็มของ D-13/D-15/D-17/D-19 |

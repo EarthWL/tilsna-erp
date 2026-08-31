@@ -102,7 +102,7 @@
 
 **ข้อมูลและโครงสร้าง**
 - ☐ worksheet ของ HR ครบ 41 ตาราง (`get_app_worksheets_list`)
-- ☐ ทุก `<TBD>` ใน BuildSpec §1 และ §2 ถูกแทนด้วย ID จริงแล้ว
+- ☐ ทุก `<TBD>` ใน `02-BuildSpec-FRS.md` §1 · `21-FRS-Modules-HR.md` (เดิม §2) · `22-Workflow-Catalog-HR.md` (เดิม §3) ถูกแทนด้วย ID จริงแล้ว
 - ☐ optionset 24 ชุดสร้างครบ และ option key ทุกตัวถูกคัดลอกลง §1.6
 - ☐ unique index ครบ 15 ตัว และ **ทดสอบด้วย `create_record` ซ้ำผ่าน API แล้วทุกตัว**
 - ☐ 🔴 **ฟิลด์ธงทุกตัวมี `defaultValue` = 0 — ยืนยันด้วย `hap worksheet fields <ws_id> --raw` เท่านั้น (MCP ไม่คืนค่านี้)** · **สถานะจริง 28 ส.ค. 2569: ยังไม่ผ่าน — ทุกตัวยังเป็น `default:""`** และการตั้งผ่าน `editFields` ไม่ persist ⇒ พิจารณาแก้ที่ branch แทน (ดู D-19)

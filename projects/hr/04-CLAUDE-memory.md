@@ -191,7 +191,7 @@ _ยืนยันก่อนย้าย 30 ส.ค. 2569: ตัวระบ
 ## โหมดส่งมอบให้ `nocoly-hybrid-builder-v2` (Handoff)
 
 - **ข้าม Phase 1 Interview** — spec ตอบครบแล้ว · ถ้าขาดค่าใด ถามเฉพาะจุดนั้นแล้ว **เขียนกลับ BuildSpec ทันที**
-- **Phase 2 Confirm จาก spec** — สรุป checklist + Mermaid ของ workflow ที่จะทำ **จาก BuildSpec §3** ให้ผู้ใช้ยืนยัน ไม่ต้องถามใหม่
+- **Phase 2 Confirm จาก spec** — สรุป checklist + Mermaid ของ workflow ที่จะทำ **จาก `22-Workflow-Catalog-HR.md` (เดิม BuildSpec §3)** ให้ผู้ใช้ยืนยัน ไม่ต้องถามใหม่
 - **Phase 3 ทำตามคอลัมน์ Surface** ใน §1.8 / §1.9 / §3 · หลัง `create_*` ทุกครั้ง **อ่าน ID กลับแล้วเติมแทน `<TBD>` ใน §1 และ §2 ทันที** (สำหรับ FR-HR-08/09 ให้เติมใน `02b-BuildSpec-Addendum-P3-1.md` แทนไฟล์หลัก — ดูหมายเหตุในไฟล์นั้น)
 - **ลำดับการสร้างที่ปลอดภัย** อยู่ใน BuildSpec §6 — relation ต้องมีปลายทางก่อนเสมอ
 - ปิดงาน ✅ ได้เมื่อ Test recipe ของงานนั้นผ่านตาม BuildSpec §5 (`_updatedBy` = `user-workflow` + approval ถ้ามี) แล้วอัปเดต `05-Roadmap-Tracker.md` + `03-RTM-Status.md` + checklist ข้างบนให้ตรงกัน

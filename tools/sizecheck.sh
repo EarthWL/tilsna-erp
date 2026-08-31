@@ -22,11 +22,10 @@ _n()   { printf "%'d" "$1"; }
 
 run_sizecheck() {
   local prefix="${1:-  }" m sz n=0
-  for m in projects/*/02-BuildSpec-FRS.md \
-           projects/*/03-RTM-Status.md \
-           projects/*/04-CLAUDE-memory.md \
-           projects/*/05-Roadmap-Tracker.md \
-           shared/00-HAP-Working-Guide.md; do
+  # เฝ้า **ทุกไฟล์ .md ที่ agent เปิดอ่าน** ไม่ใช่รายชื่อตายตัว
+  # เหตุผล: รายชื่อตายตัวทำให้ "ย้ายของไปไฟล์ที่ไม่ถูกวัด" กลายเป็นวิธีทำให้ตัวเลขดูดีขึ้น
+  #         โดยที่ปัญหายังอยู่ — เจอมาแล้วกับ 02-BuildSpec/05-Roadmap (30-31 ส.ค. 2569)
+  for m in projects/*/*.md shared/*.md ./*.md; do
     [ -f "$m" ] || continue
     sz=$(wc -c <"$m")
     if [ "$sz" -gt "$OVERMAX" ]; then
