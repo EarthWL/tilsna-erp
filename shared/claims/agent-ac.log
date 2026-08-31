@@ -20,3 +20,4 @@ HANDOFF 2026-08-31T03:15:22Z AC/COND-AUDIT /sessions/rcw-01fy2jp7j1sqyjjcapwmcqc
 CLAIM 2026-08-31T03:28:41Z deca7391-1761-424b-9af3-c8d043004ad3 AC/BTN-SCOPE projects/accounting/*,handoff/*
 RELEASE 2026-08-31T03:29:54Z AC/BTN-SCOPE
 CLAIM 2026-08-31T03:34:39Z deca7391-1761-424b-9af3-c8d043004ad3 AC/D19-APPLY WF-AC-01,WF-AC-02,projects/accounting/*,handoff/*
+HANDOFF 2026-08-31T04:02:24Z AC/D19-APPLY /sessions/rcw-01fy2jp7j1sqyjjcapwmcqcv/mnt/TILSNA/ac/handoff/AC-D19-APPLY.md
