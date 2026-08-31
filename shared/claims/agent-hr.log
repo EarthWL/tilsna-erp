@@ -39,3 +39,4 @@ CLAIM 2026-08-31T06:13:48Z deca7391-1761-424b-9af3-c8d043004ad3 HR/RELATION-AUDI
 HANDOFF 2026-08-31T06:39:39Z HR/RELATION-AUDIT /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-RELATION-AUDIT.md
 CLAIM 2026-08-31T10:04:29Z deca7391-1761-424b-9af3-c8d043004ad3 HR/COND8-PROBE projects/hr/*,shared/00-HAP-Working-Guide.md,handoff/HR-*,ZZ-COND8-*
 HANDOFF 2026-08-31T10:18:07Z HR/COND8-PROBE /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-COND8-PROBE.md
+CLAIM 2026-08-31T17:39:52Z deca7391-1761-424b-9af3-c8d043004ad3 HR/SCRUT-FIX projects/hr/*,shared/00-HAP-Working-Guide.md,handoff/HR-*
