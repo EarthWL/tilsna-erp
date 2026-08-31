@@ -326,3 +326,36 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | ฟิลด์ | alias | fieldId | type | หมายเหตุ |
 |---|---|---|---|---|
 | นโยบายการยกยอด | `hr_carry_policy` | `6a95c73b353e1b0e4a515b62` | Dropdown | inline 3 ค่าลอกจาก `OS_HR_CARRY_POLICY` `52b15a75-76fc-457b-a72d-e6b7f2136243` · FRS เคยระบุว่า 🔴 ยังไม่ได้สร้าง · **seed 6/6 แล้วตาม `carry_cap_days` — รอ HR ยืนยัน** |
+
+---
+
+### 🆕 ID Workflow WF-HR-16 / WF-HR-17 / WF-HR-18 (P7-3 · P7-4 · P7-6 — สร้าง+publish+**ยิงจริงผ่านครบ** 31 ส.ค. 2569)
+
+| workflow | processId | trigger | inner processId |
+|---|---|---|---|
+| **WF-HR-17** สร้างทะเบียนพนักงานจากผู้สมัครที่ถูกจ้าง | `6a95fc61730d20c5b7935ff6` | `worksheet_event` update บน `hr_candidate` · `triggerFields=[cand_stage]` | — |
+| **WF-HR-18** เปิดรอบประเมิน สร้างแบบประเมินทุกคน | `6a96016ee6605c4b1308f052` | `worksheet_event` update บน `hr_appraisal_cycle` · `triggerFields=[cycle_open_flag]` | `6a960190e6605c4b1308f16a` |
+| **WF-HR-16** เลื่อนขั้นตอนผู้สมัคร + แจ้งนัดสัมภาษณ์ | `6a960289730d20c5b79386a9` | `worksheet_event` update บน `hr_candidate` · `triggerFields=[cand_stage]` | `6a9602a9e6605c4b1308f927` |
+
+> 🔴 **WF-HR-16 และ WF-HR-17 ผูก trigger กับฟิลด์เดียวกัน (`cand_stage`)** — ทั้งคู่ยิงพร้อมกันทุกครั้งที่ขั้นตอนเปลี่ยน แล้วแยกกันด้วย branch ของตัวเอง (17 รับเฉพาะ `Hired` · 16 รับเฉพาะ `Interview 1/2`) · ทดสอบแล้วไม่ชนกัน แต่ **ถ้าจะเพิ่ม workflow ที่ผูก `cand_stage` อีกต้องระวังลำดับ**
+
+**node ของ WF-HR-17:** `gate` `6a95fc96730d20c5b7936178` · `mark_flag` `6a95fc96730d20c5b7936179` · `gen_code` `6a95fc96730d20c5b793617a` (code/JS) · `make_emp` `6a95fd07730d20c5b793655d` · `link_back` `6a95fd07730d20c5b793655e` · `notify_hr` `6a95fc96730d20c5b793617d`
+**node ของ WF-HR-18:** `gate` `6a960190e6605c4b1308f15c` · `find_emp` `6a960190e6605c4b1308f15d` · `loop_emp` `6a960190e6605c4b1308f15e` · `count_apr` `6a960190e6605c4b1308f15f` · `write_count` `6a960190e6605c4b1308f160`
+**node ของ WF-HR-16:** `stamp` `6a9602a9e6605c4b1308f91a` · `gate` `6a9602a9e6605c4b1308f91b` · `find_itv` `6a9602a9e6605c4b1308f91c` · `loop_itv` `6a9602a9e6605c4b1308f91d`
+
+#### 🔴 ค่าที่ยังไม่ใช่ของจริง — ต้องให้คนตัดสิน
+
+| จุด | ค่าที่ workflow เขียนตอนนี้ | ทำไม |
+|---|---|---|
+| `hr_employee.emp_code` (WF-HR-17) | **`NEW-<yyyymmddHHMMSS>`** สร้างจาก code node | **ยังไม่มีกฎการออกเลขที่พนักงาน** — ไม่มีตารางกฎเลขที่ของ HR และ FRS ไม่ได้ระบุรูปแบบ · เลือกค่าที่ **เห็นชัดว่าเป็นของชั่วคราว** แทนการเดารูปแบบเลขพนักงานจริง · การแจ้งเตือน node สุดท้ายบอก HR ให้แก้เป็นเลขจริงเป็นข้อแรก |
+| `hr_employee.emp_user` | **ว่าง** | workflow หา userId จากชื่อไม่ได้ (`find_member` ถูกถอด) · ฟิลด์ตั้ง `required` ไว้แต่ **workflow เขียนผ่านได้** (`00-HAP-Working-Guide.md` §2 ข้อ 29) ⇒ record เกิดขึ้นจริงแต่พนักงานยังยื่นใบลาไม่ได้จนกว่า HR จะผูกบัญชี |
+
+#### หลักฐานการยิงจริง
+
+| workflow | หลักฐาน |
+|---|---|
+| **WF-HR-17** | เปลี่ยน `cand_stage` → `Hired` → เกิด `hr_employee` 1 แถว · `_createdBy`/`_updatedBy` = **`user-workflow`** · `first_name_th`/`last_name_th` แยกจากชื่อเต็มถูกต้อง · `emp_status` = `Probation` · `hired_employee` บนผู้สมัครชี้กลับด้วย **sid = rowid จริง** ไม่ใช่ `已删除` · **ยิงซ้ำ (Offered→Hired) ไม่เกิดพนักงานคนที่สอง** ✅ AC-17 |
+| **WF-HR-18** | ตั้ง `cycle_open_flag` = 1 → เกิด `hr_appraisal` **2 แถว = จำนวนพนักงานที่เข้าเงื่อนไข** · `_createdBy` = `user-workflow` · `apr_cycle`/`apr_employee` sid ถูกต้องทั้งคู่ · `appraisal_status` = `Self assessment` · `generated_count` = 2 · **ยิงซ้ำไม่เพิ่มแถว** ✅ |
+| **WF-HR-16** | เปลี่ยน `cand_stage` → `Interview 1` → นัดสัมภาษณ์ 2 นัดที่ `notified_flag` **ว่าง** ถูกตั้งเป็น `1` ทั้งคู่ · `stage_changed_at` ถูกประทับเวลา · เพิ่มนัดที่ 3 (ยังไม่แจ้ง) แล้วเปลี่ยนเป็น `Interview 2` → นัดที่ 3 ถูกแจ้งและตั้งธง ส่วน 1–2 คงเป็น 1 ✅ |
+
+> ✅ **ทั้ง 3 ตัวใส่ gate กันค่าว่างตามบทเรียน D-19 ตั้งแต่แรก** — และ WF-HR-16 ได้ทดสอบเส้นทางค่าว่างจริง เพราะ `notified_flag` ของนัดที่สร้างใหม่**ว่าง** (ไม่ใช่ 0) ตามที่ `defaultValue` ไม่ persist
