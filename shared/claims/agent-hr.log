@@ -45,3 +45,4 @@ RELEASE 2026-08-31T17:46:01Z HR/SCRUT-FIX
 CLAIM 2026-08-31T17:56:45Z deca7391-1761-424b-9af3-c8d043004ad3 HR/PHASE67-TABLES projects/hr/*,handoff/HR-*,hr_welfare_*,hr_job_requisition,hr_candidate,hr_interview,hr_appraisal*
 RELEASE 2026-08-31T18:10:35Z HR/PHASE67-TABLES
 CLAIM 2026-08-31T18:18:45Z deca7391-1761-424b-9af3-c8d043004ad3 HR/WF14 projects/hr/*,handoff/HR-*,shared/00-HAP-Working-Guide.md,WF-HR-14,ZZ-NEST-*
+HANDOFF 2026-08-31T18:33:02Z HR/WF14 /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-WF14.md
