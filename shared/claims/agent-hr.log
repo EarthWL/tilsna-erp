@@ -21,3 +21,4 @@ CLAIM 2026-08-30T17:38:45Z deca7391-1761-424b-9af3-c8d043004ad3 HR/HANDOFF-A pro
 HANDOFF 2026-08-30T17:44:06Z HR/HANDOFF-A /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-HANDOFF-A.md
 CLAIM 2026-08-31T02:48:49Z deca7391-1761-424b-9af3-c8d043004ad3 HR/SLIM-B projects/hr/*,tools/check-repo.sh,ENV.md,handoff/HR-*
 HANDOFF 2026-08-31T02:55:03Z HR/SLIM-B /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-SLIM-B.md
+CLAIM 2026-08-31T03:04:25Z deca7391-1761-424b-9af3-c8d043004ad3 HR/FIX-C projects/hr/04-CLAUDE-memory.md,tools/check-repo.sh,tools/preflight.sh,handoff/HR-*
