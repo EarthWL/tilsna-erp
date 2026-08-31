@@ -42,7 +42,10 @@ for attempt in 1 2 3; do
     # เตือนขนาดไฟล์ที่ agent ต้องเปิด — คำเตือนล้วน ห้ามกระทบ exit code ของการจอง
     # (เพิ่ม 31 ส.ค. 2569: guardrail ที่ไม่มีใครเรียก = ไม่มีใครวัด ซึ่งคือต้นเหตุที่
     #  02-BuildSpec/05-Roadmap โตทะลุเพดานโดยไม่มีใครเห็น)
-    if [ -f "$ROOT/tools/sizecheck.sh" ]; then
+    if [ -f "$ROOT/tools/encodingcheck.sh" ]; then
+  ( cd "$ROOT" && . tools/encodingcheck.sh && run_encodingcheck "  " ) || true
+fi
+if [ -f "$ROOT/tools/sizecheck.sh" ]; then
       ( cd "$ROOT" && export SIZECHECK_QUIET=1 && . tools/sizecheck.sh && run_sizecheck "  " ) || true
     fi
     exit 0
