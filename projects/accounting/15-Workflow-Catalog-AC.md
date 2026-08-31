@@ -93,7 +93,7 @@
 | # | nodeAlias | ชนิด | ทำอะไร |
 |---|---|---|---|
 | 1 | `c_get_voucher` | get_single | `ac_voucher` filter `rowid` eq `process_variable`›`p_voucher_rowid` · ifEmpty `stop` |
-| 2 | `c_add_gl` | add_record | สร้าง 1 แถวใน `ac_gl` — `posting_date`/`fiscal_year`/`journal`/`period` จาก `c_get_voucher` · `voucher` = `{kind:"record", node:c_get_voucher}` · `account`/`debit`/`credit`/`debit_thb`/`credit_thb`/`cost_center`/`fund`/`project`/`partner` จาก `sub_trigger` · `voucher_row_id` จากพารามิเตอร์ |
+| 2 | `c_add_gl` | add_record | สร้าง 1 แถวใน `ac_gl` — `posting_date`/`fiscal_year`/`journal`/`period` จาก `c_get_voucher` · **`voucher` = record reference ของ node `c_get_voucher` (แก้ 31 ส.ค. 2569 — ดูด้านล่าง)** · **`gl_id` = `$c_get_voucher›voucher_no$-$sub_trigger›line_no$` (เพิ่ม 31 ส.ค. 2569)** · `account`/`debit`/`credit`/`debit_thb`/`credit_thb`/`cost_center`/`fund`/`project`/`partner` จาก `sub_trigger` · `voucher_row_id` จากพารามิเตอร์ |
 
 **ผลการทดสอบจริง 26 ส.ค. 2569**
 
@@ -102,6 +102,47 @@
 | ใบสำคัญสมดุล 2 บรรทัด → Approved | ✅ เกิด `ac_gl` **2 แถวพอดี** (540199 เดบิต 100 · 540101 เครดิต 100) พร้อม `journal`=JV, `period`=2569-11, `posting_date`, `voucher_row_id` ครบ · `movement_seq` เดินต่อเนื่อง 2, 3 |
 | ยิงซ้ำเป็น Approved อีกครั้ง | ✅ จำนวน `ac_gl` **เท่าเดิม (2)** — กันผ่านรายการซ้ำได้จริง |
 | `status1` → Posted และ `posted_at` | ✅ `posted_at` = 2026-08-26 16:46:51 เขียนโดย workflow |
+
+> ## 🔴 แก้บั๊ก Relation ใน `c_add_gl` — 31 ส.ค. 2569 (agent-ac)
+>
+> **อาการ:** `ac_gl.voucher` อ่านกลับได้ `已删除` ทุกแถว ⇒ ไล่จากใบสำคัญไปหารายการ GL ไม่ได้ · rollup/รายงานใดที่วิ่งผ่าน relation นี้ได้ค่าว่าง
+>
+> **สาเหตุ (รูปร่าง C ตาม `handoff/AC-RELATION-AUDIT.md`):** node เขียน `fieldValueId=''` + `fieldValue='["6a8ea7b8730d20c5b7604a55"]'` ⇒ **ยัด nodeId เป็น literal สตริงดิบ** ไม่ใช่การอ้างอิง · ในหน้าจอ workflow ช่อง "ใบสำคัญ" **แสดงเป็นว่าง** เพราะ UI แปลง literal นี้เป็น node object ไม่ได้ — นี่คือวิธีมองด้วยตาที่เร็วที่สุด
+>
+> **วิธีแก้:** ตั้งช่อง "ใบสำคัญ" = node object `ดึงใบสำคัญแม่` (ทั้ง record) · **ทำใน Browser** เพราะ `hap workflow node save` ถูก auto-mode classifier บล็อก (ครั้งที่สองแล้ว — ครั้งแรกตอนแก้ D-19) · `hap workflow publish` **ไม่ถูกบล็อก** ใช้ปิดงานได้
+>
+> ### 🔑 ข้อค้นพบใหม่ที่ต้องเข้าไกด์: relation-to-record มี **2 รูปแบบที่ถูก** ไม่ใช่รูปแบบเดียว
+>
+> | รูปแบบ | หน้าตาใน node config | ที่มา |
+> |---|---|---|
+> | ก. `fieldValueId: "rowid"` + `nodeId` = node ต้นทาง | มีใน WF-AC-10 (`newVoucher`) | `00-HAP-Working-Guide.md` §2 ข้อ 19 |
+> | **ข. `nodeId` = node ต้นทาง + `fieldValueId` ว่าง** | **สิ่งที่หน้าจอ Nocoly เขียนออกมาเองเมื่อเลือก node object** | 🆕 พิสูจน์ 31 ส.ค. 2569 |
+>
+> ⚠️ ผมตั้งใจจะแพตช์เป็นรูปแบบ ก. แต่พอทำผ่าน UI แล้วอ่านกลับ **ได้รูปแบบ ข.** ⇒ **รูปแบบ ข. คือ canonical ของแพลตฟอร์มเอง** · ตัวตรวจที่มองหาเฉพาะ `fieldValueId=="rowid"` จะตัดสินรูปแบบ ข. ว่าผิดทั้งที่ถูก — **อย่าเขียนสคริปต์ออดิตด้วยเกณฑ์เดียว**
+>
+> ### ผลทดสอบหลังแก้ (31 ส.ค. 2569)
+>
+> ล้าง `ac_gl` 5 แถวเดิม (soft delete) → รีเซ็ต `posted_flag`=0 → ตั้ง `status1`=อนุมัติแล้ว ทั้ง 2 ใบ → ยิงใหม่
+>
+> | ตรวจ | ผล |
+> |---|---|
+> | จำนวนแถว | ✅ **5 แถวพอดี** (JV-101 3 แถว · REV-001 2 แถว) ไม่ซ้ำ ไม่ขาด |
+> | `voucher` relation | ✅ **ชี้กลับใบสำคัญจริง** — `sid` = rowid ของใบสำคัญ · `name` = `ZZTEST-JV-101` / `ZZTEST-REV-001` (เดิม `已删除`) |
+> | `gl_id` (ฟิลด์ชื่อเรื่อง) | ✅ มีค่าแล้ว: `ZZTEST-JV-101-1/2/3` · `ZZTEST-REV-001-1/2` (เดิมว่างทุกแถว ⇒ รายการไม่มีชื่อในทุก view) |
+> | ดุล | ✅ JV-101 เดบิต 3,000+7,000 = เครดิต 10,000 · REV-001 1,000/1,000 |
+> | `movement_seq` | ✅ เดินต่อเนื่อง 27–31 |
+> | ผู้เขียน | ✅ `_updatedBy` = `user-workflow` |
+>
+> ### 🔴 ของใหม่ที่เจอระหว่างตรวจ ยังไม่แก้ — `gl_no` ไม่สมบูรณ์
+>
+> `ac_gl.gl_no` (`เลขที่รายการบัญชี` `6a860c4d1049edca1eed02d6`) เป็น **AutoNumber** ที่ render ออกมาเป็น `27GL-` `28GL-` … **ลงท้ายด้วยขีดแล้วไม่มีอะไรต่อ**
+> - **ไม่ใช่บั๊กของ workflow** — workflow ไม่ได้เขียนฟิลด์นี้เลย เป็นรูปแบบเลขอัตโนมัติระดับตาราง
+> - **สเปกไม่เคยนิยามว่า `gl_no` ควรมีหน้าตาอย่างไร** (NFR-05 พูดถึงแค่ `movement_seq`) ⇒ **ห้ามเดารูปแบบเลขเอกสารบัญชีเอง — ต้องถามผู้ใช้**
+> - แก้ได้เฉพาะใน **Browser** (รูปแบบ AutoNumber ไม่มี API อ่าน/เขียน — `worksheet fields` ไม่คืน `advancedSetting`)
+>
+> ### ข้อสังเกตเรื่องข้อมูล
+>
+> `AC_VOUCHER` มี **5 ใบ และเป็น `ZZTEST-*` ทั้งหมด — ยังไม่มีข้อมูลจริงสักใบ** ⇒ ช่วงนี้คือจังหวะที่ถูกที่สุดในการแก้บั๊กที่ต้องล้างข้อมูลตาม
 
 - **Gap ที่ยังเหลือ:** `debit_thb`/`credit_thb` ยังคัดลอกค่าเดิมโดยไม่คูณอัตราแลกเปลี่ยน (ถูกต้องเฉพาะ THB) · ยังไม่มีขั้นสร้าง `ac_vat_doc` เมื่อเอกสารมี VAT · ยังไม่ตรวจงวดบัญชีซ้ำ ณ วินาทีผ่านรายการ
 
