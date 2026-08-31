@@ -12,7 +12,9 @@
 
 ---
 
-## 1. 🔴🔴 หัวข้อหลัก — D-19 เป็นบั๊กของ **branch เท่านั้น** ไม่ใช่ของ `conditionId 10`
+## 1. 🔴🔴 หัวข้อหลัก — D-19 ขึ้นกับ **context** ไม่ใช่ขึ้นกับ `conditionId 10`
+
+> พิสูจน์แล้ว 2 context: **branch = พัง · `filters` ของ get_multiple (typeId 13) = ไม่พัง** · **trigger filter · search (typeId 7) · rollup/sub_process filter ยังไม่เคยทดสอบ**
 
 ทางนั้นเตรียมจะแก้ 2 จุด get_multiple (`WF-AC-09` `หารายการตรวจสอบปิดงวด…` · `WF-AC-12` `ค้นใบสำคัญไม่สมดุลที่ยังค้าง`) และผมก็เตรียมจะแก้ WF-HR-05 ด้วยเหตุผลเดียวกัน
 
