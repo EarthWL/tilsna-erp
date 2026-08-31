@@ -325,7 +325,13 @@
 
 ### §1.6 Custom Actions (ปุ่มบน record) — สร้างแล้ว 5 ปุ่ม (แก้ 30 ส.ค. 2569)
 
-> 🔴 **สถานะ Scope จริงบนเซิร์ฟเวอร์ (ยืนยัน 30 ส.ค. 2569 ด้วย `hap worksheet custom-actions`)** — `ac_voucher` 3 ปุ่ม `isAllView: 1` ✅ มองเห็นได้ · **`ac_period` 2 ปุ่ม (ปิดงวด, ปิดปีและยกยอด) `isAllView: 0` ❌ ยังเป็น Unassigned View — ผู้ใช้มองไม่เห็น** ⇒ **WF-AC-09 และ WF-AC-11 ที่ทดสอบผ่านครบแล้ว ยังไม่มีทางถูกเรียกจากหน้าจอจริง** เป็นงานค้าง 2 คลิกใน Browser ที่บล็อกทั้งสอง workflow อยู่
+> ✅ **Scope ปิดครบทั้งโมดูลแล้ว 31 ส.ค. 2569 — กวาดครบ 34 ตาราง เจอปุ่มทั้งหมด 5 ปุ่ม `isAllView: 1` ทุกตัว ไม่มีปุ่มไหนซ่อนอยู่อีก**
+>
+> ประวัติ: 30 ส.ค. ตรวจด้วย `hap worksheet custom-actions` พบ `ac_period` 2 ปุ่ม (ปิดงวด `6a903eb89762533b5b71c4b2`, ปิดปีและยกยอด `6a90f50e1378964f9984df83`) เป็น `isAllView: 0` ⇒ **WF-AC-09 และ WF-AC-11 ที่ทดสอบผ่านครบแล้ว ไม่มีทางถูกเรียกจากหน้าจอจริง** · **แก้แล้ว 31 ส.ค. ผ่าน Browser** (Custom Action → Scope → All Records) ยืนยันซ้ำด้วย API ว่า `isAllView` เป็น `1` จริงทั้งคู่
+>
+> 🔑 **ต้นเหตุที่เห็นกับตาบนหน้าจอ — ละเอียดกว่าที่กับดักข้อ 20 เคยเขียนไว้:** ปุ่มไม่ได้ "ไม่มี scope" แต่ถูกตั้งเป็น **`Specified View` โดยไม่ได้ติ๊ก view ใดเลยสักช่อง** จึงไม่โผล่ที่ไหน · การแก้คือเปลี่ยน radio เป็น **All Records** ซึ่ง **บันทึกทันทีไม่มีปุ่ม Save**
+>
+> 📌 **วิธีตรวจที่ถูกจากนี้ไป — ไม่ต้องเปิด Browser:** `hap worksheet custom-actions <ws>` → อ่าน `isAllView` (`1` = All Records เห็นได้ · `0` + `displayViews: []` = Unassigned View ไม่โผล่) · **การ *ตั้ง* ยังต้อง Browser เท่านั้น การ *ตรวจ* ไม่ต้องแล้ว**
 >
 > ⚠️ **หัวข้อเดิมเขียนว่า "ยังไม่มีสักปุ่ม" ซึ่งขัดกับตารางของตัวเอง** — ตอนนี้มีปุ่มจริงบนเซิร์ฟเวอร์แล้วอย่างน้อย 5 ปุ่ม: บน `ac_voucher` 3 ปุ่ม (ส่งอนุมัติ `6a8f380b1378964f99849bfe` · ยกเลิกใบสำคัญ `6a8f380bae2a0e3743a0bedb` · กลับรายการ — งาน 2.2 ครบ 3/3) และบน `ac_period` 2 ปุ่ม (ปิดงวด `6a903eb89762533b5b71c4b2` · ปิดปีและยกยอด `6a90f50e1378964f9984df83`) · แถวที่ยังเป็น `<TBD>` ด้านล่างคือปุ่มที่**ยังไม่ได้สร้าง** ไม่ใช่ว่าไม่มีปุ่มเลย
 
@@ -336,8 +342,8 @@
 | กลับรายการ | `ac_voucher` | `triggerWorkflow` → WF-AC-10 | สร้างใบสำคัญกลับรายการ | `status1` equals Posted `a234503a-…` | R3 | ✓ + ระบุเหตุผล | `<TBD>` | MCP (unverified) |
 | ส่งตั้งหนี้เพื่ออนุมัติ | `ac_ap` | `updateCurrentRecord` | `ap_status` = Pending approval `35be3f29-…` | `ap_status` equals Draft `e10952c6-…` | R1 | ✓ | `<TBD>` | MCP (unverified) |
 | สร้างใบสำคัญจ่ายจากคำขอ | `ac_pay_req` | `triggerWorkflow` → WF-AC-14 | สร้าง AC_PAY + AC_PAY_LINE | `req_status` equals Approved | R1 | ✓ | `<TBD>` | MCP (unverified) |
-| ปิดงวด | `ac_period` | `updateCurrentRecord` (เขียน `biz_close_flag`) → `runWorkflowAfterSubmit` → WF-AC-09 | ตรวจรายการค้างแล้วปิดงวด | `period_status` equals Open `f662571c-…` | R3 | ✓ | **`6a903eb89762533b5b71c4b2`** | MCP ✓ workflow logic ผ่านครบ — 🔴 **ยืนยันแล้ว 30 ส.ค. 2569 ว่าปุ่มนี้ยัง "Unassigned View" จริง** (`isAllView: 0`, `displayViews: []` อ่านผ่าน `hap worksheet custom-actions`) ⇒ **ผู้ใช้มองไม่เห็นปุ่มนี้เลยตอนนี้ WF-AC-09 จึงยังไม่มีทางถูกกดจากหน้าจอ** ต้องเข้า Browser ตั้ง Scope → All Records |
-| ปิดปีและยกยอด | `ac_period` | `updateCurrentRecord` (เขียน `biz_close_year_flag`) → `runWorkflowAfterSubmit` → WF-AC-11 | ตรวจงวดค้าง แล้วปิดปี+ยกยอด | `period_no` equals 13 **AND** `period_status` equals Soft-closed `b2986cb5-…` | R3 | ✓ | **`6a90f50e1378964f9984df83`** | MCP ✓ workflow logic ผ่านครบทั้ง 2 เส้นทาง — 🔴 **ยืนยันแล้ว 30 ส.ค. 2569 ว่าปุ่มนี้ยัง "Unassigned View" จริง** (`isAllView: 0`) ⇒ **ผู้ใช้มองไม่เห็นปุ่ม WF-AC-11 จึงยังกดจากหน้าจอไม่ได้** ต้องเข้า Browser ตั้ง Scope → All Records |
+| ปิดงวด | `ac_period` | `updateCurrentRecord` (เขียน `biz_close_flag`) → `runWorkflowAfterSubmit` → WF-AC-09 | ตรวจรายการค้างแล้วปิดงวด | `period_status` equals Open `f662571c-…` | R3 | ✓ | **`6a903eb89762533b5b71c4b2`** | ✅ **ปิดครบทุกมิติแล้ว 31 ส.ค. 2569** — workflow logic ผ่านครบ + **Scope แก้เป็น All Records แล้ว** (`isAllView: 1` ยืนยันผ่าน API หลังแก้) ⇒ ผู้ใช้กดปุ่มได้จริงแล้ว |
+| ปิดปีและยกยอด | `ac_period` | `updateCurrentRecord` (เขียน `biz_close_year_flag`) → `runWorkflowAfterSubmit` → WF-AC-11 | ตรวจงวดค้าง แล้วปิดปี+ยกยอด | `period_no` equals 13 **AND** `period_status` equals Soft-closed `b2986cb5-…` | R3 | ✓ | **`6a90f50e1378964f9984df83`** | ✅ **ปิดครบทุกมิติแล้ว 31 ส.ค. 2569** — workflow logic ผ่านครบทั้ง 2 เส้นทาง + **Scope แก้เป็น All Records แล้ว** (`isAllView: 1` ยืนยันผ่าน API หลังแก้) ⇒ ผู้ใช้กดปุ่มได้จริงแล้ว |
 | เปิดงวดใหม่ | `ac_period` | `updateCurrentRecord` | `period_status` = Open + บังคับกรอก `reopen_reason` | `period_status` equals Soft-closed `b2986cb5-…` | R3 | ✓ + ระบุเหตุผล | `<TBD>` | MCP (unverified) |
 | แปลงเป็นใบกำกับภาษี | `ac_bl` `<ยังไม่มีตาราง>` | `triggerWorkflow` → WF-AC-18 | สร้าง AC_INV จากใบแจ้งหนี้ | สถานะ = Recognised | R1 | ✓ | `<TBD>` | MCP (unverified) |
 | ยื่นแบบภาษี | `ac_tax_filing` | `updateCurrentRecord` | `filing_status` = Filed `746ab42c-…` + `filing_date` | `filing_status` equals Approved `f8c0a410-…` | R3 | ✓ | `<TBD>` | MCP (unverified) |
