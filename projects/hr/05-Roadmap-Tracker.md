@@ -121,7 +121,7 @@
 
 | # | งาน | สถานะ | effort | ขึ้นกับ | หลักฐาน |
 |---|---|---|---|---|---|
-| P6-1 | สร้าง `hr_welfare_scheme` · `hr_welfare_balance` + IX-18.1 | ⬜ | M | P2-1 | |
+| P6-1 | สร้าง `hr_welfare_scheme` · `hr_welfare_balance` + IX-18.1 | 🔶 **31 ส.ค. 2569 — โครงสร้างเสร็จ** | M | P2-1 | ✅ 2 ตาราง ฟิลด์ครบตามสเปก (11 + 8) · alias ครบทุกฟิลด์ · relation ผูก `hr_job_level`/`ac_coa`/`hr_employee` bidirectional · Data Name + view ไทย · ID ทั้งหมดใน `17-ID-Registry-HR.md` · ⬜ เหลือ **IX-18.1 unique index (Browser)** และผูก Dropdown `entitlement_cycle` เข้า shared optionset (Browser) · 🔴 `defaultValue` ไม่ persist ตามเดิม (P2-4) |
 | P6-2 | สร้าง `hr_claim` · `hr_claim_line` + Rollup RU-19.1 (🔴 **Browser** — ห้ามแตะผ่าน API อีก) | ⬜ | M | P6-1 | Rollup คำนวณจริง (แก้บรรทัดแล้วหัวขยับ) |
 | P6-3 | seed สวัสดิการและวงเงินของพนักงานทดสอบ | ⬜ | S | P6-1 | |
 | P6-4 | Business Rules ของใบเบิก (BR-19.1…4) + DV-19.1 | ⬜ | M | P6-2 | **AC-10 ส่วนแรก** — บล็อกเมื่อเกินวงเงิน |
@@ -134,11 +134,11 @@
 
 | # | งาน | สถานะ | effort | ขึ้นกับ | หลักฐาน |
 |---|---|---|---|---|---|
-| P7-1 | สร้าง `hr_job_requisition` · `hr_candidate` · `hr_interview` | ⬜ | M | P2-1 | |
+| P7-1 | สร้าง `hr_job_requisition` · `hr_candidate` · `hr_interview` | 🔶 **31 ส.ค. 2569 — โครงสร้างเสร็จ** | M | P2-1 | ✅ 3 ตาราง ฟิลด์ครบตามสเปก (13 + 18 + 10) · alias ครบ · relation ผูก `hr_position`/`ac_cost_center`/`hr_job_level`/`hr_employee` และเชื่อมกันเองครบ · Data Name + view ไทย · 🔴 PDPA: `candidate_national_id` + `data_retention_until` สร้างแล้ว **แต่ workflow ลบข้อมูลตาม A-HR-18 ยังไม่ได้ทำ (G-08)** · ⬜ ผูก Dropdown เข้า shared optionset (Browser) |
 | P7-2 | **WF-HR-15 อนุมัติใบขออัตรากำลัง** | ⬜ | M | P7-1 · P0-2 | approval 2 ขั้น |
 | P7-3 | **WF-HR-16 เลื่อนสถานะผู้สมัคร + แจ้งนัดสัมภาษณ์** | ⬜ | M | P7-1 | แจ้งครั้งเดียว ยิงซ้ำไม่แจ้งซ้ำ |
 | P7-4 | **WF-HR-17 สร้างทะเบียนพนักงานจากผู้สมัคร** | ⬜ | M | P7-1 · P2-2 | **AC-17** |
-| P7-5 | สร้าง `hr_appraisal_cycle` · `hr_appraisal` · `hr_appraisal_item` + IX-22.1/2 | ⬜ | M | P2-2 | |
+| P7-5 | สร้าง `hr_appraisal_cycle` · `hr_appraisal` · `hr_appraisal_item` + IX-22.1/2 | 🔶 **31 ส.ค. 2569 — โครงสร้างเสร็จ** | M | P2-2 | ✅ 3 ตาราง ฟิลด์ครบตามสเปก (10 + 15 + 9) · alias ครบ · relation cycle→appraisal→item + `hr_employee` ครบ · Data Name + view ไทย · ⬜ เหลือ **IX-22.1 (`cycle_year`,`cycle_no`) และ IX-22.2 (`cycle`,`employee`) unique index (Browser)** · ⬜ BR-22.1 |
 | P7-6 | **WF-HR-18 เปิดรอบประเมินสร้างแบบให้ทุกคน** | ⬜ | M | P7-5 | จำนวนแบบ = จำนวนพนักงาน |
 | P7-7 | **WF-HR-19 เดินสถานะแบบประเมิน 3 ขั้น** | ⬜ | L | P7-6 · P0-2 | `final_score` ถ่วงน้ำหนักถูกต้อง |
 | P7-8 | สร้าง `hr_course` · `hr_training` + IX-23.1 + view Kanban ผู้สมัคร | ⬜ | M | P2-2 | ⚠️ verify view Kanban โผล่จริง |

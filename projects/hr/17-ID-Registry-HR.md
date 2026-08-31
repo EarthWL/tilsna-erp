@@ -153,3 +153,153 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 - `ac_pay_req.biz_preq_status` `6a8ec5be353e1b0e4a506d75` → Draft = `08092993-906a-4956-b0ff-6f91f766fe61`
 
 ---
+
+---
+
+### 🆕 ID ตารางเฟส 6–7 · สวัสดิการ / สรรหา / ประเมินผล (P6-1 · P7-1 · P7-5 — สร้าง 31 ส.ค. 2569)
+
+> **วิธีสร้างที่ใช้รอบนี้ (ต่างจากรอบก่อน):** `hap worksheet create <app> "<ชื่อไทย>" --alias <alias> --section-id <sec>` สร้างเปลือกตาราง แล้ว **MCP `update_worksheet` ส่ง `removeFields` (คอลัมน์เริ่มต้น 3 ตัว) + `addFields` (ฟิลด์จริงพร้อม alias) ในคำสั่งเดียว**
+> ✅ ได้ alias ครบทุกฟิลด์ (ต่างจาก `hap worksheet create --fields` / `add-fields --controls` ที่ alias หายทั้งคู่)
+> 🆕 **`hap worksheet create` ให้ค่าเริ่มต้นเป็นภาษาอังกฤษ (`entityName: "Record"` · view `"All"`) ไม่ใช่ภาษาจีน `记录`/`全部` แบบ workaround `create_app_items`** — แต่ยังต้องแก้เป็นไทยอยู่ดี · แก้แล้วทั้ง 8 ตาราง
+> 🔴 **`defaultValue` ยังไม่ persist เหมือนเดิม** — อ่านกลับ `--raw` ได้ `default: ""` ทุกตัว ⇒ ฟิลด์ธงของ 8 ตารางนี้ก็เกิดมาพร้อมค่าว่าง ต้องตั้งผ่านหน้าจอตาม **P2-4**
+> **Section:** HR-05 Talent `6a8ee66ce56d2e6eb7bd6cb9` · HR-06 Welfare and Claims `6a8ee66ce56d2e6eb7bd6cba`
+> **ยังไม่ได้ทำ:** unique index IX-18.1 / IX-22.1 / IX-22.2 (Browser) · ผูก Dropdown เข้า shared optionset (ตอนนี้เป็น inline options ที่ลอกค่าจาก optionset จริงมาครบทุกตัว — key คนละค่ากับ optionset กลาง)
+
+#### `hr_welfare_scheme` — สวัสดิการ · `6a95c0db8b6633ef76f1fcf9`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อสวัสดิการ | `scheme_name` | `6a95c10c353e1b0e4a515a95` | Text |
+| รหัสสวัสดิการ | `scheme_code` | `6a95c10c353e1b0e4a515a96` | Text |
+| ระดับพนักงาน | `job_level` | `6a95c10c353e1b0e4a515a97` | Relation |
+| วงเงินสิทธิ | `entitlement_amount` | `6a95c10c353e1b0e4a515a99` | Number |
+| รอบสิทธิ | `entitlement_cycle` | `6a95c10c353e1b0e4a515a9a` | Dropdown |
+| วงเงินสูงสุดต่อครั้ง | `max_per_claim` | `6a95c10c353e1b0e4a515a9b` | Number |
+| ต้องแนบใบเสร็จ | `require_receipt` | `6a95c10c353e1b0e4a515a9c` | Checkbox |
+| ครอบคลุมผู้ติดตาม | `covers_dependent` | `6a95c10c353e1b0e4a515a9d` | Checkbox |
+| ผังบัญชีที่ผูก | `coa_account` | `6a95c10c353e1b0e4a515a9e` | Relation |
+| มีผลตั้งแต่วันที่ | `effective_from` | `6a95c10c353e1b0e4a515aa0` | Date |
+| เปิดใช้งาน | `is_active` | `6a95c10c353e1b0e4a515aa1` | Checkbox |
+| วงเงินสวัสดิการคงเหลือ | `_(reverse-relation ระบบสร้าง)_` | `6a95c129353e1b0e4a515ac5` | Relation |
+
+#### `hr_welfare_balance` — วงเงินสวัสดิการคงเหลือ · `6a95c0de9762533b5b7250a1`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อรายการวงเงิน | `wb_name` | `6a95c129353e1b0e4a515ac1` | Text |
+| พนักงาน | `wb_employee` | `6a95c129353e1b0e4a515ac2` | Relation |
+| สวัสดิการ | `wb_welfare_scheme` | `6a95c129353e1b0e4a515ac4` | Relation |
+| ปีสิทธิประโยชน์ | `benefit_year` | `6a95c129353e1b0e4a515ac6` | Number |
+| วงเงินสิทธิ | `entitled_amount` | `6a95c129353e1b0e4a515ac7` | Number |
+| วงเงินที่ใช้ไป | `used_amount` | `6a95c129353e1b0e4a515ac8` | Number |
+| วงเงินคงเหลือ | `remaining_amount` | `6a95c129353e1b0e4a515ac9` | Number |
+| หมายเหตุ | `wb_note` | `6a95c129353e1b0e4a515aca` | Text |
+
+#### `hr_job_requisition` — ใบขออัตรากำลัง · `6a95c1349762533b5b7250b5`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| เลขที่ใบขออัตรากำลัง | `req_no` | `6a95c175ae2a0e3743a1888b` | Text |
+| ตำแหน่งงาน | `req_position` | `6a95c175ae2a0e3743a1888c` | Relation |
+| หน่วยงาน / ศูนย์ต้นทุน | `req_cost_center` | `6a95c175ae2a0e3743a1888e` | Relation |
+| ระดับพนักงาน | `req_job_level` | `6a95c175ae2a0e3743a18890` | Relation |
+| จำนวนอัตราที่ขอ | `headcount` | `6a95c175ae2a0e3743a18892` | Number |
+| งบประมาณที่ตั้งไว้ | `budget_amount` | `6a95c175ae2a0e3743a18893` | Number |
+| เหตุผลความจำเป็น | `req_reason` | `6a95c175ae2a0e3743a18894` | Text |
+| วันที่ต้องการเริ่มงาน | `target_start_date` | `6a95c175ae2a0e3743a18895` | Date |
+| สถานะใบขอ | `req_status` | `6a95c175ae2a0e3743a18896` | Dropdown |
+| ผู้อนุมัติที่ระบบกำหนด | `req_approver_user` | `6a95c175ae2a0e3743a18897` | Collaborator |
+| วันที่อนุมัติ | `req_approved_at` | `6a95c175ae2a0e3743a18898` | DateTime |
+| (ระบบ) ส่งอนุมัติแล้ว | `req_submitted_flag` | `6a95c175ae2a0e3743a18899` | Number |
+| จำนวนที่บรรจุแล้ว | `filled_count` | `6a95c175ae2a0e3743a1889a` | Number |
+| ผู้สมัคร | `_(reverse-relation ระบบสร้าง)_` | `6a95c1988b6633ef76f1fd0b` | Relation |
+
+#### `hr_candidate` — ผู้สมัคร · `6a95c137ae2a0e3743a1887f`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อผู้สมัคร | `candidate_name` | `6a95c1988b6633ef76f1fd09` | Text |
+| ใบขออัตรากำลัง | `cand_job_requisition` | `6a95c1988b6633ef76f1fd0a` | Relation |
+| ตำแหน่งที่สมัคร | `applied_position` | `6a95c1988b6633ef76f1fd0c` | Relation |
+| ขั้นตอนการคัดเลือก | `cand_stage` | `6a95c1988b6633ef76f1fd0e` | Dropdown |
+| อีเมล | `cand_email` | `6a95c1988b6633ef76f1fd0f` | Email |
+| โทรศัพท์มือถือ | `cand_mobile` | `6a95c1988b6633ef76f1fd10` | PhoneNumber |
+| เลขประจำตัวประชาชน (PDPA) | `candidate_national_id` | `6a95c1988b6633ef76f1fd11` | Text |
+| วันเกิด | `cand_birth_date` | `6a95c1988b6633ef76f1fd12` | Date |
+| ประสบการณ์ (ปี) | `experience_years` | `6a95c1988b6633ef76f1fd13` | Number |
+| เงินเดือนที่คาดหวัง | `expected_salary` | `6a95c1988b6633ef76f1fd14` | Number |
+| การศึกษา | `cand_education` | `6a95c1988b6633ef76f1fd15` | Text |
+| ช่องทางที่มา | `source_channel` | `6a95c1988b6633ef76f1fd16` | SingleSelect |
+| เวลาที่เปลี่ยนขั้นตอน | `stage_changed_at` | `6a95c1988b6633ef76f1fd17` | DateTime |
+| เอกสารสมัคร | `cand_resume` | `6a95c1988b6633ef76f1fd18` | Attachment |
+| พนักงานที่จ้างแล้ว | `hired_employee` | `6a95c1988b6633ef76f1fd19` | Relation |
+| (ระบบ) จ้างแล้ว | `hire_flag` | `6a95c1988b6633ef76f1fd1b` | Number |
+| วันที่ให้ความยินยอม PDPA | `pdpa_consent_date` | `6a95c1988b6633ef76f1fd1c` | Date |
+| เก็บข้อมูลถึงวันที่ | `data_retention_until` | `6a95c1988b6633ef76f1fd1d` | Date |
+| การสัมภาษณ์ | `_(reverse-relation ระบบสร้าง)_` | `6a95c1ac8b6633ef76f1fd4e` | Relation |
+
+#### `hr_interview` — การสัมภาษณ์ · `6a95c1399762533b5b7250c1`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อรายการสัมภาษณ์ | `interview_name` | `6a95c1ac8b6633ef76f1fd4c` | Text |
+| ผู้สมัคร | `itv_candidate` | `6a95c1ac8b6633ef76f1fd4d` | Relation |
+| รอบที่สัมภาษณ์ | `interview_round` | `6a95c1ac8b6633ef76f1fd4f` | Number |
+| วันเวลาสัมภาษณ์ | `interview_at` | `6a95c1ac8b6633ef76f1fd50` | DateTime |
+| กรรมการสัมภาษณ์ | `interviewers` | `6a95c1ac8b6633ef76f1fd51` | Collaborator |
+| สถานที่ | `itv_location` | `6a95c1ac8b6633ef76f1fd52` | Text |
+| คะแนน | `itv_score` | `6a95c1ac8b6633ef76f1fd53` | Number |
+| ผลการสัมภาษณ์ | `itv_result` | `6a95c1ac8b6633ef76f1fd54` | SingleSelect |
+| ความเห็นกรรมการ | `itv_comments` | `6a95c1ac8b6633ef76f1fd55` | Text |
+| (ระบบ) แจ้งนัดแล้ว | `notified_flag` | `6a95c1ac8b6633ef76f1fd56` | Number |
+
+#### `hr_appraisal_cycle` — รอบประเมินผล · `6a95c13b1378964f99857909`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อรอบประเมิน | `cycle_name` | `6a95c1c1353e1b0e4a515af0` | Text |
+| ปีที่ประเมิน | `cycle_year` | `6a95c1c1353e1b0e4a515af1` | Number |
+| ครั้งที่ | `cycle_no` | `6a95c1c1353e1b0e4a515af2` | Number |
+| รอบประเมินตั้งแต่วันที่ | `period_from` | `6a95c1c1353e1b0e4a515af3` | Date |
+| รอบประเมินถึงวันที่ | `period_to` | `6a95c1c1353e1b0e4a515af4` | Date |
+| กำหนดส่งประเมินตนเอง | `self_due_date` | `6a95c1c1353e1b0e4a515af5` | Date |
+| กำหนดหัวหน้าประเมิน | `supervisor_due_date` | `6a95c1c1353e1b0e4a515af6` | Date |
+| กำหนด HR สรุป | `hr_due_date` | `6a95c1c1353e1b0e4a515af7` | Date |
+| (ระบบ) เปิดรอบแล้ว | `cycle_open_flag` | `6a95c1c1353e1b0e4a515af8` | Number |
+| จำนวนแบบประเมินที่สร้างแล้ว | `generated_count` | `6a95c1c1353e1b0e4a515af9` | Number |
+| แบบประเมินผล | `_(reverse-relation ระบบสร้าง)_` | `6a95c1e0353e1b0e4a515b17` | Relation |
+
+#### `hr_appraisal` — แบบประเมินผล · `6a95c13d1378964f99857913`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อแบบประเมิน | `appraisal_name` | `6a95c1e0353e1b0e4a515b15` | Text |
+| รอบประเมิน | `apr_cycle` | `6a95c1e0353e1b0e4a515b16` | Relation |
+| พนักงาน | `apr_employee` | `6a95c1e0353e1b0e4a515b18` | Relation |
+| หัวหน้าผู้ประเมิน | `apr_supervisor_user` | `6a95c1e0353e1b0e4a515b1a` | Collaborator |
+| สถานะการประเมิน | `appraisal_status` | `6a95c1e0353e1b0e4a515b1b` | Dropdown |
+| คะแนนประเมินตนเอง | `self_score` | `6a95c1e0353e1b0e4a515b1c` | Number |
+| คะแนนจากหัวหน้า | `supervisor_score` | `6a95c1e0353e1b0e4a515b1d` | Number |
+| คะแนนสุดท้าย | `final_score` | `6a95c1e0353e1b0e4a515b1e` | Number |
+| เกรด | `apr_grade` | `6a95c1e0353e1b0e4a515b1f` | SingleSelect |
+| ความเห็นของพนักงาน | `self_comment` | `6a95c1e0353e1b0e4a515b20` | Text |
+| ความเห็นของหัวหน้า | `supervisor_comment` | `6a95c1e0353e1b0e4a515b21` | Text |
+| ความเห็นของ HR | `hr_comment` | `6a95c1e0353e1b0e4a515b22` | Text |
+| วันที่ส่งแบบประเมิน | `apr_submitted_at` | `6a95c1e0353e1b0e4a515b23` | DateTime |
+| วันที่ประเมินเสร็จ | `apr_completed_at` | `6a95c1e0353e1b0e4a515b24` | DateTime |
+| (ระบบ) ขั้นการประเมิน | `apr_step_flag` | `6a95c1e0353e1b0e4a515b25` | Number |
+| รายการประเมิน | `_(reverse-relation ระบบสร้าง)_` | `6a95c1f38b6633ef76f1fd75` | Relation |
+
+#### `hr_appraisal_item` — รายการประเมิน · `6a95c140353e1b0e4a515ae6`
+
+| ฟิลด์ | alias | fieldId | type |
+|---|---|---|---|
+| ชื่อรายการประเมิน | `item_name` | `6a95c1f38b6633ef76f1fd73` | Text |
+| แบบประเมิน | `item_appraisal` | `6a95c1f38b6633ef76f1fd74` | Relation |
+| หมวดรายการ | `item_category` | `6a95c1f38b6633ef76f1fd76` | SingleSelect |
+| น้ำหนัก (%) | `weight_pct` | `6a95c1f38b6633ef76f1fd77` | Number |
+| เป้าหมาย | `target_value` | `6a95c1f38b6633ef76f1fd78` | Text |
+| ผลงานจริง | `actual_value` | `6a95c1f38b6633ef76f1fd79` | Text |
+| คะแนนตนเอง | `self_rating` | `6a95c1f38b6633ef76f1fd7a` | Number |
+| คะแนนหัวหน้า | `supervisor_rating` | `6a95c1f38b6633ef76f1fd7b` | Number |
+| ความเห็นต่อรายการ | `item_comment` | `6a95c1f38b6633ef76f1fd7c` | Text |
