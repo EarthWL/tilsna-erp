@@ -31,21 +31,43 @@ for f in preflight.sh postflight.sh claimlib.sh; do
   [ -x "tools/$f" ] && say y "tools/$f รันได้" || say n "tools/$f ไม่มีหรือไม่มีสิทธิ์รัน (chmod +x)"
 done
 [ -f ENV.md ] && say y "มี ENV.md" || echo "  ⚠️  ยังไม่มี ENV.md (ไม่บล็อก แต่ควรสร้างจาก assets/AgentProtocol-template.md)"
-# ── เตือนขนาดไฟล์ที่ agent ต้องโหลดทุก session ──────────────────────────────
-# เพดาน Read ของ agent = 25,000 tokens · วัดจริงบน repo นี้ ~7.5 bytes/token (ข้อความไทย)
-# => ~187,000 bytes คือขีดที่อ่านไม่จบใน 1 call · เตือนที่ 150,000 (~80% ของเพดาน)
-# เพื่อให้มีเวลาบีบก่อนชน ไม่ใช่เตือนทันทีที่เพิ่งบีบเสร็จ (คำเตือนที่ดังตลอดจะถูกเมิน)
-MEMMAX=${MEMMAX:-150000}
-for m in projects/*/04-CLAUDE-memory.md; do
-  [ -f "$m" ] || continue
+# ── เตือนขนาดไฟล์ที่ agent ต้องเปิดอ่าน ────────────────────────────────────
+# เพดาน Read ของ agent = 25,000 tokens · วัดจริงบน repo นี้ ~7 bytes/token (ข้อความไทย)
+# => ~175,000 bytes คือขีดที่อ่านไม่จบใน 1 call
+#   WARN ที่ 150,000 (~86% ของเพดาน) เพื่อให้มีเวลาจัดการก่อนชน
+#   OVER ที่ 175,000 = อ่านไม่จบแล้วจริง ๆ ต้องแยกไฟล์
+#
+# 🔴 บทเรียน 31 ส.ค. 2569: เดิมเช็คแค่ `04-CLAUDE-memory.md` ไฟล์เดียว ทำให้
+#    `02-BuildSpec-FRS.md` (276 KB) และ `05-Roadmap-Tracker.md` (160 KB) โตทะลุเพดาน
+#    โดยไม่มีใครเห็น — และตัวเลข "memory เล็กลง" ก็ดูดีขึ้นได้ด้วยการย้ายของออกไปไฟล์
+#    ที่ไม่ถูกวัด ⇒ เกณฑ์ต้องครอบทุกไฟล์ที่ agent ต้องเปิด ไม่ใช่ไฟล์เดียว
+WARNMAX=${WARNMAX:-${MEMMAX:-150000}}
+OVERMAX=${OVERMAX:-175000}
+tot_warn=0
+check_size() {
+  m="$1"; [ -f "$m" ] || return 0
   sz=$(wc -c <"$m")
-  if [ "$sz" -gt "$MEMMAX" ]; then
-    echo "  ⚠️  $m = $(printf "%'d" "$sz") bytes (~$((sz/7)) tokens) เกินเกณฑ์ $(printf "%'d" "$MEMMAX")"
-    echo "      ถึงเวลาบีบตาม MIGRATION.md §C — ไม่บล็อก แต่ถ้าปล่อยจะอ่านไม่จบใน 1 call (เพดาน 25,000 tokens)"
+  if [ "$sz" -gt "$OVERMAX" ]; then
+    echo "  🔴 $m = $(printf "%'d" "$sz") bytes (~$((sz/7)) tokens) — **เกินเพดาน Read 25,000 tokens อ่านไม่จบใน 1 call**"
+    echo "      ต้องแยกไฟล์ (ดู MIGRATION.md §C) — ไม่บล็อก แต่ agent จะอ่านไฟล์นี้ไม่ครบทุก session"
+    tot_warn=$((tot_warn+1))
+  elif [ "$sz" -gt "$WARNMAX" ]; then
+    echo "  ⚠️  $m = $(printf "%'d" "$sz") bytes (~$((sz/7)) tokens) เกินเกณฑ์เตือน $(printf "%'d" "$WARNMAX")"
+    echo "      ใกล้ชนเพดานแล้ว ถึงเวลาจัดการตาม MIGRATION.md §C"
+    tot_warn=$((tot_warn+1))
   else
     say y "$m = $(printf "%'d" "$sz") bytes (~$((sz/7)) tokens) อยู่ในเกณฑ์"
   fi
+}
+# ไฟล์ที่ agent ต้องเปิดอ่าน — ครอบทั้งสองโมดูล + คู่มือกลาง
+for m in projects/*/02-BuildSpec-FRS.md \
+         projects/*/03-RTM-Status.md \
+         projects/*/04-CLAUDE-memory.md \
+         projects/*/05-Roadmap-Tracker.md \
+         shared/00-HAP-Working-Guide.md; do
+  check_size "$m"
 done
+[ "$tot_warn" -gt 0 ] && echo "  ── รวม $tot_warn ไฟล์ที่เกินเกณฑ์ (ไม่บล็อกการทำงาน)"
 
 N="$(git config user.name)"; [ -n "$N" ] && say y "git identity = $N (ใช้เป็น agent-id)" || say n "ยังไม่ตั้ง git config user.name — ใช้เป็น agent-id ไม่ได้"
 

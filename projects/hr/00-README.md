@@ -16,7 +16,8 @@
 | `04-CLAUDE-memory.md` | **build agent** | 🔴 **โหลดทุก session ก่อนเริ่มงาน** — ข้อกำหนด · กับดักเฉพาะแอปนี้ · pointer ไปไฟล์อื่น (~13k tokens) |
 | `15-Investigations-D13-D17.md` · `16-D19-Empty-Flag-Branch.md` | build agent | เปิดเมื่อเจออาการเดิมซ้ำ — บันทึกการสอบสวนเต็มของ D-13/D-15/D-17/D-19 |
 | `17-ID-Registry-HR.md` | **build agent** | 🔴 **เปิดเมื่อจะแตะ object จริง** — ws / view / workflow ID · ตารางบัญชีที่ HR เขียนถึง · option key ที่ใช้บ่อย (แยกออกจาก memory 30 ส.ค. 2569) |
-| `05-Roadmap-Tracker.md` | PM · build agent | 🔴 **living doc** — อัปเดตทุกครั้งที่เริ่ม/ปิดงาน |
+| `05-Roadmap-Tracker.md` | PM · build agent | 🔴 **living doc** — เก็บ **สถานะปัจจุบัน** เท่านั้น อัปเดตทุกครั้งที่เริ่ม/ปิดงาน |
+| `19-Change-Log-HR.md` | PM · build agent | 🔴 **เขียน Change Log ที่นี่ ไม่ใช่ใน `05-`** — ประวัติว่าใครทำอะไรเมื่อไร (แยกออกมา 31 ส.ค. 2569) |
 | `06-Demo-Plan-Checklist.md` | ผู้สาธิต · QA | เตรียมเดโมและตรวจความครบถ้วนก่อนส่งมอบ |
 
 ## เริ่มงานอย่างไร (build agent)

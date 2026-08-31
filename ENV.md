@@ -45,6 +45,29 @@ find ~/mnt/TILSNA -name "*.lock" -o -name "tmp_obj_*" -delete   # ถ้า Oper
 
 > `preflight.sh` เวอร์ชันตั้งแต่ 28 ส.ค. 2569 จับเคสนี้ได้เองแล้ว (`check_locks` + ตรวจ exit code ของ commit) จะขึ้น `PREFLIGHT FAIL: มี lock ค้างใน .git` แทนที่จะรายงาน OK ลวง — แต่ยัง**แก้ให้เองไม่ได้** ต้องมีคนกดอนุมัติสิทธิ์
 
+## 🔴🔴 โฟลเดอร์เดียวถูก mount 2 ที่ — สิทธิ์ลบไฟล์ผูกกับ **mount** ไม่ใช่โฟลเดอร์ (พบ 31 ส.ค. 2569)
+
+เครื่องผู้ใช้ต่อโฟลเดอร์เข้ามา 3 อัน แล้วสองอันในนั้น**ทับซ้อนกัน**:
+
+```
+C:\Users\criti\Documents\ERP_TILSA      -> $HOME/mnt/ERP_TILSA
+C:\Users\criti\Documents\TILSNA         -> $HOME/mnt/TILSNA      (repo อยู่ที่ TILSNA/hr)
+C:\Users\criti\Documents\TILSNA\hr      -> $HOME/mnt/hr          ← โฟลเดอร์เดียวกันเป๊ะกับข้างบน
+```
+
+⇒ `$HOME/mnt/TILSNA/hr` กับ `$HOME/mnt/hr` คือ **ไฟล์ชุดเดียวกันบนดิสก์** (ยืนยันแล้ว: `git rev-parse HEAD` ตรงกัน) แต่ device bridge มองเป็นคนละ mount
+
+**สองอาการที่เกิดตามมา — เคยทำให้เสียเวลาไป 2 รอบ:**
+
+| ทำที่ | `rm` / ลบ lock ของ git | `git pull` / `push` |
+|---|---|---|
+| `$HOME/mnt/hr` | ✅ ได้ (ถ้าขอสิทธิ์ path `…\TILSNA\hr`) | ❌ **ล้ม** — remote เป็น path สัมพัทธ์ `../origin.git` ซึ่งจาก mount นี้ชี้ไป `$HOME/mnt/origin.git` ที่ไม่มีอยู่ |
+| `$HOME/mnt/TILSNA/hr` | ✅ ได้ **ต่อเมื่อขอสิทธิ์ที่ path แม่ `…\Documents\TILSNA`** | ✅ ได้ (`../origin.git` ชี้ถูก) |
+
+🔴 **กฎ: ทำงาน git ที่ `$HOME/mnt/TILSNA/hr` เสมอ และตอนขอสิทธิ์ลบไฟล์ ให้ขอที่ `C:\Users\criti\Documents\TILSNA` (โฟลเดอร์แม่) ไม่ใช่ `…\TILSNA\hr`**
+ถ้าขอผิด path จะได้ข้อความว่า "enabled แล้ว" แต่ `rm` ที่ mount ที่ใช้งานจริงยัง `Operation not permitted` อยู่ — **ข้อความยืนยันจาก tool ไม่ใช่หลักฐานว่าลบได้** ให้ทดสอบจริงด้วย `touch x && rm x` ก่อนเชื่อ
+
+
 ## กติกาที่ผูกกับค่าข้างบน
 
 | ค่า | ผล |
