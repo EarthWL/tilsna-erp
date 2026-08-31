@@ -126,9 +126,9 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | **Main** WF-HR-06 เตือนคำขอค้างอนุมัติเกิน SLA | `6a910222730d20c5b77115e5` | v1 | 9 node · trigger = schedule (`frequency:0`) · → `แจ้งเตือนทีละใบ`(sub_process) |
 | **Inner** WF-HR-06 แจ้งเตือนต่อ 1 ใบ | `6a9102345f8564a68c449ee7` | v1 | 9 node · branch `มีผู้อนุมัติ`(cond 7 บนฟิลด์ type 26) |
 
-🔴 **node ที่ต้องระวัง — `หาบันทึกลงเวลาที่ยังไม่สรุป` (`6a91018d730d20c5b7710fdc`)** filter = `สรุปแล้ว`(`6a8fcd7f353e1b0e4a507d4f`) **`≠ "1"` OR `is empty`** · OR group ที่สองเพิ่มเมื่อ 30 ส.ค. เพื่อแก้ D-19 — **ถ้าแก้ node นี้ต้องส่ง config ครบทั้งก้อนผ่าน `hap workflow node save --type 13` ห้ามใช้ `save-get-more --condition` เพราะมันทิ้ง OR group ที่สองเงียบ ๆ** (ไกด์ §2 ข้อ 23/24)
+🔴 **node ที่ต้องระวัง — `หาบันทึกลงเวลาที่ยังไม่สรุป` (`6a91018d730d20c5b7710fdc`)** filter = `สรุปแล้ว`(`6a8fcd7f353e1b0e4a507d4f`) **`≠ "1"` OR `is empty`** · OR group ที่สองเพิ่มเมื่อ 30 ส.ค. เพื่อแก้ D-19 — **ถ้าแก้ node นี้ต้องส่ง config ครบทั้งก้อนผ่าน `hap workflow node save --type 13` ห้ามใช้ `save-get-more --condition` เพราะมันทิ้ง OR group ที่สองเงียบ ๆ** (`shared/00-HAP-Working-Guide.md` §2 ข้อ 23/24)
 
-⚠️ **ทั้ง WF-HR-05 และ WF-HR-06 ยังไม่เคย live-fire test** — เป็น schedule และ `hap workflow trigger` ไม่รัน flow จริง (ไกด์ §2 ข้อ 25) ต้องดู Workflow History บนเบราว์เซอร์ · fixture ที่เตรียมไว้: `hr_attendance` → `TEST-ATT-D19-01` (rowid `0a91bd5e-9b1b-4221-a113-739212564ca7`)
+⚠️ **ทั้ง WF-HR-05 และ WF-HR-06 ยังไม่เคย live-fire test** — เป็น schedule และ `hap workflow trigger` ไม่รัน flow จริง (`shared/00-HAP-Working-Guide.md` §2 ข้อ 25) ต้องดู Workflow History บนเบราว์เซอร์ · fixture ที่เตรียมไว้: `hr_attendance` → `TEST-ATT-D19-01` (rowid `0a91bd5e-9b1b-4221-a113-739212564ca7`)
 
 ⚠️ **WF-HR-06 v1 จำกัดขอบเขตเหลือแค่ `hr_leave_request`** — ตัด `hr_ot_request` ออกเพราะ D-18 (`hr_ot_request` ไม่มีฟิลด์ `submitted_at`)
 

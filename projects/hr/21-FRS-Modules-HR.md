@@ -3,7 +3,7 @@
 _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2569 — **เนื้อหาเหมือนเดิมทุกตัวอักษร ไม่ได้ตัดอะไรทิ้ง**_
 
 > **ทำไมแยก:** `02-BuildSpec-FRS.md` โตถึง 276,580 bytes (~37,075 tokens) ซึ่ง **เกินเพดาน Read 25,000 tokens** ⇒ agent อ่านไฟล์ที่ §0 ของมันเองสั่งให้ "เปิดทุกครั้งก่อนแตะ object ใด ๆ" ไม่จบใน 1 call
-> แบ่งตามหลัก **"อะไรที่ต้องเปิดพร้อมกัน"**: §0 กฎ + §1 ID Registry + §4–§6 = แกนที่ต้องเปิดทุกครั้ง (อยู่ใน `02-`) · ส่วนสเปกราย FR และ Workflow Catalog เป็นการ **เปิดหาเฉพาะตัวที่กำลังทำ** จึงแยกออกมา
+> แบ่งตามหลัก **"อะไรที่ต้องเปิดพร้อมกัน"**: `02-BuildSpec-FRS.md` §0 กฎ + §1 ID Registry + §4–§6 = แกนที่ต้องเปิดทุกครั้ง · ส่วนสเปกราย FR และ Workflow Catalog เป็นการ **เปิดหาเฉพาะตัวที่กำลังทำ** จึงแยกออกมา
 
 ---
 
@@ -12,7 +12,7 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 > 🔴🔴 **`create_worksheet` (สร้างตารางใหม่) พังทั้งระบบตั้งแต่ 26 ส.ค. 2569** — ทุกครั้ง (ทดสอบ 6 payload ต่างกัน ข้าม connector/แอป) คืน error `Validation failed: structuredContent does not match tool outputSchema... required property 'appId' not found` และไม่สร้างตารางเลย · **วิธีแก้ที่ยืนยันแล้วว่าใช้ได้:** (1) `create_app_items` (`type:"worksheet"`) → ได้ worksheet เปล่าพร้อม field default 3 ตัว (名称/描述/附件 = wsid+1/+2/+3 ในเลขฐาน 16) (2) `get_worksheet_structure` ยืนยัน ID field default (3) `update_worksheet.removeFields` ลบ field default ทั้ง 3 (4) `update_worksheet.addFields` เติมฟิลด์จริงทั้งหมด (5) `get_worksheet_structure` verify — **ใช้วิธีนี้สร้างครบทั้ง 10 ตาราง HR-00 + hr_ot_request/hr_attendance + hr_pay_component/hr_pay_period/hr_salary_structure สำเร็จแล้ว** ดู Known Issues ในนี้และ CLAUDE-memory
 > **type ต้องเป็น enum ที่ `addFields` รับจริง**: `Text` `Number` `SingleSelect` `MultipleSelect` `Date` `DateTime` `Collaborator` `Relation` `Checkbox` `Role` (+ `Attachment` `Rating` `Time` best-effort) — **ยืนยันแล้วว่า `Checkbox`/`Role` สร้างผ่าน `addFields` ได้จริง** (แก้ไขจากที่เข้าใจผิดก่อนหน้านี้ว่าต้อง Browser)
 > ชนิดอื่น (`Department` `SubTable` `Formula` `AutoNumber` `Location` `Rollup`) 🔴 ยังไม่ทดสอบ/ยังต้อง **สร้างใน Browser** แล้วอ่าน ID กลับด้วย `get_worksheet_structure`
-> 🔴 **`Dropdown` ที่ผูก shared optionset (เช่น 24 ชุด OS_HR_* ใน §1.6) ผูกผ่าน API ไม่ได้เลย** ทั้ง `create_worksheet` และ `addFields` — `addFields` ให้แค่ `options[]` inline (สร้าง option ใหม่เฉพาะฟิลด์ ไม่ใช่ผูกกับ optionset ที่มีอยู่) — **การผูก shared optionset ทำได้แค่ตอนสร้างฟิลด์ใหม่ใน Browser UI เท่านั้น** ยืนยันซ้ำหลายรอบล่าสุดถึง P5-1 (27 ส.ค. 2569)
+> 🔴 **`Dropdown` ที่ผูก shared optionset (เช่น 24 ชุด OS_HR_* ใน `02-BuildSpec-FRS.md` §1.6) ผูกผ่าน API ไม่ได้เลย** ทั้ง `create_worksheet` และ `addFields` — `addFields` ให้แค่ `options[]` inline (สร้าง option ใหม่เฉพาะฟิลด์ ไม่ใช่ผูกกับ optionset ที่มีอยู่) — **การผูก shared optionset ทำได้แค่ตอนสร้างฟิลด์ใหม่ใน Browser UI เท่านั้น** ยืนยันซ้ำหลายรอบล่าสุดถึง P5-1 (27 ส.ค. 2569)
 > `subType` ที่ใช้บ่อย: Relation `1` = เดี่ยว · `2` = หลายรายการ/ย้อนกลับ · Date `3` = Y-M-D · DateTime `1` = Y-M-D h:m · Text `1` = หลายบรรทัด (ใช้ `config:{textMode:"multiLine"}`)
 
 ---
@@ -49,7 +49,7 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 ---
 
 ### FR-HR-01B กฎการอนุมัติของโมดูลบุคคล (เพิ่มระหว่างสร้างจริง — เดิมไม่มี field table ในสเปกฉบับแรก)
-**Worksheet:** กฎการอนุมัติของโมดูลบุคคล `hr_approval_rule` `6a8eebf81378964f998499f8` — ตารางตั้งค่าที่ workflow ทุกสายอนุมัติ (WF-HR-01/04/06/09/12/17…) ใช้ `get_single` ค้นหา **ภายในสายอนุมัติ** (ห้าม `update_record` คัดลอกค่า Role ออกมา — ดู DO/DON'T §0)
+**Worksheet:** กฎการอนุมัติของโมดูลบุคคล `hr_approval_rule` `6a8eebf81378964f998499f8` — ตารางตั้งค่าที่ workflow ทุกสายอนุมัติ (WF-HR-01/04/06/09/12/17…) ใช้ `get_single` ค้นหา **ภายในสายอนุมัติ** (ห้าม `update_record` คัดลอกค่า Role ออกมา — ดู DO/DON'T ใน `02-BuildSpec-FRS.md` §0)
 
 ✅ **สร้างจริงแล้ว 26 ส.ค. 2569** — `Role` และ `Checkbox` สร้างผ่าน `update_worksheet.addFields` **สำเร็จทั้งคู่** (ทดสอบแยกและ verify ด้วย `get_worksheet_structure` แล้ว) — ⚠️ **แก้ CLAUDE-memory เดิม**: บทเรียนที่ว่า Checkbox สร้างผ่าน API ไม่ได้ ใช้ได้กับ `create_worksheet` เท่านั้น (ซึ่งพังทั้งระบบตอนนี้ ดู Known Issues) **ไม่ใช่กับ `addFields`**
 
@@ -60,13 +60,13 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 | ระดับการอนุมัติ | `hr_approval_level` | `6a8eec558b6633ef76f12a3e` | `Number` | precision 0 · required | — | 1 = หัวหน้างาน/หัวหน้าหน่วยงาน · 2 = HR · 3 = ผู้บริหาร (A-HR-08) |
 | หน่วยงานที่ใช้กฎนี้ | `hr_rule_cost_center` | `6a8eec558b6633ef76f12a3f` | `Relation` | subType 1 · dataSource → `ac_cost_center` `6a85452b9b6999a714d26720` ✅ | — | ว่าง = ทุกหน่วยงาน (กฎ default) |
 | หมายเหตุ | `hr_rule_remark` | `6a8eec558b6633ef76f12a41` | `Text` | multiLine | — | |
-| ผู้อนุมัติ (ตามบทบาท) | `hr_approver_role` | `6a8eec6e8b6633ef76f12a56` | `Role` | ✅ สร้างผ่าน API สำเร็จ | — | ผูกกับ custom role HR-R3 (HR) หรือ HR-R6 (ผู้บริหาร) แล้วแต่ระดับ — ใช้ใน Approve node ผ่าน `get_single` ตรง ๆ (ห้าม `update_record` คัดลอก) — ยังไม่ได้ผูก role จริง (role ยังไม่สร้าง §1.7) |
+| ผู้อนุมัติ (ตามบทบาท) | `hr_approver_role` | `6a8eec6e8b6633ef76f12a56` | `Role` | ✅ สร้างผ่าน API สำเร็จ | — | ผูกกับ custom role HR-R3 (HR) หรือ HR-R6 (ผู้บริหาร) แล้วแต่ระดับ — ใช้ใน Approve node ผ่าน `get_single` ตรง ๆ (ห้าม `update_record` คัดลอก) — ยังไม่ได้ผูก role จริง (role ยังไม่สร้าง — `02-BuildSpec-FRS.md` §1.7) |
 | เปิดใช้งาน | `hr_rule_is_active` | `6a8eec6e8b6633ef76f12a57` | `Checkbox` | ✅ สร้างผ่าน API สำเร็จ | — | |
 
 **Form rules:** IX-01B.1 Unique index (`doc_kind`, `approval_level`, `cost_center`) — กันสร้างกฎซ้ำหน่วยงานเดียวกัน
 **DoD:** seed อย่างน้อย 1 กฎต่อ `doc_kind` ที่มี workflow ใช้งานจริงในเฟสนั้น (เริ่มจาก Leave request 2 แถว: level 1 = ว่าง (ใช้ `hr_employee.supervisor` แทน) — จริง ๆ level 1 ของใบลาไม่ผ่านตารางนี้ (ดู WF-HR-01 หมายเหตุ) มีแค่ level 2 = HR)
 
-⬜ **ยังไม่ seed (26 ส.ค. 2569)** — รอสร้าง role จริง (§1.7) ก่อน เพราะ `hr_approver_role` ต้องผูกกับ role ที่มีอยู่จริงในระบบ · ยกไปทำพร้อม P8-1 (สร้าง role 8 บทบาท) ไม่ใช่ P1-4
+⬜ **ยังไม่ seed (26 ส.ค. 2569)** — รอสร้าง role จริง (`02-BuildSpec-FRS.md` §1.7) ก่อน เพราะ `hr_approver_role` ต้องผูกกับ role ที่มีอยู่จริงในระบบ · ยกไปทำพร้อม P8-1 (สร้าง role 8 บทบาท) ไม่ใช่ P1-4
 **Pitfall:** 🔴 **ห้าม `update_record` คัดลอกค่าฟิลด์ `approver_role`** (ชนิด Role/OrgRole) — ใช้ node `get_single` ค้นตารางนี้ **ภายในสายอนุมัติ** แล้วให้ `approve.approvers` อ้าง `{kind:"field", node:<get_single nodeId>, fieldId:<approver_role>}` ตรง ๆ
 
 ---
@@ -111,7 +111,7 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 ### FR-HR-03 ทะเบียนพนักงาน (แกนกลางของโมดูล)
 **Worksheet:** ทะเบียนพนักงาน `hr_employee` `6a8efa5e9762533b5b7185c1` ✅ สร้างจริงแล้ว 26 ส.ค. 2569 (view "ทั้งหมด" `6a8efa5e9762533b5b7185c5`)
 
-> ⚠️ **gender/marital_status/employment_type/emp_status สร้างเป็น inline options ชั่วคราว** (ค่าเดียวกับ shared optionset แต่เป็น option ใหม่แยกต่างหาก ไม่ใช่ตัวเดียวกับ `OS_HR_*` ใน §1.6) เพราะ `addFields` ผูก shared optionset ให้ Dropdown ไม่ได้เลย (ยืนยันซ้ำอีกครั้งตอนสร้างตารางนี้) — ต้องลบ 4 ฟิลด์นี้แล้วสร้างใหม่ผ่าน Browser (เลือก "ใช้ชุดตัวเลือกที่มีอยู่") แบบเดียวกับที่โมดูลบัญชีทำไปแล้ว 20 ฟิลด์ (ดู `tilsna-accounting/08-Naming-Rollout-Report.md` §3.4) — งานค้างใน Roadmap Tracker
+> ⚠️ **gender/marital_status/employment_type/emp_status สร้างเป็น inline options ชั่วคราว** (ค่าเดียวกับ shared optionset แต่เป็น option ใหม่แยกต่างหาก ไม่ใช่ตัวเดียวกับ `OS_HR_*` ใน `02-BuildSpec-FRS.md` §1.6) เพราะ `addFields` ผูก shared optionset ให้ Dropdown ไม่ได้เลย (ยืนยันซ้ำอีกครั้งตอนสร้างตารางนี้) — ต้องลบ 4 ฟิลด์นี้แล้วสร้างใหม่ผ่าน Browser (เลือก "ใช้ชุดตัวเลือกที่มีอยู่") แบบเดียวกับที่โมดูลบัญชีทำไปแล้ว 20 ฟิลด์ (ดู `tilsna-accounting/08-Naming-Rollout-Report.md` §3.4) — งานค้างใน Roadmap Tracker
 
 | ฟิลด์ (ไทย) | alias | ID | **type** | subType / props | option / relation | หมายเหตุ |
 |---|---|---|---|---|---|---|
@@ -271,7 +271,7 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 | ลาครึ่งวันได้ | `hr_allow_half_day` | `6a8eec80353e1b0e4a507547` | `Checkbox` | ✅ | |
 | นับวันหยุดรวมด้วย | `hr_count_holidays` | `6a8eec80353e1b0e4a507548` | `Checkbox` | ✅ | ลาคลอดนับวันหยุดรวม · ลาพักผ่อนไม่นับ |
 | เปิดใช้งาน | `hr_leave_type_is_active` | `6a8eec80353e1b0e4a507549` | `Checkbox` | ✅ | |
-| นโยบายการยกยอด | `carry_policy` | `<TBD>` | `Dropdown` | → `OS_HR_CARRY_POLICY` `52b15a75-76fc-457b-a72d-e6b7f2136243` | 🔴 **ยังไม่ได้สร้าง** — shared optionset bind ทำได้แค่ Browser เท่านั้น (ยืนยันจาก anti-drift-playbook §11 — `addFields` ให้แค่ inline options ไม่ผูก shared optionset ได้) ต้องสร้างใน Browser แล้วอ่าน ID กลับ |
+| นโยบายการยกยอด | `carry_policy` | `<TBD>` | `Dropdown` | → `OS_HR_CARRY_POLICY` `52b15a75-76fc-457b-a72d-e6b7f2136243` | 🔴 **ยังไม่ได้สร้าง** — shared optionset bind ทำได้แค่ Browser เท่านั้น (ยืนยันจาก `anti-drift-playbook.md` (สกิล `nocoly-build-docs`) §11 — `addFields` ให้แค่ inline options ไม่ผูก shared optionset ได้) ต้องสร้างใน Browser แล้วอ่าน ID กลับ |
 | องค์ประกอบค่าจ้างที่ผูก | `pay_component` | `6a8ff2868b6633ef76f13871` | `Relation` | subType 1 → `hr_pay_component` | ✅ ตารางปลายทางสร้างแล้ว (P5-1) — ยังไม่ได้เพิ่มฟิลด์นี้บน `hr_leave_type` เอง (ค้างเพิ่มด้วย `addFields`) |
 
 **7B. นโยบายสิทธิการลา** `hr_leave_policy` `6a8eebf88b6633ef76f129e1` ✅ สร้างจริงแล้ว 26 ส.ค. 2569
@@ -368,7 +368,7 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 
 > 🔴 `leave_status` **ต้อง read-only บนฟอร์ม** — ทุก transition ขับด้วยปุ่มหรือ workflow ทั้งหมด
 
-**Custom Actions ที่ผูก:** `<TBD-CA-01>` ส่งคำขอ · `<TBD-CA-02>` ยกเลิกใบลา (§1.9)
+**Custom Actions ที่ผูก:** `<TBD-CA-01>` ส่งคำขอ · `<TBD-CA-02>` ยกเลิกใบลา (`02-BuildSpec-FRS.md` §1.9)
 **Workflow ที่ผูก:** WF-HR-01 (อนุมัติ) · WF-HR-02 (ตัดสิทธิ) · WF-HR-03 (คืนสิทธิ) · WF-HR-05 (เชื่อมกับบันทึกลงเวลา) · WF-HR-06 (เตือน SLA)
 **Definition of Done:** AC-01 AC-02 AC-03 ผ่านครบ · `get_record_details(includeSystemFields:true)` → `_updatedBy` = `user-workflow` (และ `_processName`/`_processStatus` มีค่าเมื่อเข้าสายอนุมัติ) · `get_approval_list_by_row` มี instance ทั้ง 2 ขั้น · 🔴 **ห้ามใช้ operator ใน `get_record_logs` เป็นเกณฑ์ผ่าน — ให้ผลลบลวง** เพราะการเขียนฟิลด์ธุรกิจโดย node ของ workflow ถูกบันทึกเป็น `user-api` ([V] 28 ส.ค. 2569 — ดู Known Issues ใน `04-CLAUDE-memory.md`)
 **Pitfall:** 🔴 อย่าใส่ `filter` ใน trigger ของ WF-HR-01 — ใช้ `triggerFields = [leave_status]` แล้วเช็กเงื่อนไขใน branch node แรก
@@ -760,7 +760,7 @@ BR-10.1 interaction `att_status` = On leave → ซ่อน `late_minutes` · B
 **Pitfall:** 🔴 `hr_employee.emp_user` ที่ WF-HR-17 สร้างจะว่างเสมอ (หา userId จากชื่อไม่ได้) — พนักงานใหม่ยื่นใบลาไม่ได้จนกว่า HR จะกรอกด้วยมือ
 
 ### FR-HR-24 บทบาทและการควบคุมสิทธิ์
-ดู **§1.7 Permission matrix** — ทั้งหมดต้องตั้งผ่าน `create_role` แล้ว **ยืนยันด้วย `get_role_details`** และ **ทดสอบด้วยบัญชีจริงของแต่ละบทบาท**
+ดู **`02-BuildSpec-FRS.md` §1.7 Permission matrix** — ทั้งหมดต้องตั้งผ่าน `create_role` แล้ว **ยืนยันด้วย `get_role_details`** และ **ทดสอบด้วยบัญชีจริงของแต่ละบทบาท**
 **DoD:** AC-11 AC-12 AC-13 ผ่าน — 🔴 ทำไม่ได้จนกว่าจะมีบัญชีทดสอบเพิ่ม (Gap G-06)
 
 ### FR-HR-25 รายงานและแดชบอร์ด
@@ -777,7 +777,7 @@ BR-10.1 interaction `att_status` = On leave → ซ่อน `late_minutes` · B
 **Pitfall:** ⚠️ Rollup ใช้เงื่อนไข "วันนี้" ไม่ได้ ⇒ รายงานที่ต้องเทียบกับวันปัจจุบันให้ใช้ **Chart หรือ Aggregated Table** ไม่ใช่ฟิลด์ Rollup
 
 ### FR-HR-26 การแจ้งเตือน
-รวมอยู่ในแต่ละ workflow (§3) — ทุก node `Send Internal Notification` ต้องระบุผู้รับจาก node `Get associated records` ไม่ใช่พิมพ์ชื่อ · **ปิด "Notify when approved/rejected" ใน Approve node ถ้ามี Send Internal Notification ใน flow นอกอยู่แล้ว** (กันแจ้งซ้ำ)
+รวมอยู่ในแต่ละ workflow (`22-Workflow-Catalog-HR.md` §3) — ทุก node `Send Internal Notification` ต้องระบุผู้รับจาก node `Get associated records` ไม่ใช่พิมพ์ชื่อ · **ปิด "Notify when approved/rejected" ใน Approve node ถ้ามี Send Internal Notification ใน flow นอกอยู่แล้ว** (กันแจ้งซ้ำ)
 **Definition of Done (FR-HR-26):** เดินเส้นทางใบลา 1 ใบตั้งแต่ส่งจนอนุมัติ แล้วนับการแจ้งเตือนที่ผู้อนุมัติและพนักงานได้รับ — **ต้องได้ขั้นละ 1 ครั้ง ไม่ซ้ำ** · **AC-14** ผ่าน (WF-HR-06) · ทุก node แจ้งเตือนระบุผู้รับจาก node `Get associated records` ไม่มีการพิมพ์ชื่อคนลงไปตรง ๆ
 **วิธี verify:** เปิดกล่องแจ้งเตือนของบัญชีทดสอบแต่ละบทบาทหลังจบเส้นทาง
 

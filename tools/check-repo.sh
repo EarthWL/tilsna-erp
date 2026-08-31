@@ -41,6 +41,15 @@ else
   say n "ไม่มี tools/sizecheck.sh — ไม่ได้ตรวจขนาดไฟล์"
 fi
 
+# ── ตรวจการอ้างอิง §หัวข้อ ข้ามไฟล์ (ต้องมีชื่อไฟล์กำกับเสมอ) ─────────────
+if [ -f tools/refcheck.sh ]; then
+  bash tools/refcheck.sh --quiet | sed 's/^/  /'
+  # เต็ม ๆ ดูรายบรรทัดด้วย: bash tools/refcheck.sh
+  say y "tools/refcheck.sh รันได้"
+else
+  say n "ไม่มี tools/refcheck.sh — ไม่ได้ตรวจการอ้างอิง §"
+fi
+
 N="$(git config user.name)"; [ -n "$N" ] && say y "git identity = $N (ใช้เป็น agent-id)" || say n "ยังไม่ตั้ง git config user.name — ใช้เป็น agent-id ไม่ได้"
 
 echo
