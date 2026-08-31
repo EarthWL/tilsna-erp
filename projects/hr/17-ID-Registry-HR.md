@@ -303,3 +303,26 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | คะแนนตนเอง | `self_rating` | `6a95c1f38b6633ef76f1fd7a` | Number |
 | คะแนนหัวหน้า | `supervisor_rating` | `6a95c1f38b6633ef76f1fd7b` | Number |
 | ความเห็นต่อรายการ | `item_comment` | `6a95c1f38b6633ef76f1fd7c` | Text |
+
+---
+
+### 🆕 ID Workflow WF-HR-13A / WF-HR-13B + ฟิลด์ที่เพิ่งเติม (P8-4 — สร้าง+publish 31 ส.ค. 2569 · **ยังไม่ live-fire**)
+
+| workflow | processId | trigger | offset | executeTime |
+|---|---|---|---|---|
+| **WF-HR-13A** เตือนสัญญาจ้างใกล้ครบกำหนด | `6a95c6b8730d20c5b79226ac` | `date_field` บน `hr_employment_contract.biz_contract_to` `6a8efd39353e1b0e4a507653` | **−30 วัน** | `10:00:00` (= **09:00 เวลาไทย** เพราะ tenant ใช้ UTC+8) |
+| **WF-HR-13B** เตือนครบกำหนดทดลองงาน | `6a95c701e6605c4b130752aa` | `date_field` บน `hr_employee.probation_end_date` `6a8efa78353e1b0e4a5075e3` | **−14 วัน** | `10:00:00` |
+
+**node ของ 13A:** `gate` `6a95c6d2730d20c5b7922792` (branch 2 OR group) · `get_emp` `6a95c6d2730d20c5b7922793` (get_single) · `notify` `6a95c6d2730d20c5b7922794` · `mark_done` `6a95c6d2730d20c5b7922795`
+**node ของ 13B:** `gate` `6a95c718730d20c5b7922934` · `notify` `6a95c718730d20c5b7922935` · `mark_done` `6a95c718730d20c5b7922936`
+
+🔴 **ลำดับ node ต่างจากสเปทเจตนา:** แจ้งเตือน **ก่อน** ตั้งธง — ถ้าแจ้งเตือนล้ม (เช่น `supervisor_user` ว่าง) แล้วตั้งธงไปก่อน การแจ้งเตือนจะหายถาวร · เรียงแบบนี้กรณีแย่สุดคือแจ้งซ้ำ
+✅ **gate กันค่าว่างตามบทเรียน D-19 ตั้งแต่แรก** — 2 OR group: `สถานะ = ...` AND `ธง ≠ "1"` (`cid 9`+`cid 10`) OR `สถานะ = ...` AND `ธง is empty` (`cid 9`+`cid 8`) — อ่านกลับด้วย `hap workflow structure` ยืนยันแล้วทั้งสองตัว
+⚠️ **ผู้รับ = `supervisor_user` เท่านั้น** (`hr_employee.supervisor_user` `6a8efa78353e1b0e4a5075d7`) · ฝั่ง HR ตามสเปกยังไม่ได้ใส่ เพราะยังไม่มี role/บัญชี HR ที่ resolve ได้ (**P0-2**)
+🔴 **get_single ของ 13A ใช้ pattern reverse-relation ตามข้อ 16** — กรอง `hr_employee.<reverse ของ biz_employee>` `6a8efd39353e1b0e4a507650` เทียบ `trigger.rowid` · MCP แปลง `op:"contains"` บนฟิลด์ Relation ออกมาเป็น **`conditionId 33`**
+
+#### ฟิลด์ที่เติมเพิ่มให้ `hr_leave_type` (ปลดบล็อก WF-HR-14)
+
+| ฟิลด์ | alias | fieldId | type | หมายเหตุ |
+|---|---|---|---|---|
+| นโยบายการยกยอด | `hr_carry_policy` | `6a95c73b353e1b0e4a515b62` | Dropdown | inline 3 ค่าลอกจาก `OS_HR_CARRY_POLICY` `52b15a75-76fc-457b-a72d-e6b7f2136243` · FRS เคยระบุว่า 🔴 ยังไม่ได้สร้าง · **seed 6/6 แล้วตาม `carry_cap_days` — รอ HR ยืนยัน** |
