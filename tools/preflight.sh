@@ -38,7 +38,14 @@ for attempt in 1 2 3; do
     echo "PREFLIGHT FAIL: commit ใบจองไม่สำเร็จ — ยังไม่ได้ถือสิทธิ์ ห้ามแตะแอป"; exit 1
   fi
   if push_or_retry && claim_landed "$AGENT" "$TASK"; then
-    echo "PREFLIGHT OK: $AGENT ถือ $TASK"; exit 0
+    echo "PREFLIGHT OK: $AGENT ถือ $TASK"
+    # เตือนขนาดไฟล์ที่ agent ต้องเปิด — คำเตือนล้วน ห้ามกระทบ exit code ของการจอง
+    # (เพิ่ม 31 ส.ค. 2569: guardrail ที่ไม่มีใครเรียก = ไม่มีใครวัด ซึ่งคือต้นเหตุที่
+    #  02-BuildSpec/05-Roadmap โตทะลุเพดานโดยไม่มีใครเห็น)
+    if [ -f "$ROOT/tools/sizecheck.sh" ]; then
+      ( cd "$ROOT" && SIZECHECK_QUIET=1 . tools/sizecheck.sh && run_sizecheck "  " ) || true
+    fi
+    exit 0
   fi
   echo "PREFLIGHT RETRY $attempt: มีคนpushก่อน — ตรวจใหม่"
   git reset -q --hard HEAD~1
