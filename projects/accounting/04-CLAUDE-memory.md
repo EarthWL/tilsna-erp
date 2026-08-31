@@ -9,14 +9,14 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 ## ⚠️ ข้อกำหนดหลัก (CRITICAL CONSTRAINTS)
 
 1. **ทุก business logic ต้องอยู่บน Nocoly เท่านั้น** — ห้ามใช้สคริปต์หรือไฟล์ภายนอกเป็นส่วนหนึ่งของระบบที่ส่งมอบ
-2. **Brownfield** — มี 39 worksheet (34 เดิม + 5 ตาราง Phase 8 ที่สร้างใหม่ 27 ส.ค. 2569: `AC_BANK_RECON`/`AC_BANK_RECON_LINE`/`AC_CLOSE`/`AC_CLOSING_ENTRY`/`AC_OPENING`) · **67 view** (62 เดิม + 5 view ของ 5 ตารางใหม่ที่เปลี่ยนชื่อเป็นไทยแล้ว 28 ส.ค. 2569 รอบค่ำ) · 35 optionset · 8 custom role อยู่แล้ว **ห้ามสร้างซ้ำ** เปิด BuildSpec §1 ก่อนแตะ object ใด ๆ
+2. **Brownfield** — มี 39 worksheet (34 เดิม + 5 ตาราง Phase 8 ที่สร้างใหม่ 27 ส.ค. 2569: `AC_BANK_RECON`/`AC_BANK_RECON_LINE`/`AC_CLOSE`/`AC_CLOSING_ENTRY`/`AC_OPENING`) · **67 view** (62 เดิม + 5 view ของ 5 ตารางใหม่ที่เปลี่ยนชื่อเป็นไทยแล้ว 28 ส.ค. 2569 รอบค่ำ) · 35 optionset · 8 custom role อยู่แล้ว **ห้ามสร้างซ้ำ** เปิด `13-ID-Registry-AC.md` §1 ก่อนแตะ object ใด ๆ
 3. **มี workflow ทำงานจริงแล้ว 2 ตัว** (26 ส.ค. 2569): WF-AC-01 `6a8eaa45e6605c4b13ccf49b` · WF-AC-02 `6a8ea77e5f8564a68c33f9db` — ที่เหลืออีก 20 ตัวยังไม่สร้าง (ปัจจุบัน 28 ส.ค. 2569 มี workflow live รวม 5 ตัวแล้ว: WF-AC-01/02/09/10/11 + WF-AC-08/12 — ดู "ID สำคัญ")
 4. **การอนุมัติทำผ่าน MCP ไม่ได้** — ผู้อนุมัติต้องกดใน To-do จริง ⇒ ห้ามปิดงาน ✅ ถ้า approval ยัง pending
 5. **ห้ามใช้ org-auth API กดอนุมัติแทนคน** (ข้อสมมติ A-15 — ผู้ใช้ยังไม่อนุญาต)
 6. เอกสารบัญชีเป็นข้อมูลตามกฎหมาย — **ห้ามลบ record จริง** ใช้การยกเลิก/กลับรายการแทน
 7. 🔴 **ชื่อ worksheet · ชื่อฟิลด์ · ชื่อ view · ค่าตัวเลือก (option value) เป็นภาษาไทยทั้งหมดแล้ว** (26 ส.ค. 2569 — ยกเว้น 5 view ของ 5 ตาราง Phase 8/AC-07 ที่สร้างทีหลังและปิด gap แล้วเมื่อ 28 ส.ค. 2569 รอบค่ำ) — ห้ามอ้างชื่อ/ค่าอังกฤษเดิมจากเอกสารเก่า · และ **ห้ามใส่ฟิลด์ Rollup หรือ Dropdown ที่ผูก optionset ส่วนกลาง หรือฟิลด์ SingleSelect/MultipleSelect ที่มีตัวเลือกฝังตัว ลงใน `update_worksheet.editFields` เด็ดขาด** (อ่านหัวข้อถัดไปให้จบก่อนแตะฟิลด์ใด ๆ) · 🔴🆕 **ทุกครั้งที่เรียก `editFields` แก้ฟิลด์ใดก็ตาม ต้องส่ง `name`+`alias` กลับไปพร้อมกันเสมอ แม้ไม่ได้ตั้งใจแก้สองค่านี้** — ไม่งั้นจะถูกล้างเป็นค่าว่างเงียบ ๆ (ดูกับดักข้อ 32)
 8. ✅ **วันที่ที่แสดงเป็นรูปแบบจีน (`YYYY年M月D日`) แก้ครบทั้งแอปแล้ว** (26 ส.ค. 2569 — งาน 1.22) — **24 ตาราง (14 Accounting + 10 HR) รวม 37 ฟิลด์ Date/DateTime** ตั้ง custom format ผ่าน `update_worksheet.editFields.config.format` เป็น `DD/MM/YYYY` (Date) หรือ `DD/MM/YYYY HH:mm` (DateTime) — ดูกับดักข้อ 14
-9. ✅ **ตั้ง permission ตาม matrix ครบทั้ง 8/8 role แล้ว** (26 ส.ค. 2569 — งาน 1.8) — ยืนยันผ่าน `get_role_details` ตรง matrix §1.4 100% ทุก role — ดูกับดักข้อ 17
+9. ✅ **ตั้ง permission ตาม matrix ครบทั้ง 8/8 role แล้ว** (26 ส.ค. 2569 — งาน 1.8) — ยืนยันผ่าน `get_role_details` ตรง matrix `13-ID-Registry-AC.md` §1.4 100% ทุก role — ดูกับดักข้อ 17
 10. 🔴 **`update_worksheet.sectionId` ตั้งค่าจริงไม่ได้** (26 ส.ค. 2569 — พยายามทำงาน 1.20) — คืน `success:true` แต่ worksheet ไม่ถูกย้ายจริง (ยืนยันด้วย `get_app_info` ก่อน/หลัง) — ดูกับดักข้อ 18
 11. ✅ **การย้ายตารางข้ามกลุ่ม/section ทำผ่านหน้าจอได้จริงและง่ายด้วยเมนู "..." → "Move to" ในไซด์บาร์หลัก** (26 ส.ค. 2569 — งาน 1.20 เสร็จ, ผู้ใช้เป็นคนเจอวิธีนี้) — เชื่อถือได้กว่า drag-and-drop ในหน้า Navigation Settings มาก (drag ไม่เสถียร พิกัดเลื่อนทุกครั้ง) — ดูกับดักข้อ 19
 12. ✅ **Custom Action button ครบ 3/3 ปุ่มบน AC_VOUCHER แล้ว ทั้งหมด verify Scope ผ่าน Browser เป็น "All Records" ครบแล้ว** (27 ส.ค. 2569) — "ส่งอนุมัติ" `6a8f380b1378964f99849bfe`, "ยกเลิกใบสำคัญ" `6a8f380bae2a0e3743a0bedb`, และ "กลับรายการ" `6a8fb9ea9762533b5b7189fb` — **ทุกปุ่มที่สร้างผ่าน MCP มี Scope เริ่มต้นเป็น "Unassigned View" เสมอ (ไม่โผล่ที่ไหนเลยจนกว่าจะตั้ง Scope ผ่าน Browser)** และปุ่มชนิด `updateCurrentRecord` คลิกแล้ว**ไม่ auto-apply ค่าเป้าหมาย** — เปิด dialog ให้เลือกค่าเองก่อนกด Confirm — ดูกับดักข้อ 20 และ 21
@@ -42,7 +42,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 - **option key (GUID) ทุกตัวคงเดิม** ⇒ workflow ที่เทียบ option key ยังทำงานได้ตามปกติ · ไม่มีข้อมูลใน record สูญหาย (รวมทั้งรอบตั้งชื่อและรอบแปลค่าตัวเลือก)
 - ⚠️ `get_worksheet_structure` **คืนชื่อตารางเป็นค่าเก่าเสมอ** — ถ้าจะเช็กชื่อตารางจริงต้องใช้ `get_app_worksheets_list`
 
-**กับดักของ `update_worksheet` และชั้นการแสดงผล (พิสูจน์จากการยิงจริง — §4.1 ของรายงาน 08 · §5 ของรายงาน 09 · §3 ของรายงาน 10)**
+**กับดักของ `update_worksheet` และชั้นการแสดงผล (พิสูจน์จากการยิงจริง — `08-Naming-Rollout-Report.md` §4.1 · `09-View-Layer-Naming-Review.md` §5 · `10-Data-Name-Translation-Report.md` §3)**
 
 1. ส่ง `name` (ระดับตาราง) พร้อม `editFields` ในคอลเดียว → **`name` ถูกเมินเงียบ ๆ** ต้องแยกคอล
 2. `editFields` **รีเซ็ตทุก attribute ที่ไม่ได้ส่งไป** — `required`, `isTitle`, `precision` และ `subType` ของ Relation / Date / DateTime / Attachment / Collaborator — 🆕 **ยืนยันขยายผล 28 ส.ค. 2569: ครอบคลุมถึง `name`/`alias` ของฟิลด์ด้วยเช่นกัน แม้เป็นฟิลด์ inline SingleSelect — ดูกับดักข้อ 32**
@@ -116,7 +116,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 | Surface R (org-auth API) | ❌ ไม่ใช้ |
 | **CLI** | `hap` — login แล้วในเซสชันที่ผ่านมา ทำงานที่ MCP ทำไม่ได้ เช่น `hap worksheet view update` (ดูกับดักข้อ 33) — auth ผูกกับ container ของแต่ละ session ต้อง login ใหม่ทุกครั้ง |
 
-**ตารางที่แตะบ่อยที่สุด** (ID เต็มทุกตาราง + ทุกฟิลด์อยู่ใน BuildSpec §1.2 / §2 · ชื่อไทยคือชื่อที่เห็นบนหน้าจอตอนนี้)
+**ตารางที่แตะบ่อยที่สุด** (ID เต็มทุกตาราง + ทุกฟิลด์อยู่ใน `13-ID-Registry-AC.md` §1.2 / `14-FRS-Modules-AC.md` §2 · ชื่อไทยคือชื่อที่เห็นบนหน้าจอตอนนี้)
 
 | ตาราง (ชื่อไทยปัจจุบัน) | รหัสเดิม | ws ID | หมายเหตุด่วน |
 |---|---|---|---|
@@ -138,7 +138,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 | **workflow ที่ทำงานอยู่** | — | WF-AC-01 `6a8eaa45e6605c4b13ccf49b` (inner `6a8eaa76730d20c5b76071f3`) · WF-AC-02 `6a8ea77e5f8564a68c33f9db` (subprocess `6a8ea79efdab77a41c4a37d6`) · **WF-AC-10 `6a8f49b8730d20c5b764f302`** (publish v4 — 27 ส.ค. 2569, sub-process `reverseLines`/`reverseVatDocs`/`markGLReversed` ตั้งใจปล่อยเป็น draft ถาวร ดูกับดักข้อ 24) · **WF-AC-09 `6a903ec05f8564a68c3f7d7d`** (publish v1 — 27 ส.ค. 2569, ปิดงวด, trigger `worksheet_event` บน `AC_PERIOD` ฟิลด์ `biz_close_flag`, 16 nodes + trigger, ดูกับดักข้อ 28/29/30) · **WF-AC-08 `6a8ff2c0fdab77a41c543108`** (publish v3, กระทบยอดธนาคาร) · **WF-AC-12 `6a9032d3fdab77a41c56420b`** (publish v1, แจ้งเตือนความผิดปกติ) · **WF-AC-11 `6a90ef69fdab77a41c5b514f`** (publish v1 — 28 ส.ค. 2569, ปิดปีและยกยอด, trigger `worksheet_event` บน `AC_PERIOD` ฟิลด์ `biz_close_year_flag`, 56 nodes + trigger + 4 inner sub-process, ดูกับดักข้อ 31) | ทั้งหมด publish แล้ว = **live** (ยกเว้น inner sub-process ของ WF-AC-10/WF-AC-11 ที่เป็น draft โดยตั้งใจ) · 🆕 [28 ส.ค. 2569] orphan build-iteration duplicate ของ WF-AC-01 (2 ตัว), WF-AC-02 (1 stale human draft), WF-AC-10 (7 sub-process orphan) ถูกระบุผ่าน `hap workflow list` cross-reference กับ `get_workflow_structure` แล้วลบครบแล้ว — ดูกับดักข้อ 35 |
 | **ทะเบียนภาษีซื้อ–ภาษีขาย** | `ac_vat_doc` | `6a8677f9055f2288c5b77d58` | `biz_vd_vat_side` `6a8ec598353e1b0e4a506d5f` · `biz_vd_claim_status` `6a8ec598353e1b0e4a506d60` · alias `sign` → `sign_factor` · `vat_doc_ref` → `vat_doc_no` |
 | **กฎการอนุมัติตามวงเงิน** | `ac_approval_rule` | `6a8434f18b36df988c16ed8e` | `approver_role_1/2/3` เป็นชนิด **OrgRole** |
-| **กฎการบันทึกบัญชี** | `ac_posting_rule` | `6a85518c33560633b8cd6a15` | คู่บัญชีทุก event — **ห้าม hard-code รหัสบัญชีใน workflow** (ยกเว้นข้อยกเว้นตั้งใจของ WF-AC-11 ที่ hardcode rowid บัญชีรายได้/ค่าใช้จ่ายเพราะไม่มี Lookup ให้ traverse relation — ดูกับดักข้อ 31 และหมายเหตุใน BuildSpec §3 WF-AC-11) · **`event_code` (`6a85518c055f2288c5b7430b`) เป็นฟิลด์ inline SingleSelect ธรรมดา ไม่ใช่ shared optionset — 28 ส.ค. 2569 เพิ่ม 2 option ใหม่ `PAYROLL_ACCRUAL`/`PAYROLL_PAYMENT` แล้ว รวม 12 option — ดูหัวข้อ "ช่วยเหลือ HR" ด้านล่าง** |
+| **กฎการบันทึกบัญชี** | `ac_posting_rule` | `6a85518c33560633b8cd6a15` | คู่บัญชีทุก event — **ห้าม hard-code รหัสบัญชีใน workflow** (ยกเว้นข้อยกเว้นตั้งใจของ WF-AC-11 ที่ hardcode rowid บัญชีรายได้/ค่าใช้จ่ายเพราะไม่มี Lookup ให้ traverse relation — ดูกับดักข้อ 31 และหมายเหตุใน `15-Workflow-Catalog-AC.md` §3 WF-AC-11) · **`event_code` (`6a85518c055f2288c5b7430b`) เป็นฟิลด์ inline SingleSelect ธรรมดา ไม่ใช่ shared optionset — 28 ส.ค. 2569 เพิ่ม 2 option ใหม่ `PAYROLL_ACCRUAL`/`PAYROLL_PAYMENT` แล้ว รวม 12 option — ดูหัวข้อ "ช่วยเหลือ HR" ด้านล่าง** |
 | **องค์ประกอบค่าจ้าง (HR)** | `hr_pay_component` | `6a8ff2868b6633ef76f13871` | ✅ **28 ส.ค. 2569 รอบค่ำ: `biz_coa_account` เชื่อมครบ 6/6 แล้ว** — `SALARY`/`OT`/`ABSENCE_DEDUCT` เชื่อมอยู่ก่อนแล้วชี้ COA `530101` · `WHT`/`SSO_EE`/`SSO_ER` เชื่อมเพิ่มรอบนี้ผ่าน `update_record`(`triggerWorkflow:false`) ชี้ COA `210304`/`210402`/`530102` ตามลำดับ ยืนยันครบผ่าน `get_record_details` — ดูหัวข้อ "ช่วยเหลือ HR" |
 
 ### ช่วยเหลือ HR — ปิด Gap ผังบัญชีเงินเดือน (28 ส.ค. 2569)
@@ -197,7 +197,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 
 **พบกับดักใหม่ระหว่างทาง — ดูกับดักข้อ 34**: worksheet-level `alias` ตั้งผ่าน `update_worksheet.alias` ไม่ persist และไม่มี MCP/CLI tool ใดยืนยันค่าจริงได้เลย (field-level alias `biz_*` ทั้ง 4 ตัวใช้งานปกติ ไม่กระทบ)
 
-**ยังไม่ได้ทำ — pending manual**: role permission ของตารางนี้ยังไม่ได้ตั้งเลย — `get_role_list` ยืนยันว่าหลาย role (AC-R2/AC-R3/AC-R4/AC-R7/AC-R8) มีคำเตือนในตัวเองว่า "⚠️ permission ต้องตั้งใน UI ตาม Build Spec §1.4" ซึ่งเป็นธรรมเนียมเดิมของโปรเจกต์นี้ (ตั้งผ่านหน้าจอเท่านั้น ไม่ใช่ API) — ข้อเสนอเบื้องต้น (ยังไม่ตัดสินใจ/ยังไม่ตั้งจริง ต้องยืนยันกับ Build Spec §1.4 ก่อน): ให้ **AC-R4 Master Data Steward** มีสิทธิ์แก้ไข (ตรงกับแพทเทิร์นของอีก 7 ตาราง "config data" ใน AC-00) ส่วน role อื่นอ่านอย่างเดียวหรือไม่มีสิทธิ์
+**ยังไม่ได้ทำ — pending manual**: role permission ของตารางนี้ยังไม่ได้ตั้งเลย — `get_role_list` ยืนยันว่าหลาย role (AC-R2/AC-R3/AC-R4/AC-R7/AC-R8) มีคำเตือนในตัวเองว่า "⚠️ permission ต้องตั้งใน UI ตาม `13-ID-Registry-AC.md` §1.4" ซึ่งเป็นธรรมเนียมเดิมของโปรเจกต์นี้ (ตั้งผ่านหน้าจอเท่านั้น ไม่ใช่ API) — ข้อเสนอเบื้องต้น (ยังไม่ตัดสินใจ/ยังไม่ตั้งจริง ต้องยืนยันกับ `13-ID-Registry-AC.md` §1.4 ก่อน): ให้ **AC-R4 Master Data Steward** มีสิทธิ์แก้ไข (ตรงกับแพทเทิร์นของอีก 7 ตาราง "config data" ใน AC-00) ส่วน role อื่นอ่านอย่างเดียวหรือไม่มีสิทธิ์
 
 ### WF-AC-11 ปิดปีและยกยอด (สร้าง publish + ทดสอบผ่านครบ — 28 ส.ค. 2569)
 
@@ -207,7 +207,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 - **Inner sub-process (4 ตัว, ทั้งหมด `use_existing`, ตั้งใจปล่อย draft ถาวรตามกับดักข้อ 24):**
   - Opening ×3 (Asset `6a90f0f3fdab77a41c5b5c77`, Liability `6a90f11afdab77a41c5b6042`, Equity `6a90f139fdab77a41c5b63c9`) — โครงสร้างเหมือนกันทุกตัว: `sub_trigger` (record บัญชีที่ iterate) → 2 `rollup(sum)` (debit_base, credit_base ของ AC_GL filter `account eq sub_trigger.rowid` AND `fiscal_year lte <closingFiscalYear>` — สะสมถึงปีที่ปิด ไม่ใช่แค่ปีเดียว) → `add_record` เข้า AC_OPENING (เก็บ gross ไม่ netted) — ใช้ `process_variable` node (nodeId ซ้ำกันทั้ง 3 flow: `6038a1cbf18158039fb40e68`) รับค่า closing voucher rowid + fiscal year ถัดไปที่ parent ส่งเข้ามาผ่าน `config.input`+`inputFields`
   - Lock periods ×1 (`6a90f14cfdab77a41c5b66f7`) — `sub_trigger` (record งวดที่ iterate) → `update_record` ตั้ง `period_status` เป็น Permanently Locked
-- **ออกแบบใหม่จาก spec เดิม (ดูรายละเอียดเหตุผลเต็มใน BuildSpec §3 WF-AC-11):**
+- **ออกแบบใหม่จาก spec เดิม (ดูรายละเอียดเหตุผลเต็มใน `15-Workflow-Catalog-AC.md` §3 WF-AC-11):**
   1. `AC_GL.account` เป็น Relation ไม่มี Lookup ให้ filter ตาม `account_type` ผ่าน API ⇒ hardcode รายการ rowid บัญชีรายได้ 4 + ค่าใช้จ่าย 12 ตัวตรง ๆ
   2. `op:"in"` truncation (กับดักข้อ 28) ครอบคลุมถึง Relation field ด้วย ⇒ แตกเป็น 1 rollup ต่อ 1 บัญชี แทน `in` เดียว (ดูกับดักข้อ 31)
   3. `source_module` ไม่มีตัวเลือก "CLOSING" จริง ⇒ ใช้คีย์ "ปิดงวด" เดิมแทน (`9f91b297-8939-4d23-8d72-168fd9cfd792`)
@@ -239,7 +239,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 | ปิดปีและยกยอด | `6a90f50e1378964f9984df83` | updateCurrentRecord (แก้ `biz_close_year_flag`) → runWorkflowAfterSubmit → WF-AC-11 | `period_no` = 13 AND `period_status` = Soft-closed | ⬜ ยังไม่ verify (คาดว่า Unassigned View) | workflow logic ทดสอบผ่านครบ 2 เส้นทาง · 🆕 [28 ส.ค. 2569] พบปุ่มซ้ำชื่อเดียวกันบน AC_PERIOD (triggerId เก่า `6a90ef438b6633ef76f16f5a` — stale test draft) ลบแล้วผ่าน Browser (Custom Action list → "..." → Delete) — ดูกับดักข้อ 35 |
 
 > ⚠️ **ทุกปุ่มที่สร้างผ่าน `create_custom_actions` ต้องเข้า Browser ตั้ง Scope เป็นขั้นตอนที่สองเสมอ** (ดูกับดักข้อ 20) — มิฉะนั้นปุ่มจะไม่โผล่ที่ไหนเลยแม้ MCP จะคืน `success:true`
-> ⚠️ **Role-based visibility ("Role ที่เห็น" ใน BuildSpec §1.6) ยังไม่ได้ตั้งค่า** — ไม่ใช่พารามิเตอร์ของ `create_custom_actions` และไม่ใช่ของหน้า Scope นี้ด้วย ต้องหาทางตั้งแยกในอนาคต
+> ⚠️ **Role-based visibility ("Role ที่เห็น" ใน `13-ID-Registry-AC.md` §1.6) ยังไม่ได้ตั้งค่า** — ไม่ใช่พารามิเตอร์ของ `create_custom_actions` และไม่ใช่ของหน้า Scope นี้ด้วย ต้องหาทางตั้งแยกในอนาคต
 
 ---
 
@@ -289,7 +289,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 - 🔴 **ปุ่ม custom action ชนิด `updateCurrentRecord` ไม่ auto-apply ค่า**
 - 🔴🔴 **`update_worksheet.editFields` ล้าง `name`/`alias` ของฟิลด์เป็นค่าว่างเงียบ ๆ ถ้าไม่ส่งกลับไปด้วยตอนแก้ attribute อื่น** — ดูกับดักข้อ 32
 
-- 🟡🆕 **[28 ส.ค. 2569] role permission ของตาราง AC_SYSTEM_PARAM (พารามิเตอร์ระบบบัญชี) ยังไม่ได้ตั้งเลย** — pending manual step ตามธรรมเนียมเดิม (ตั้งผ่าน Browser ตาม Build Spec §1.4 เท่านั้น) ข้อเสนอเบื้องต้น: AC-R4 Master Data Steward แก้ไขได้ ตารางอื่นอ่านอย่างเดียว/ไม่มีสิทธิ์ — ยังไม่ตัดสินใจ/ยังไม่ตั้งจริง
+- 🟡🆕 **[28 ส.ค. 2569] role permission ของตาราง AC_SYSTEM_PARAM (พารามิเตอร์ระบบบัญชี) ยังไม่ได้ตั้งเลย** — pending manual step ตามธรรมเนียมเดิม (ตั้งผ่าน Browser ตาม `13-ID-Registry-AC.md` §1.4 เท่านั้น) ข้อเสนอเบื้องต้น: AC-R4 Master Data Steward แก้ไขได้ ตารางอื่นอ่านอย่างเดียว/ไม่มีสิทธิ์ — ยังไม่ตัดสินใจ/ยังไม่ตั้งจริง
 
 **กับดักแพลตฟอร์มทั่วไป (ยังใช้ได้)**
 
@@ -323,15 +323,15 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 ## โหมดส่งมอบให้ `nocoly-hybrid-builder-v2` (Handoff)
 
 - **ข้าม Phase 1 Interview** — spec ตอบครบแล้ว
-- **Phase 2 Confirm จาก spec** — สรุป checklist + Mermaid จาก BuildSpec §3 ให้ผู้ใช้ยืนยัน
-- **Phase 3 ทำตามคอลัมน์ Surface** ใน §1.5 / §3 · หลัง `create_*` ทุกครั้ง อ่าน ID กลับแล้วเติมแทน `<TBD>` ใน §1 ทันที
-- ปิดงาน ✅ ได้เมื่อ Test recipe ของงานนั้นผ่านตาม BuildSpec §5.3 แล้วอัปเดต `05-Roadmap-Tracker.md` + checklist ข้างบนให้ตรงกัน
+- **Phase 2 Confirm จาก spec** — สรุป checklist + Mermaid จาก `15-Workflow-Catalog-AC.md` §3 ให้ผู้ใช้ยืนยัน
+- **Phase 3 ทำตามคอลัมน์ Surface** ใน `13-ID-Registry-AC.md` §1.5 / `15-Workflow-Catalog-AC.md` §3 · หลัง `create_*` ทุกครั้ง อ่าน ID กลับแล้วเติมแทน `<TBD>` ใน `13-ID-Registry-AC.md` §1 ทันที
+- ปิดงาน ✅ ได้เมื่อ Test recipe ของงานนั้นผ่านตาม `02-BuildSpec-FRS.md` §5.3 แล้วอัปเดต `05-Roadmap-Tracker.md` + checklist ข้างบนให้ตรงกัน
 
 ---
 
 ## กฎทำงาน (สั้น)
 
-1. เปิด **BuildSpec §1 ID Registry** ก่อนพิมพ์ ID ใด ๆ
+1. เปิด **`13-ID-Registry-AC.md` §1 ID Registry** ก่อนพิมพ์ ID ใด ๆ
 2. `get_app_info` ยืนยันแอปก่อน write แรกของทุก session
 3. **อ่านหัวข้อ "ชื่อไทย + กับดัก `update_worksheet`" ให้จบก่อนแตะฟิลด์ทุกครั้ง** — รวมข้อ 33 ใหม่ (CLI `hap` ทำ `update_view` ได้จริง แก้ไขข้อ 11 เดิม)
 4. **Verify ก่อน claim** เสมอ — ผลว่างจาก tool ≠ ไม่มีของ · `success:true` ≠ เปลี่ยนแปลงจริง
