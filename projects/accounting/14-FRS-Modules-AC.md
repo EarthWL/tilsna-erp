@@ -353,10 +353,10 @@
 | `rate_percent` | `6a8545468b36df988c17244e` | Number (subType=0) | required |
 | `effective_from` | `6a8545468b36df988c17244f` | Date (subType=3) | required |
 | `effective_to` | `6a8545468b36df988c172450` | Date (subType=3) |  |
-| `is_taxable_base` | `6a85e5dd33560633b8cd9ec0` | Checkbox (subType=0) |  |
+| `counts_in_taxable_base` | `6a85e5dd33560633b8cd9ec0` | Checkbox (subType=0) | 🔴 **แก้ 1 ก.ย. 2569 — alias จริงคือ `counts_in_taxable_base` ไม่ใช่ `is_taxable_base` ที่เอกสารเขียนไว้เดิม** (field ID ตรง) |
 | `is_active` | `6a85e5f933560633b8cd9ec5` | Checkbox (subType=0) |  |
 
-> `is_taxable_base` คือฟิลด์ที่ทำให้ **TC-16** ผ่าน — แยกฐานที่ต้องเสียภาษีออกจากฐานที่ไม่ต้อง เมื่อเอกสารเดียวมีหลายอัตราปนกัน
+> `counts_in_taxable_base` คือฟิลด์ที่ทำให้ **TC-16** ผ่าน — แยกฐานที่ต้องเสียภาษีออกจากฐานที่ไม่ต้อง เมื่อเอกสารเดียวมีหลายอัตราปนกัน
 
 #### FR-05.2 อัตราภาษีหัก ณ ที่จ่าย — **Worksheet `AC_WHT_RATE`** · ws `6a8545688b36df988c172471` · alias `ac_wht_rate` · view `6a8545688b36df988c172475`
 
@@ -643,11 +643,11 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว 26 ส.ค. 2569 | Field ID | type · subType | ผูกกับ / หมายเหตุ |
 |---|---|---|---|
-| `ap_status` `biz_ap_status` | `6a8ead08ae2a0e3743a0b1c3` | Dropdown | ✅ **ผูกกับ `OS_AP_STATUS` `9f29af16-…` แล้ว** — key ตาม `13-ID-Registry-AC.md` §1.3 |
+| `ap_status` `biz_ap_status` | `6a8ec51dae2a0e3743a0b574` 🔴 **แก้ 1 ก.ย. 2569 — ID เดิม 6a8ead08ae2a0e3743a0b1c3 ตายแล้ว ไม่มีอยู่บน AC_AP** (ยืนยันโดยดึงฟิลด์สดทั้งตาราง) | Dropdown | ✅ **ผูกกับ `OS_AP_STATUS` `9f29af16-…` แล้ว** — key ตาม `13-ID-Registry-AC.md` §1.3 |
 | `doc_type` `biz_ap_doc_type` | `6a8ead2f9762533b5b716fa6` | Relation subType 1 | → AC_DOC_TYPE `6a8434dd9b6999a714d22e3d` |
 | `period` `biz_ap_period` | `6a8ead2f9762533b5b716fa8` | Relation subType 1 | → AC_PERIOD `6a8434d5055f2288c5b6d4b8` · บังคับ BR-03 |
 | `doc_setting` `biz_ap_doc_setting` | `6a8ead2f9762533b5b716faa` | Relation subType 1 | → AC_DOC_SETTING `6a8434f69b6999a714d22e75` |
-| `price_basis` `biz_ap_price_basis` | `6a8ead2f9762533b5b716fac` | Dropdown | → `OS_PRICE_BASIS` `abd98ad7-…` · บังคับ **TC-17** |
+| `price_basis` `biz_ap_price_basis` | `6a8ec51dae2a0e3743a0b575` 🔴 **แก้ 1 ก.ย. 2569 — ID เดิม 6a8ead2f9762533b5b716fac ตายแล้ว ไม่มีอยู่บน AC_AP** (ยืนยันโดยดึงฟิลด์สดทั้งตาราง) | Dropdown | → `OS_PRICE_BASIS` `abd98ad7-…` · บังคับ **TC-17** |
 | `taxable_base` `biz_ap_taxable_base` | `6a8ead2f9762533b5b716fad` | Number | ฐานที่ต้องเสีย VAT — workflow เขียน · **TC-16** |
 | `non_taxable_base` `biz_ap_non_taxable_base` | `6a8ead2f9762533b5b716fae` | Number | ฐานที่ไม่ต้องเสีย VAT |
 | `vat_amount` `biz_ap_vat_amount` | `6a8ead2f9762533b5b716faf` | Number | |
