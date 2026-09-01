@@ -38,3 +38,4 @@ EXPIRED 2026-09-01T09:06:13Z projects/accounting/*,MIGRATION.md,handoff/AC-*,too
 CLAIM 2026-09-01T09:06:13Z  AC/FLAG-DEFAULTS projects/accounting/*,handoff/AC-*,MIGRATION.md,AC_VOUCHER,AC_GL,ac_gl.gl_no
 RELEASE 2026-09-01T09:07:41Z AC/FLAG-DEFAULTS
 CLAIM 2026-09-01T09:07:49Z deca7391-1761-424b-9af3-c8d043004ad3 AC/CLAIM-BUG-FIX tools/claimlib.sh,tools/preflight.sh,projects/accounting/*,handoff/AC-*,MIGRATION.md,AC_VOUCHER,AC_GL
+CLAIM 2026-09-01T09:10:19Z - AC/SELFTEST zz/never-used-path
