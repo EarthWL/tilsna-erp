@@ -36,3 +36,4 @@ RELEASE 2026-08-31T22:30:24Z AC/WF02-RELATION-FIX
 EXPIRED 2026-09-01T09:06:13Z projects/accounting/*,handoff/AC-*,MIGRATION.md,WF-AC-02,AC_GL,AC_VOUCHER by=agent-ac was=agent-ac
 EXPIRED 2026-09-01T09:06:13Z projects/accounting/*,MIGRATION.md,handoff/AC-*,tools/refcheck-strict.sh by=agent-ac was=agent-ac
 CLAIM 2026-09-01T09:06:13Z  AC/FLAG-DEFAULTS projects/accounting/*,handoff/AC-*,MIGRATION.md,AC_VOUCHER,AC_GL,ac_gl.gl_no
+RELEASE 2026-09-01T09:07:41Z AC/FLAG-DEFAULTS
