@@ -280,6 +280,7 @@
 | WF-AC-22 ปรับปรุงอัตราแลกเปลี่ยนปลายงวด | `schedule` | MCP | `<TBD>` | ⬜ | FR-15 |
 | WF-AC-23 เครื่องคิดภาษีระดับบรรทัด (AP) | `worksheet_event` (update) | MCP | `6a96a250730d20c5b799f265` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569** · สายลูก `6a96a28a730d20c5b799f480` (publish v4) · TC-16/17/18 ผ่านครบ |
 | WF-AC-24 กันใบแจ้งหนี้ซ้ำ (BR-22) | `worksheet_event` (update) | MCP | `6a96a92fe6605c4b130f949b` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569 (v3)** · TC-09 / 09b / 09c / 09d / 09e / 09f ผ่านครบ · v3 ปิด R6 (`submitted_flag`) และ R7 (เหตุผลหมดอายุเมื่อคีย์เปลี่ยน) |
+| WF-AC-25 ออกใบสำคัญตั้งหนี้จากใบตั้งหนี้ (งาน 3.5 ครึ่งหลัง) | `worksheet_event` (update) | MCP | `6a970bc77dc381d682a550ba` · สายลูก `6a970c20500f6714e479dfe8` | ✅ **สร้างและ publish แล้ว 2 ก.ย. 2569 (v2)** · ทดสอบด้วย `ITC-2569/0917` → `PV-2026-00002` → GL-000045…50 ดุล 34,010 · กันสร้างซ้ำผ่าน | FR-07 |
 
 > **Surface default = MCP** · เขียน **Browser** เฉพาะ workflow ที่ใช้ trigger นอก 4 ชนิด (`worksheet_event` / `schedule` / `date_field` / `webhook`) หรือ node นอก 17 ชนิดที่ MCP สร้างได้ (Loop, Terminate, Send API Request, JSON Parsing, Print Record, AI nodes …) — และเมื่อเป็นแบบนั้นให้ทำ **ทั้ง workflow** ใน Browser ห้ามแบ่งกราฟเดียวข้าม surface
 > ⚠️ **WF-AC-02 ใช้ node Loop** ซึ่ง MCP สร้างไม่ได้ → ดูทางเลี่ยงใน `15-Workflow-Catalog-AC.md` §3 WF-AC-02
