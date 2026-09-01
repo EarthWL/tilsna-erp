@@ -27,19 +27,21 @@
 ### §1.2 Worksheets + View — **ของจริงบนเซิร์ฟเวอร์ (39 ตาราง)**
 
 > alias ของทุก worksheet = ชื่อ code ตัวพิมพ์เล็ก (ยืนยันจาก `get_app_info`) · ทุกตารางมี view เดียว ชื่อ `全部` ยกเว้น AC_PERIOD ที่ view ชื่อ `Main`
-> คอลัมน์ record = จำนวนที่นับจริงเมื่อ 26 ส.ค. 2569 · `—` = ยังไม่ได้นับ (**ห้ามตีความว่าว่าง**)
+> คอลัมน์ record = **นับจริงครบทุกตารางเมื่อ 1 ก.ย. 2569 (งาน 0.6 ปิดแล้ว)** — ไม่เหลือ `—` แล้ว
+> ⚠️ **แก้ตัวเลขที่ตกรุ่น 2 จุด:** `AC_COA` 79 → **82** · `AC_VOUCHER` 4 → **5** (ตัวเลข 79 ยังค้างอยู่ในที่อื่นของชุดเอกสาร ถ้าเจอให้ยึด 82)
+> 🔴 **สามตารางที่ยังว่างและกลายเป็นเงื่อนไขของงานเฟส 3–4:** `AC_ITEM` **0** (เครื่องคิดภาษีระดับบรรทัดต้องมี item ที่ผูกบัญชีไว้ก่อน) · `AC_PARTNER_BANK` **0** (สายจ่ายเงินต้องมีบัญชีธนาคารคู่ค้า) · `AC_FX_RATE` **0** (หลายสกุลเงินยังไม่เคยทดสอบ)
 
 **AC-00 Configuration · section `6a8538dee16cff5c409bc74d`**
 
 | # | Worksheet | alias | Worksheet ID | View ID (`全部`/Main) | record |
 |---|---|---|---|---|---|
 | 1 | `AC_PERIOD` | `ac_period` | `6a8434d5055f2288c5b6d4b8` | `6a8434d5055f2288c5b6d4bc` | 13 |
-| 2 | `AC_JOURNAL` | `ac_journal` | `6a8434da33560633b8cd2efd` | `6a8434da33560633b8cd2f01` | — |
-| 3 | `AC_DOC_TYPE` | `ac_doc_type` | `6a8434dd9b6999a714d22e3d` | `6a8434dd9b6999a714d22e41` | — |
-| 4 | `AC_DOC_NUMBER_RULE` | `ac_doc_number_rule` | `6a8434ea8b36df988c16ed84` | `6a8434ea8b36df988c16ed88` | — |
-| 5 | `AC_APPROVAL_RULE` | `ac_approval_rule` | `6a8434f18b36df988c16ed8e` | `6a8434f18b36df988c16ed92` | — |
-| 6 | `AC_DOC_SETTING` | `ac_doc_setting` | `6a8434f69b6999a714d22e75` | `6a8434f69b6999a714d22e79` | — |
-| 7 | `AC_POSTING_RULE` | `ac_posting_rule` | `6a85518c33560633b8cd6a15` | `6a85518c33560633b8cd6a19` | — |
+| 2 | `AC_JOURNAL` | `ac_journal` | `6a8434da33560633b8cd2efd` | `6a8434da33560633b8cd2f01` | 5 |
+| 3 | `AC_DOC_TYPE` | `ac_doc_type` | `6a8434dd9b6999a714d22e3d` | `6a8434dd9b6999a714d22e41` | 12 |
+| 4 | `AC_DOC_NUMBER_RULE` | `ac_doc_number_rule` | `6a8434ea8b36df988c16ed84` | `6a8434ea8b36df988c16ed88` | 12 |
+| 5 | `AC_APPROVAL_RULE` | `ac_approval_rule` | `6a8434f18b36df988c16ed8e` | `6a8434f18b36df988c16ed92` | 7 |
+| 6 | `AC_DOC_SETTING` | `ac_doc_setting` | `6a8434f69b6999a714d22e75` | `6a8434f69b6999a714d22e79` | 2 |
+| 7 | `AC_POSTING_RULE` | `ac_posting_rule` | `6a85518c33560633b8cd6a15` | `6a85518c33560633b8cd6a19` | 21 |
 | 40 | `AC_SYSTEM_PARAM` | `worksheet31` ⚠️ | `6a917a2d9762533b5b720392` | `6a917a2d9762533b5b720396` | 1 |
 
 > ✅ **เพิ่มใหม่ 28 ส.ค. 2569 (รอบดึก)** — แถว #40 `AC_SYSTEM_PARAM` ("พารามิเตอร์ระบบบัญชี") สร้างตามคำขอผู้ใช้ให้ทำให้ข้อสมมติ **A-08** (จุดตัดข้อมูล/วันขึ้นระบบ, `01-BRD.md` §11) "ตั้งค่าได้" — สร้างผ่าน workaround เดิม (§1.2c) เก็บ **วันตัดยอดข้อมูล** และ **วันขึ้นระบบจริง** ที่จะอ้างอิงโดย BRD A-08 เมื่อมีค่าจริง (ปัจจุบันยังว่าง) · ⚠️ alias ระดับ worksheet เป็น `worksheet31` (auto-generated) และ **ตั้งใหม่ผ่าน `update_worksheet.alias` ไม่ persist จริง** (ยืนยันซ้ำ 2 ครั้ง ไม่มี MCP/CLI ใดยืนยันค่าจริงได้เลย — ดูกับดักข้อ 34 ใน `04-CLAUDE-memory.md`) — field-level alias (`biz_*` ด้านล่าง) ใช้งานปกติ ไม่กระทบ · **4 ฟิลด์**: `biz_setting_name` (Text, isTitle, required) `6a917a45353e1b0e4a50fa32` · `biz_cutover_date` (Date subType 3) `6a917a45353e1b0e4a50fa33` · `biz_go_live_date` (Date subType 3) `6a917a45353e1b0e4a50fa34` · `biz_note` (Text multiLine) `6a917a45353e1b0e4a50fa35` · 1 record เริ่มต้น rowId `65eb8bc0-ac6b-4301-96a8-9e3b0bf2ba89` (ค่าวันที่ทั้งสองว่างไว้ตั้งใจ) · **role permission ยังไม่ได้ตั้ง** — pending manual ตาม §1.4
@@ -48,48 +50,48 @@
 
 | # | Worksheet | alias | Worksheet ID | View ID (`全部`/Main) | record |
 |---|---|---|---|---|---|
-| 8 | `AC_COA` | `ac_coa` | `6a85516e1049edca1eecd9b7` | `6a85516e1049edca1eecd9bb` | 79 |
-| 9 | `AC_COST_CENTER` | `ac_cost_center` | `6a85452b9b6999a714d26720` | `6a85452b9b6999a714d26725` | — |
-| 10 | `AC_FUND` | `ac_fund` | `6a85453033560633b8cd68dc` | `6a85453033560633b8cd68e0` | — |
-| 11 | `AC_PROJECT_DIM` | `ac_project_dim` | `6a854534055f2288c5b741ce` | `6a854534055f2288c5b741d2` | — |
-| 12 | `AC_CURRENCY` | `ac_currency` | `6a8545261049edca1eecd818` | `6a8545261049edca1eecd81c` | — |
-| 13 | `AC_FX_RATE` | `ac_fx_rate` | `6a8545911049edca1eecd8a5` | `6a8545911049edca1eecd8a9` | — |
+| 8 | `AC_COA` | `ac_coa` | `6a85516e1049edca1eecd9b7` | `6a85516e1049edca1eecd9bb` | 82 |
+| 9 | `AC_COST_CENTER` | `ac_cost_center` | `6a85452b9b6999a714d26720` | `6a85452b9b6999a714d26725` | 3 |
+| 10 | `AC_FUND` | `ac_fund` | `6a85453033560633b8cd68dc` | `6a85453033560633b8cd68e0` | 4 |
+| 11 | `AC_PROJECT_DIM` | `ac_project_dim` | `6a854534055f2288c5b741ce` | `6a854534055f2288c5b741d2` | 4 |
+| 12 | `AC_CURRENCY` | `ac_currency` | `6a8545261049edca1eecd818` | `6a8545261049edca1eecd81c` | 8 |
+| 13 | `AC_FX_RATE` | `ac_fx_rate` | `6a8545911049edca1eecd8a5` | `6a8545911049edca1eecd8a9` | 0 |
 | 14 | `AC_VAT_RATE` | `ac_vat_rate` | `6a8545469b6999a714d2673c` | `6a8545469b6999a714d26740` | 5 |
-| 15 | `AC_WHT_RATE` | `ac_wht_rate` | `6a8545688b36df988c172471` | `6a8545688b36df988c172475` | — |
-| 16 | `AC_WHT_INCOME_TYPE` | `ac_wht_income_type` | `6a85454133560633b8cd68e6` | `6a85454133560633b8cd68ea` | — |
+| 15 | `AC_WHT_RATE` | `ac_wht_rate` | `6a8545688b36df988c172471` | `6a8545688b36df988c172475` | 13 |
+| 16 | `AC_WHT_INCOME_TYPE` | `ac_wht_income_type` | `6a85454133560633b8cd68e6` | `6a85454133560633b8cd68ea` | 10 |
 | 17 | `AC_PARTNER` | `ac_partner` | `6a85457033560633b8cd6920` | `6a85457033560633b8cd6924` | 30 |
-| 18 | `AC_PARTNER_BANK` | `ac_partner_bank` | `6a85458033560633b8cd692a` | `6a85458033560633b8cd692e` | — |
-| 19 | `AC_BANK` | `ac_bank` | `6a854584055f2288c5b74202` | `6a854584055f2288c5b74206` | — |
-| 20 | `AC_ITEM` | `ac_item` | `6a8545a89b6999a714d26769` | `6a8545a89b6999a714d2676d` | — |
-| 21 | `AC_PAYMENT_CHANNEL` | `ac_payment_channel` | `6a8545a19b6999a714d2675f` | `6a8545a19b6999a714d26763` | — |
-| 22 | `AC_ASSET_CATEGORY` | `ac_asset_category` | `6a8545948b36df988c17247c` | `6a8545948b36df988c172480` | — |
+| 18 | `AC_PARTNER_BANK` | `ac_partner_bank` | `6a85458033560633b8cd692a` | `6a85458033560633b8cd692e` | 0 |
+| 19 | `AC_BANK` | `ac_bank` | `6a854584055f2288c5b74202` | `6a854584055f2288c5b74206` | 2 |
+| 20 | `AC_ITEM` | `ac_item` | `6a8545a89b6999a714d26769` | `6a8545a89b6999a714d2676d` | 0 |
+| 21 | `AC_PAYMENT_CHANNEL` | `ac_payment_channel` | `6a8545a19b6999a714d2675f` | `6a8545a19b6999a714d26763` | 3 |
+| 22 | `AC_ASSET_CATEGORY` | `ac_asset_category` | `6a8545948b36df988c17247c` | `6a8545948b36df988c172480` | 3 |
 
 **AC-02 Ledger · section `6a8539a3c011bf786fef6b56`**
 
 | # | Worksheet | alias | Worksheet ID | View ID (`全部`/Main) | record |
 |---|---|---|---|---|---|
-| 23 | `AC_VOUCHER` | `ac_voucher` | `6a85fb2e9b6999a714d2a53d` | `6a85fb2e9b6999a714d2a541` | 4 |
-| 24 | `AC_VOUCHER_LINE` | `ac_voucher_line` | `6a85fb3933560633b8cd9f40` | `6a85fb3933560633b8cd9f44` | — |
-| 25 | `AC_GL` | `ac_gl` | `6a85fb4133560633b8cd9f4a` | `6a85fb4133560633b8cd9f4e` | — |
+| 23 | `AC_VOUCHER` | `ac_voucher` | `6a85fb2e9b6999a714d2a53d` | `6a85fb2e9b6999a714d2a541` | 5 |
+| 24 | `AC_VOUCHER_LINE` | `ac_voucher_line` | `6a85fb3933560633b8cd9f40` | `6a85fb3933560633b8cd9f44` | 11 |
+| 25 | `AC_GL` | `ac_gl` | `6a85fb4133560633b8cd9f4a` | `6a85fb4133560633b8cd9f4e` | 5 |
 
 **AC-03 Payable and Payment · section `6a8539cac011bf786fef6b59`**
 
 | # | Worksheet | alias | Worksheet ID | View ID (`全部`/Main) | record |
 |---|---|---|---|---|---|
 | 26 | `AC_AP` | `ac_ap` | `6a8673d61049edca1eed0638` | `6a8673d61049edca1eed063c` | 0 |
-| 27 | `AC_AP_LINE` | `ac_ap_line` | `6a8673e78b36df988c176b77` | `6a8673e78b36df988c176b7b` | — |
-| 28 | `AC_PAY_REQ` | `ac_pay_req` | `6a8677b19b6999a714d2aa83` | `6a8677b19b6999a714d2aa87` | — |
-| 29 | `AC_PAY` | `ac_pay` | `6a8677c38b36df988c176cd3` | `6a8677c38b36df988c176cd7` | — |
-| 30 | `AC_PAY_LINE` | `ac_pay_line` | `6a8677d7055f2288c5b77d12` | `6a8677d7055f2288c5b77d16` | — |
-| 31 | `AC_PAY_SETTLE` | `ac_pay_settle` | `6a8677de8b36df988c176d02` | `6a8677de8b36df988c176d06` | — |
-| 32 | `AC_WHT` | `ac_wht` | `6a8677f1055f2288c5b77d1d` | `6a8677f1055f2288c5b77d21` | — |
+| 27 | `AC_AP_LINE` | `ac_ap_line` | `6a8673e78b36df988c176b77` | `6a8673e78b36df988c176b7b` | 0 |
+| 28 | `AC_PAY_REQ` | `ac_pay_req` | `6a8677b19b6999a714d2aa83` | `6a8677b19b6999a714d2aa87` | 0 |
+| 29 | `AC_PAY` | `ac_pay` | `6a8677c38b36df988c176cd3` | `6a8677c38b36df988c176cd7` | 0 |
+| 30 | `AC_PAY_LINE` | `ac_pay_line` | `6a8677d7055f2288c5b77d12` | `6a8677d7055f2288c5b77d16` | 0 |
+| 31 | `AC_PAY_SETTLE` | `ac_pay_settle` | `6a8677de8b36df988c176d02` | `6a8677de8b36df988c176d06` | 0 |
+| 32 | `AC_WHT` | `ac_wht` | `6a8677f1055f2288c5b77d1d` | `6a8677f1055f2288c5b77d21` | 0 |
 
 **AC-04 Tax · section `6a8539e70f7255ac5594e0d9`**
 
 | # | Worksheet | alias | Worksheet ID | View ID (`全部`/Main) | record |
 |---|---|---|---|---|---|
-| 33 | `AC_TAX_FILING` | `ac_tax_filing` | `6a8677c79b6999a714d2aa93` | `6a8677c79b6999a714d2aa97` | — |
-| 34 | `AC_VAT_DOC` | `ac_vat_doc` | `6a8677f9055f2288c5b77d58` | `6a8677f9055f2288c5b77d5c` | — |
+| 33 | `AC_TAX_FILING` | `ac_tax_filing` | `6a8677c79b6999a714d2aa93` | `6a8677c79b6999a714d2aa97` | 0 |
+| 34 | `AC_VAT_DOC` | `ac_vat_doc` | `6a8677f9055f2288c5b77d58` | `6a8677f9055f2288c5b77d5c` | 0 |
 
 **AC-07 Close and Reconciliation · section `6a853b2f0f7255ac5594e0e1`** ✅ **สร้างใหม่ 27 ส.ค. 2569**
 
