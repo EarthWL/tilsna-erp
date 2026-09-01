@@ -504,3 +504,57 @@
 - **Pitfall:** ห้ามเขียนทับ `fx_rate` บนเอกสารเดิม — เอกสารต้องคงอัตราที่ใช้ตอนบันทึกไว้ (BR-14) รายการปรับปรุงเป็นใบสำคัญแยกต่างหาก
 
 ---
+
+---
+
+### WF-AC-23 เครื่องคิดภาษีระดับบรรทัด (AP) `<TBD>` 🚧 กำลังสร้าง 1 ก.ย. 2569
+
+> **ทำไมแยกออกมาเป็น workflow ของตัวเอง ไม่ทำในตัว WF-AC-03**
+> งาน 3.2 เขียนว่า "ส่วนคำนวณของ WF-AC-03" แต่ **WF-AC-03 เป็น webhook ที่ยังติดรอข้อตกลง payload กับโมดูลจัดซื้อ** ⇒ ถ้าฝังการคำนวณไว้ในนั้น งาน 3.2–3.4 จะถูกบล็อกตามไปด้วยทั้งที่ไม่จำเป็น
+> แยกออกมาเป็น workflow ที่ยิงจาก `AC_AP` เอง ⇒ ทดสอบได้ทันที และภายหลัง WF-AC-03 เรียกใช้ซ้ำเป็น `sub_process` ได้
+
+- **ชนิด / Surface:** `worksheet_event` (update) บน `AC_AP` · **MCP**
+- **Trigger Field = `biz_ap_status` `6a8ec51dae2a0e3743a0b574`** · 🔴 ห้ามใส่ `filter` ใน trigger (ข้อ 31 ในไกด์)
+- **กันวนซ้ำ:** workflow เขียนเฉพาะฟิลด์ยอดรวม **ไม่เขียน `biz_ap_status`** ⇒ ไม่ยิงตัวเอง (นี่คือเหตุผลที่ต้องตั้ง Trigger Field ไม่ใช่ trigger condition)
+- **คิดใหม่ได้เสมอ (idempotent)** — ทุกครั้งที่สถานะกลับมาเป็น "รออนุมัติ" จะคำนวณทับของเดิม จึงไม่ต้องมีฟิลด์ธงกันซ้ำ
+
+#### สูตรที่ผู้ใช้ยืนยันแล้ว 1 ก.ย. 2569
+
+| กรณี | สูตร |
+|---|---|
+| **แยกภาษี** `biz_ap_price_basis` = `b3171393-…` | `line_taxable_base` = `line_amount` · `line_vat` = ฐาน × อัตรา |
+| **รวมภาษี** `biz_ap_price_basis` = `77f0e10d-…` | `line_taxable_base` = `line_amount ÷ (1 + อัตรา)` · `line_vat` = `line_amount − ฐาน` |
+| **แยกฐาน (TC-16)** | บรรทัดที่ `AC_VAT_RATE.counts_in_taxable_base` ไม่ติ๊ก ⇒ `line_taxable_base` = **0** และ `line_vat` = **0** · ค่าของบรรทัดไปรวมใน `non_taxable_base` |
+| **ผู้รับเงินออกภาษีเอง** `wht_borne_by` = `46d4ae25-…` | `wht_base` = ฐาน · `line_wht` = `wht_base × อัตรา WHT` |
+| **ผู้จ่ายออกแทน (gross-up)** `5f9ef035-…` · `a577d502-…` | `wht_base` = `ฐาน ÷ (1 − อัตรา WHT)` · `line_wht` = `wht_base − ฐาน` |
+
+**สองข้อที่ผู้ใช้ตัดสินและต้องไม่เปลี่ยนเองภายหลัง**
+
+1. 🔑 **ตอน gross-up ฐาน VAT ไม่ขยายตาม** — VAT ยังคิดจากฐานเดิม เพราะมูลค่าตามใบกำกับไม่เปลี่ยน · gross-up กระทบเฉพาะฐาน WHT
+2. 🔑 **ปัดเศษที่ระดับบรรทัด 2 ตำแหน่ง** แล้วยอดรวมหัวเอกสาร = ผลรวมของบรรทัดที่ปัดแล้ว ⇒ ตรงกับใบกำกับภาษีของคู่ค้าที่แสดงเป็นรายบรรทัด
+
+#### วิธีรวมยอดขึ้นหัวเอกสาร — และทำไมไม่ใช้ Rollup field
+
+`taxable_base` … `outstanding` เป็น Rollup field ไม่ได้ เพราะ rollup รองรับ filter คงที่เท่านั้น (บันทึกไว้ใน `14-FRS-Modules-AC.md` §2 FR-07.1)
+
+⇒ ใช้ `get_multiple` + node `rollup` หลังลูปจบ:
+
+| ยอด | ที่มา |
+|---|---|
+| `biz_ap_taxable_base` | sum(`line_taxable_base`) ทุกบรรทัด |
+| `biz_ap_vat_amount` | sum(`line_vat`) |
+| `biz_ap_wht_amount` | sum(`line_wht`) |
+| `biz_ap_non_taxable_base` | sum(`line_amount`) เฉพาะบรรทัดที่ `line_taxable_base` = 0 |
+| `biz_ap_total_amount` | `taxable_base + non_taxable_base + vat_amount` |
+| `biz_ap_net_payable` | `total_amount − wht_amount` |
+| `biz_ap_outstanding` | `net_payable − paid_amount` |
+
+> 🔑 **ทำไมไม่คิด `non_taxable_base` จาก `Σline_amount − Σline_taxable_base`** — เพราะแบบรวมภาษี `line_amount` ของบรรทัดที่ต้องเสียภาษีรวม VAT อยู่ด้วย สูตรลบจะเพี้ยน · การกรองบรรทัดที่ฐาน = 0 แล้วรวม `line_amount` ถูกต้องทั้งสองแบบราคา เพราะบรรทัดที่ไม่ต้องเสียภาษีไม่มี VAT ไม่ว่าจะตั้งราคาแบบไหน
+> ⚠️ ลูปเขียน `0` ลง `line_taxable_base` ของบรรทัดที่ไม่ต้องเสียภาษี **อย่างชัดเจน** (ไม่ปล่อยว่าง) เพราะ filter `= 0` ไม่จับค่าว่าง
+
+**Test recipe (TC-16 · TC-17 · TC-18)**
+
+1. สร้าง `AC_AP` 1 ใบ + 3 บรรทัด: อัตราปกติ 7% · อัตราศูนย์ · ยกเว้น — ตั้ง `price_basis` = แยกภาษี ⇒ ตรวจ `taxable_base` / `non_taxable_base` / `vat_amount` แยกถูก **(TC-16)**
+2. ทำใบที่สองด้วยตัวเลขที่ให้ผลเท่ากันแต่ `price_basis` = รวมภาษี ⇒ **`total_amount` ต้องเท่ากันทั้งสองใบ (TC-17 / AC-7)**
+3. บรรทัดที่มี `wht_borne_by` = ผู้จ่ายออกแทน ⇒ `wht_base` > ฐาน และ `line_wht` = `wht_base − ฐาน` · **`vat_amount` ต้องไม่เปลี่ยนจากกรณีผู้รับออกเอง (TC-18)**
+4. ยืนยันผู้เขียนด้วย `get_record_details(includeSystemFields:true)` → `_updatedBy` = `user-workflow`
