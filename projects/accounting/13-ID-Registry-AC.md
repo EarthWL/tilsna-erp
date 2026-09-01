@@ -256,7 +256,7 @@
 
 | Workflow | ชนิด trigger | Surface | ID | สถานะ | FR |
 |---|---|---|---|---|---|
-| WF-AC-01 อนุมัติใบสำคัญ | `worksheet_event` (update) | MCP | **`6a8eaa45e6605c4b13ccf49b`** · สายอนุมัติภายใน **`6a8eaa76730d20c5b76071f3`** | 🔶 publish แล้ว · เส้นทางตรวจดุล/ตรวจงวดพิสูจน์แล้ว · การกดอนุมัติจริงยังไม่ทดสอบ | FR-06 |
+| WF-AC-01 อนุมัติใบสำคัญ | `worksheet_event` (update) | MCP | **`6a8eaa45e6605c4b13ccf49b`** · สายอนุมัติภายใน **`6a8eaa76730d20c5b76071f3`** | 🔶 **publish v3 (1 ก.ย. 2569 — `set_flag` ล้าง `reject_reason`, D-34)** · เส้นทางตรวจดุล/ตรวจงวดพิสูจน์แล้ว · 🆕 **สายอนุมัติมอบหมายผู้อนุมัติได้จริงแล้ว** (`_nodeAssignees` = ผู้ใช้จริง, `_processStatus` = อนุมัติระดับที่ 1) · เหลือแค่ **การกดอนุมัติ/ปฏิเสธโดยคน** ซึ่ง MCP ทำแทนไม่ได้ | FR-06 |
 | WF-AC-02 ผ่านรายการเข้าบัญชีแยกประเภท | `worksheet_event` (update) | MCP | **`6a8ea77e5f8564a68c33f9db`** · subprocess วนบรรทัด **`6a8ea79efdab77a41c4a37d6`** | ✅ พิสูจน์ครบรวมการยิงซ้ำ | FR-06 |
 | WF-AC-03 รับรู้หนี้สินจากการตรวจรับ | `webhook` | MCP | `<TBD>` | ⬜ | FR-07/17 |
 | WF-AC-04 ตัดชำระเมื่อได้ผลการจ่าย | `webhook` | MCP | `<TBD>` | ⬜ | FR-08/17 |
@@ -279,7 +279,7 @@
 | WF-AC-21 ตั้งสินทรัพย์และตัดจำหน่าย | `worksheet_event` (update) | MCP | `<TBD>` | ⬜ | FR-13 |
 | WF-AC-22 ปรับปรุงอัตราแลกเปลี่ยนปลายงวด | `schedule` | MCP | `<TBD>` | ⬜ | FR-15 |
 | WF-AC-23 เครื่องคิดภาษีระดับบรรทัด (AP) | `worksheet_event` (update) | MCP | `6a96a250730d20c5b799f265` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569** · สายลูก `6a96a28a730d20c5b799f480` (publish v4) · TC-16/17/18 ผ่านครบ |
-| WF-AC-24 กันใบแจ้งหนี้ซ้ำ (BR-22) | `worksheet_event` (update) | MCP | `6a96a92fe6605c4b130f949b` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569 (v2)** · TC-09 / 09b / 09c ผ่านครบ |
+| WF-AC-24 กันใบแจ้งหนี้ซ้ำ (BR-22) | `worksheet_event` (update) | MCP | `6a96a92fe6605c4b130f949b` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569 (v3)** · TC-09 / 09b / 09c / 09d / 09e / 09f ผ่านครบ · v3 ปิด R6 (`submitted_flag`) และ R7 (เหตุผลหมดอายุเมื่อคีย์เปลี่ยน) |
 
 > **Surface default = MCP** · เขียน **Browser** เฉพาะ workflow ที่ใช้ trigger นอก 4 ชนิด (`worksheet_event` / `schedule` / `date_field` / `webhook`) หรือ node นอก 17 ชนิดที่ MCP สร้างได้ (Loop, Terminate, Send API Request, JSON Parsing, Print Record, AI nodes …) — และเมื่อเป็นแบบนั้นให้ทำ **ทั้ง workflow** ใน Browser ห้ามแบ่งกราฟเดียวข้าม surface
 > ⚠️ **WF-AC-02 ใช้ node Loop** ซึ่ง MCP สร้างไม่ได้ → ดูทางเลี่ยงใน `15-Workflow-Catalog-AC.md` §3 WF-AC-02
