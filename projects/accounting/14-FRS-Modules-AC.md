@@ -290,7 +290,7 @@
 | `address` | `6a8545701049edca1eecd86a` | Text (subType=0) | required |
 | `postcode` | `6a8545701049edca1eecd86b` | Text (subType=0) | required |
 | `delivery_info` | `6a8545701049edca1eecd86c` | Text (subType=0) |  |
-| `is_domestic` | `6a8545701049edca1eecd86d` 🔴 **ID ตายแล้ว (ตรวจ 1 ก.ย. 2569) — ไม่มี alias นี้บน AC_PARTNER แล้ว — อาจถูกลบหรือเปลี่ยนชื่อ **ต้องยืนยันก่อนใช้**** | SingleSelect (subType=0) | required · options: `5d274ae0-5cd5-49e3-b230-89ddd24b5865`=Domestic · `d26d20fa-44d0-4702-80ae-cf8779b0b9a4`=Foreign |
+| ~~`is_domestic`~~ → **`partner_residence`** | `6a8ee32a1378964f9984985b` ✅ **ยืนยันกับเซิร์ฟเวอร์แล้ว 1 ก.ย. 2569** (ID เดิม `6a8545701049edca1eecd86d` ตาย · alias เปลี่ยนตาม E-25 แล้วถูกลบ–สร้างใหม่รอบแปลค่าตัวเลือกเป็นไทย E-31) | SingleSelect (subType=0) | required · options: `ef96e318-6b1b-4d35-9e4c-3211f844cd30`=ในประเทศ · `1af399ae-f5aa-460b-b8f6-6e4220cbcaaa`=ต่างประเทศ · ⚠️ **key ชุดเดิม `5d274ae0-…` / `d26d20fa-…` ตายแล้ว** |
 | `credit_days` | `6a8545701049edca1eecd86e` | Number (subType=0) | required |
 | `default_wht_type` | `6a8545701049edca1eecd86f` | Relation (subType=1) | → ws `6a85454133560633b8cd68e6` (AC_WHT_INCOME_TYPE) · sourceField = `6a8545701049edca1eecd870` |
 | `contact_name` | `6a8545701049edca1eecd871` | Text (subType=0) |  |
@@ -339,7 +339,7 @@
 |---|---|---|---|
 | BR-04.1 | Business Rule · validation | `legal_form` = Juristic person `adf4bb5f-…` และ `tax_id` ไม่ใช่ 13 หลัก | Block save "เลขประจำตัวผู้เสียภาษีต้องมี 13 หลัก" |
 | BR-04.2 | Business Rule · interaction | `branch_type` = Branch `f5abd6cd-…` | `branch_code` เป็นฟิลด์บังคับ |
-| BR-04.3 | Business Rule · interaction | `is_domestic` = Foreign `d26d20fa-…` | ซ่อน `tax_id`, `branch_type` · แสดง `swift_code` บนตารางลูก |
+| BR-04.3 | Business Rule · interaction | `partner_residence` = ต่างประเทศ `1af399ae-f5aa-460b-b8f6-6e4220cbcaaa` (แก้ 1 ก.ย. 2569 — เดิมเขียน `is_domestic` = Foreign `d26d20fa-…` ซึ่งตายทั้งฟิลด์และ key) | ซ่อน `tax_id`, `branch_type` · แสดง `swift_code` บนตารางลูก |
 | IX-04.1 | Unique index | `AC_PARTNER.partner_code` | required ✓ |
 | IX-04.2 | Unique index | (`AC_PARTNER.tax_id`, `AC_PARTNER.branch_code`) | ⚠️ ทั้งสองฟิลด์ **ไม่ required** — ค่าว่างได้แค่ 1 แถวทั้งตาราง ⇒ **ต้องตั้ง required ก่อน หรือใช้ workflow กันซ้ำแทน** |
 | BR-04.4 | Field permission | ซ่อน `tax_id` และ `AC_PARTNER_BANK.account_no` จาก AC-R6 | NFR-02 / PDPA — ตั้งในหน้า Role |
@@ -359,7 +359,7 @@
 | ฟิลด์ (alias) | Field ID | type · subType | หมายเหตุ / option key · relation |
 |---|---|---|---|
 | `vat_code` | `6a8545468b36df988c17244c` | Text (subType=0) | required · isTitle=True |
-| `vat_name` | `6a8545468b36df988c17244d` 🔴 **ID ตายแล้ว (ตรวจ 1 ก.ย. 2569) — ไม่มี alias นี้บน AC_VAT_RATE แล้ว · ฟิลด์ SingleSelect ที่มีอยู่จริงคือ `vat_treatment` `6a8ee548ae2a0e3743a0bc72` — **น่าจะเป็นตัวเดียวกันที่เปลี่ยนชื่อ แต่ยังไม่ยืนยัน**** | SingleSelect (subType=0) | required · options: `38bd3e38-85c1-4645-a470-6f50ab8720a7`=Standard-rated · `abf766cc-682d-4c27-9efa-52d2e24189b8`=Zero-rated · `bb56396e-c0ad-4006-9946-174c2824031a`=Exempt · `5f03e574-907f-4fc5-a72b-ad68917efc4f`=Non-VAT |
+| ~~`vat_name`~~ → **`vat_treatment`** | `6a8ee548ae2a0e3743a0bc72` ✅ **ยืนยันกับเซิร์ฟเวอร์แล้ว 1 ก.ย. 2569** (ID เดิม `6a8545468b36df988c17244d` ตาย) · ⚠️ **ตารางนี้ไม่มีฟิลด์ "ชื่อ" อยู่เลย** — ฟิลด์ที่ใช้แสดงชื่อคือ `vat_code` `6a8545468b36df988c17244c` (isTitle) | SingleSelect (subType=0) | required · options: `faade2d0-fa48-446f-86e4-fda27b6e05fb`=อัตราปกติ · `7194b5d5-3e08-4c7b-8a93-9f5f624537a0`=อัตราศูนย์ · `2804f5ef-e119-472e-bb25-eb9a9df2dbde`=ยกเว้นภาษี · `288275de-a537-4107-8a31-4735e8964a43`=ไม่อยู่ในระบบภาษีมูลค่าเพิ่ม · ⚠️ **key ชุดเดิม `38bd3e38-…` / `abf766cc-…` / `bb56396e-…` / `5f03e574-…` ตายแล้วทั้งชุด** |
 | `rate_percent` | `6a8545468b36df988c17244e` | Number (subType=0) | required |
 | `effective_from` | `6a8545468b36df988c17244f` | Date (subType=3) | required |
 | `effective_to` | `6a8545468b36df988c172450` | Date (subType=3) |  |
@@ -458,7 +458,7 @@
 | # | ชนิด | เงื่อนไข | การกระทำ |
 |---|---|---|---|
 | BR-05.1 | Business Rule · validation | `effective_to` < `effective_from` | Block save (ใช้กับ AC_VAT_RATE, AC_WHT_RATE) |
-| BR-05.2 | Business Rule · interaction | `vat_name` in (Zero-rated `abf766cc-…`, Exempt `bb56396e-…`, Non-VAT `5f03e574-…`) | `rate_percent` = 0 และ read-only |
+| BR-05.2 | Business Rule · interaction | `vat_treatment` in (อัตราศูนย์ `7194b5d5-3e08-4c7b-8a93-9f5f624537a0`, ยกเว้นภาษี `2804f5ef-e119-472e-bb25-eb9a9df2dbde`, ไม่อยู่ในระบบ VAT `288275de-a537-4107-8a31-4735e8964a43`) — แก้ 1 ก.ย. 2569 (เดิมเขียน `vat_name` + key ชุดที่ตายแล้ว) | `rate_percent` = 0 และ read-only |
 | IX-05.1 | Unique index | `AC_VAT_RATE.vat_code` · `AC_ITEM.item_code` · `AC_CURRENCY.currency_code` | required ✓ ทั้งหมด |
 | IX-05.2 | Unique index | (`AC_FX_RATE.currency`, `rate_date`, `rate_type`) | ⚠️ `rate_type` ไม่ required ⇒ ตั้ง required ก่อน |
 | BR-05.3 | Business Rule · validation | มี `AC_CURRENCY.is_base` ติ๊กมากกว่า 1 record | ต้องกันด้วย workflow (Business Rule มองข้ามแถวอื่นไม่ได้) |
