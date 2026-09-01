@@ -8,6 +8,16 @@
 
 ## §2. สเปกรายโมดูล (FR-01 … FR-19)
 
+> # 🔴 กวาด field ID ที่ตายแล้วทั้งไฟล์ — 1 ก.ย. 2569
+>
+> เทียบ **field ID ทุกตัวในตารางฟิลด์ (456 ตัว) กับฟิลด์สดของ 40 ตารางบนเซิร์ฟเวอร์** พบว่า **28 ตัวไม่มีอยู่จริงแล้ว** และ **ทุกตัวเป็นฟิลด์ชนิดตัวเลือก (Dropdown / SingleSelect / MultipleSelect)** ไม่มีชนิดอื่นเลยสักตัว
+>
+> ⇒ **สาเหตุร่วม:** ฟิลด์ตัวเลือกทั้งชุดถูก **ลบแล้วสร้างใหม่** ตอนรอบผูก shared optionset / ตั้งชื่อไทย (บันทึกไว้ใน `10-Data-Name-Translation-Report.md` §3.2) — ID ใหม่ทั้งหมด แต่เอกสารยังถือ ID ก่อนรอบนั้น
+> ⇒ **แก้แล้ว 26 ตัว** (จับคู่ด้วย alias กับของสดทีละตัว) · เหลือ 2 ตัวที่ alias หายไปเลย ติดธง 🔴 ไว้ในบรรทัดของมัน
+>
+> 🔴 **ความเสียหายที่เกือบเกิด:** ผมเจอเรื่องนี้ตอนสร้าง node ของ WF-AC-23 แล้ว `validate_process` ฟ้อง `StartNodeControlsIsNull` ที่ฟิลด์ `wht_borne_by` · **ถ้าฟิลด์นั้นบังเอิญเป็นชนิดที่ validate ไม่จับ จะได้ workflow ที่เขียนลงที่ที่ไม่มีอยู่โดยไม่มีใครรู้**
+> ⇒ **กฎ: ก่อนสร้าง node ทุกครั้ง ดึงฟิลด์สดของตารางนั้นมาเทียบ ID ก่อน — โดยเฉพาะฟิลด์ตัวเลือก** · เอกสารชุดนี้เชื่อได้เฉพาะ ID ที่เพิ่งกวาด
+
 > อ่านคู่กับ `13-ID-Registry-AC.md` §1 เสมอ · ตารางฟิลด์ทุกตารางในส่วนนี้ **คัดลอกตรงจากเซิร์ฟเวอร์** — แถวที่ขึ้นต้นด้วย 🆕 คือฟิลด์ที่ **ยังไม่มี** และต้องสร้าง
 
 ---
@@ -22,7 +32,7 @@
 |---|---|---|---|
 | `journal_code` | `6a8434da33560633b8cd2f07` | Text (subType 0) | required · **isTitle = true** |
 | `journal_name` | `6a8434da33560633b8cd2f08` | Text (subType 0) | required |
-| `journal_type` | `6a8434da33560633b8cd2f09` | SingleSelect (subType 0) | required · options: `f0881dbf-d50b-4cf0-a3a7-ee4283dfe876`=General · `2da23e7e-a843-4308-b1c0-356bfc8033a3`=Purchase · `55a6baa2-6866-462a-bc14-5800e6b8dc77`=Sales · `53bf163f-b1e6-47ed-92d5-2ab8a0d8ee89`=Payment · `4414a81d-b18a-4848-b3e5-a90ba53ee923`=Receipt |
+| `journal_type` | `6a8ee5389762533b5b718449` | SingleSelect (subType 0) | required · options: `f0881dbf-d50b-4cf0-a3a7-ee4283dfe876`=General · `2da23e7e-a843-4308-b1c0-356bfc8033a3`=Purchase · `55a6baa2-6866-462a-bc14-5800e6b8dc77`=Sales · `53bf163f-b1e6-47ed-92d5-2ab8a0d8ee89`=Payment · `4414a81d-b18a-4848-b3e5-a90ba53ee923`=Receipt |
 | `voucher_prefix` | `6a8434da33560633b8cd2f0a` | Text (subType 0) |  |
 
 #### FR-01.2 ประเภทเอกสาร — **Worksheet `AC_DOC_TYPE`** · ws `6a8434dd9b6999a714d22e3d` · alias `ac_doc_type` · view `6a8434dd9b6999a714d22e41`
@@ -40,7 +50,7 @@
 
 | ฟิลด์ (alias) | Field ID | type · subType | หมายเหตุ / option key · relation |
 |---|---|---|---|
-| `year_era` | `6a8434ea1049edca1eec9f6d` | SingleSelect (subType 0) | required · options: `1a4e4946-e30e-44dc-ab07-e1e355293e3a`=CE · `295b875b-b296-44f3-ba9a-e6a456477dca`=BE |
+| `year_era` | `6a8ee53b1378964f99849987` | SingleSelect (subType 0) | required · options: `1a4e4946-e30e-44dc-ab07-e1e355293e3a`=CE · `295b875b-b296-44f3-ba9a-e6a456477dca`=BE |
 | `effective_from` | `6a8434ea1049edca1eec9f6c` | Date (subType 3) | required |
 | `current_sequence` | `6a8434ea1049edca1eec9f6b` | Number (subType 0) | precision 0 |
 | `running_length` | `6a8434ea1049edca1eec9f6a` | Number (subType 0) | required · precision 0 |
@@ -59,7 +69,7 @@
 | ฟิลด์ (alias) | Field ID | type · subType | หมายเหตุ / option key · relation |
 |---|---|---|---|
 | `standard_remark` | `6a8434f69b6999a714d22e82` | Text (subType 0) |  |
-| `side` | `6a8434f69b6999a714d22e81` | SingleSelect (subType 0) | required · options: `1c74b144-1225-41e5-872f-1cf5d7f8d708`=Purchase · `e6a7b9b8-9e24-4109-bed0-44a131d91f74`=Sales |
+| `side` | `6a8ee53eae2a0e3743a0bc6c` | SingleSelect (subType 0) | required · options: `1c74b144-1225-41e5-872f-1cf5d7f8d708`=Purchase · `e6a7b9b8-9e24-4109-bed0-44a131d91f74`=Sales |
 | `setting_name` | `6a8434f69b6999a714d22e80` | Text (subType 0) | required · **isTitle = true** |
 | `show_adjustment_lines_on_receipt` | `6a843a0a33560633b8cd30b9` | Checkbox (subType 0) |  |
 | `logo_image` | `6a843a0a33560633b8cd30ba` | Attachment (subType 3) | placeholder "Add files" |
@@ -141,7 +151,7 @@
 | `closed_at` | `6a8434d58b36df988c16ed6b` | DateTime (subType 1) |  |
 | `reopen_reason` | `6a8434d58b36df988c16ed6c` | Text (subType 0) |  |
 | `period_status` | `6a851f70055f2288c5b73edf` | Dropdown (subType 0) | required · optionset dataSource `e9ae2c06-eb06-45ee-a2ee-4eb1757f1116` · options: `f662571c-3de0-4e4c-9828-9172e337d223`=Open · `b2986cb5-59db-4fdc-87ed-d57a38201c6a`=Soft-closed · `38392e32-7c09-4339-a9b4-81a9f53eba0a`=Permanently locked |
-| `tax_period_status` | `6a851f70055f2288c5b73ee0` | Dropdown (subType 0) | required · optionset dataSource `a04fa23c-4498-473a-9637-12e754802d06` · options: `d41e3a2e-684b-4533-9913-09a04302626e`=Open · `fa108e9e-c642-4740-af6a-a6964ecc50d3`=Filed · `3d94b4e7-170b-47ee-a5e1-e3a2e415cfa4`=Amended |
+| `tax_period_status` | `6a8ee2c68b6633ef76f1288e` | Dropdown (subType 0) | required · optionset dataSource `a04fa23c-4498-473a-9637-12e754802d06` · options: `d41e3a2e-684b-4533-9913-09a04302626e`=Open · `fa108e9e-c642-4740-af6a-a6964ecc50d3`=Filed · `3d94b4e7-170b-47ee-a5e1-e3a2e415cfa4`=Amended |
 | `biz_close_flag` (ปิดงวด (ธง)) | `6a903ea68b6633ef76f169c5` | Number (subType 0) | precision 0 · default 0 · ✅ สร้างแล้ว 27 ส.ค. 2569 — ธงกันยิงซ้ำ/trigger field ของ **WF-AC-09** (เดิมชื่อ 🆕 `close_flag` ในเอกสาร — สร้างจริงเป็น `biz_close_flag`) |
 | `biz_close_year_flag` (ปิดปี (ธง)) | `6a90ef228b6633ef76f16f55` | Number (subType 0) | precision 0 · default 0 · ✅ สร้างแล้ว 28 ส.ค. 2569 — ธงกันยิงซ้ำ/trigger field ของ **WF-AC-11** (ปิดปีและยกยอด) — pattern เดียวกับ `biz_close_flag`/WF-AC-09 |
 
@@ -234,7 +244,7 @@
 |---|---|---|---|
 | `fund_code` | `6a8545309b6999a714d2672c` | Text (subType 0) | required · **isTitle=True** |
 | `fund_name` | `6a8545309b6999a714d2672d` | Text (subType 0) | required |
-| `fund_type` | `6a8545309b6999a714d2672e` | SingleSelect (subType 0) | required · inline options (no optionset id) · keys: `ee7d5539-1267-476f-92f1-89efd3671287`=Budget · `9a254a31-7aba-459e-ade2-619086ed9ead`=Non-budgetary · `76566396-abf3-4b36-9f8f-fe61f5928748`=Own revenue · `cb8f4292-a8e4-46cc-9226-624dc9de123b`=Research |
+| `fund_type` | `6a8ee5439762533b5b71844f` | SingleSelect (subType 0) | required · inline options (no optionset id) · keys: `ee7d5539-1267-476f-92f1-89efd3671287`=Budget · `9a254a31-7aba-459e-ade2-619086ed9ead`=Non-budgetary · `76566396-abf3-4b36-9f8f-fe61f5928748`=Own revenue · `cb8f4292-a8e4-46cc-9226-624dc9de123b`=Research |
 | `is_active` | `6a85e6361049edca1eed0194` | Checkbox (subType 0) |  |
 
 #### FR-03.4 มิติโครงการ — **Worksheet `AC_PROJECT_DIM`** · ws `6a854534055f2288c5b741ce` · alias `ac_project_dim` · view `6a854534055f2288c5b741d2`
@@ -280,7 +290,7 @@
 | `address` | `6a8545701049edca1eecd86a` | Text (subType=0) | required |
 | `postcode` | `6a8545701049edca1eecd86b` | Text (subType=0) | required |
 | `delivery_info` | `6a8545701049edca1eecd86c` | Text (subType=0) |  |
-| `is_domestic` | `6a8545701049edca1eecd86d` | SingleSelect (subType=0) | required · options: `5d274ae0-5cd5-49e3-b230-89ddd24b5865`=Domestic · `d26d20fa-44d0-4702-80ae-cf8779b0b9a4`=Foreign |
+| `is_domestic` | `6a8545701049edca1eecd86d` 🔴 **ID ตายแล้ว (ตรวจ 1 ก.ย. 2569) — ไม่มี alias นี้บน AC_PARTNER แล้ว — อาจถูกลบหรือเปลี่ยนชื่อ **ต้องยืนยันก่อนใช้**** | SingleSelect (subType=0) | required · options: `5d274ae0-5cd5-49e3-b230-89ddd24b5865`=Domestic · `d26d20fa-44d0-4702-80ae-cf8779b0b9a4`=Foreign |
 | `credit_days` | `6a8545701049edca1eecd86e` | Number (subType=0) | required |
 | `default_wht_type` | `6a8545701049edca1eecd86f` | Relation (subType=1) | → ws `6a85454133560633b8cd68e6` (AC_WHT_INCOME_TYPE) · sourceField = `6a8545701049edca1eecd870` |
 | `contact_name` | `6a8545701049edca1eecd871` | Text (subType=0) |  |
@@ -291,9 +301,9 @@
 | `website` | `6a8545701049edca1eecd876` | Text (subType=0) |  |
 | `note` | `6a8545701049edca1eecd877` | Text (subType=0) |  |
 | `bank_accounts` | `6a8545b58b36df988c172486` | Relation (subType=2) | → ws `6a85458033560633b8cd692a` (AC_PARTNER_BANK) · sourceField = `6a8545b58b36df988c172487` |
-| `partner_type` | `6a85e4269b6999a714d2a3f0` | MultipleSelect (subType=0) | optionset dataSource = `fd947876-5402-408c-8c09-87db96c188c5` · options: `90ce110c-6767-44bc-97ca-5de884c2ad49`=Customer · `13235e3d-088a-49b0-8c48-aec8c33280cd`=Supplier |
-| `legal_form` | `6a85e486055f2288c5b77672` | Dropdown (subType=0) | optionset dataSource = `b97a1a08-78ab-4683-8472-837c48af4423` · options: `adf4bb5f-5a6b-4a99-b416-4d03ec5e295e`=Juristic person · `1aeb1a04-1957-4905-92d9-c506d8bbdccc`=Individual |
-| `branch_type` | `6a85e486055f2288c5b77673` | Dropdown (subType=0) | optionset dataSource = `081f8bfc-bab8-4a89-91cf-ea3e501b3b4c` · options: `6ec11519-e394-42db-8610-db6abdd5ab6d`=Head office · `f5abd6cd-e45b-4353-b0a7-527c0d18d027`=Branch |
+| `partner_type` | `6a8ee32a1378964f99849859` | MultipleSelect (subType=0) | optionset dataSource = `fd947876-5402-408c-8c09-87db96c188c5` · options: `90ce110c-6767-44bc-97ca-5de884c2ad49`=Customer · `13235e3d-088a-49b0-8c48-aec8c33280cd`=Supplier |
+| `legal_form` | `6a8ec8539762533b5b717e72` | Dropdown (subType=0) | optionset dataSource = `b97a1a08-78ab-4683-8472-837c48af4423` · options: `adf4bb5f-5a6b-4a99-b416-4d03ec5e295e`=Juristic person · `1aeb1a04-1957-4905-92d9-c506d8bbdccc`=Individual |
+| `branch_type` | `6a8ee32a1378964f9984985a` | Dropdown (subType=0) | optionset dataSource = `081f8bfc-bab8-4a89-91cf-ea3e501b3b4c` · options: `6ec11519-e394-42db-8610-db6abdd5ab6d`=Head office · `f5abd6cd-e45b-4353-b0a7-527c0d18d027`=Branch |
 | `is_active` | `6a85e486055f2288c5b77674` | Checkbox (subType=0) |  |
 | `attachments` | `6a85e486055f2288c5b77675` | Attachment (subType=3) |  |
 
@@ -349,7 +359,7 @@
 | ฟิลด์ (alias) | Field ID | type · subType | หมายเหตุ / option key · relation |
 |---|---|---|---|
 | `vat_code` | `6a8545468b36df988c17244c` | Text (subType=0) | required · isTitle=True |
-| `vat_name` | `6a8545468b36df988c17244d` | SingleSelect (subType=0) | required · options: `38bd3e38-85c1-4645-a470-6f50ab8720a7`=Standard-rated · `abf766cc-682d-4c27-9efa-52d2e24189b8`=Zero-rated · `bb56396e-c0ad-4006-9946-174c2824031a`=Exempt · `5f03e574-907f-4fc5-a72b-ad68917efc4f`=Non-VAT |
+| `vat_name` | `6a8545468b36df988c17244d` 🔴 **ID ตายแล้ว (ตรวจ 1 ก.ย. 2569) — ไม่มี alias นี้บน AC_VAT_RATE แล้ว · ฟิลด์ SingleSelect ที่มีอยู่จริงคือ `vat_treatment` `6a8ee548ae2a0e3743a0bc72` — **น่าจะเป็นตัวเดียวกันที่เปลี่ยนชื่อ แต่ยังไม่ยืนยัน**** | SingleSelect (subType=0) | required · options: `38bd3e38-85c1-4645-a470-6f50ab8720a7`=Standard-rated · `abf766cc-682d-4c27-9efa-52d2e24189b8`=Zero-rated · `bb56396e-c0ad-4006-9946-174c2824031a`=Exempt · `5f03e574-907f-4fc5-a72b-ad68917efc4f`=Non-VAT |
 | `rate_percent` | `6a8545468b36df988c17244e` | Number (subType=0) | required |
 | `effective_from` | `6a8545468b36df988c17244f` | Date (subType=3) | required |
 | `effective_to` | `6a8545468b36df988c172450` | Date (subType=3) |  |
@@ -367,8 +377,8 @@
 | `rate_percent` | `6a85456833560633b8cd690b` | Number (subType=0) | required |
 | `effective_from` | `6a85456833560633b8cd690c` | Date (subType=3) | required |
 | `effective_to` | `6a85456833560633b8cd690d` | Date (subType=3) |  |
-| `payee_legal_form` | `6a85e519055f2288c5b7768d` | Dropdown (subType=0) | optionset dataSource = `b97a1a08-78ab-4683-8472-837c48af4423` · options: `adf4bb5f-5a6b-4a99-b416-4d03ec5e295e`=Juristic person · `1aeb1a04-1957-4905-92d9-c506d8bbdccc`=Individual |
-| `form_type` | `6a85e519055f2288c5b7768e` | Dropdown (subType=0) | optionset dataSource = `7b605ddd-bf7f-4837-9fa7-e6ae2153b2f8` · options: `d6c591cf-32c0-43d0-916d-803266f5e121`=P.P.30 · `614d5168-334c-4cb2-bd34-cda27357d134`=P.P.36 · `86d28c16-c735-403b-beb1-1573990188d6`=P.N.D.3 · `08e5c9c1-bcd7-4e28-9a08-ed0c028dc21b`=P.N.D.53 · `2b0971ed-7db0-4a2e-ba7b-e83d6b18a987`=P.N.D.54 |
+| `payee_legal_form` | `6a8ec8529762533b5b717e6a` | Dropdown (subType=0) | optionset dataSource = `b97a1a08-78ab-4683-8472-837c48af4423` · options: `adf4bb5f-5a6b-4a99-b416-4d03ec5e295e`=Juristic person · `1aeb1a04-1957-4905-92d9-c506d8bbdccc`=Individual |
+| `form_type` | `6a8ec8529762533b5b717e6b` | Dropdown (subType=0) | optionset dataSource = `7b605ddd-bf7f-4837-9fa7-e6ae2153b2f8` · options: `d6c591cf-32c0-43d0-916d-803266f5e121`=P.P.30 · `614d5168-334c-4cb2-bd34-cda27357d134`=P.P.36 · `86d28c16-c735-403b-beb1-1573990188d6`=P.N.D.3 · `08e5c9c1-bcd7-4e28-9a08-ed0c028dc21b`=P.N.D.53 · `2b0971ed-7db0-4a2e-ba7b-e83d6b18a987`=P.N.D.54 |
 | `is_active` | `6a85e519055f2288c5b7768f` | Checkbox (subType=0) |  |
 
 #### FR-05.3 ประเภทเงินได้หัก ณ ที่จ่าย — **Worksheet `AC_WHT_INCOME_TYPE`** · ws `6a85454133560633b8cd68e6` · alias `ac_wht_income_type` · view `6a85454133560633b8cd68ea`
@@ -379,7 +389,7 @@
 | `description_th` | `6a8545411049edca1eecd84d` | Text (subType=0) | required |
 | `description_en` | `6a8545411049edca1eecd84e` | Text (subType=0) |  |
 | `sort_order` | `6a8545411049edca1eecd84f` | Number (subType=0) |  |
-| `form_type` | `6a85e538055f2288c5b77698` | Dropdown (subType=0) | optionset dataSource = `7b605ddd-bf7f-4837-9fa7-e6ae2153b2f8` · options: `d6c591cf-32c0-43d0-916d-803266f5e121`=P.P.30 · `614d5168-334c-4cb2-bd34-cda27357d134`=P.P.36 · `86d28c16-c735-403b-beb1-1573990188d6`=P.N.D.3 · `08e5c9c1-bcd7-4e28-9a08-ed0c028dc21b`=P.N.D.53 · `2b0971ed-7db0-4a2e-ba7b-e83d6b18a987`=P.N.D.54 |
+| `form_type` | `6a8ec84d353e1b0e4a506da0` | Dropdown (subType=0) | optionset dataSource = `7b605ddd-bf7f-4837-9fa7-e6ae2153b2f8` · options: `d6c591cf-32c0-43d0-916d-803266f5e121`=P.P.30 · `614d5168-334c-4cb2-bd34-cda27357d134`=P.P.36 · `86d28c16-c735-403b-beb1-1573990188d6`=P.N.D.3 · `08e5c9c1-bcd7-4e28-9a08-ed0c028dc21b`=P.N.D.53 · `2b0971ed-7db0-4a2e-ba7b-e83d6b18a987`=P.N.D.54 |
 
 #### FR-05.4 สินค้าและบริการ — **Worksheet `AC_ITEM`** · ws `6a8545a89b6999a714d26769` · alias `ac_item` · view `6a8545a89b6999a714d2676d`
 
@@ -394,7 +404,7 @@
 | `standard_price` | `6a8545a81049edca1eecd8c4` | Number (subType 0) |  |
 | `revenue_account` | `6a8551af9b6999a714d268e0` | Relation (subType 1) | → ws `6a85516e1049edca1eecd9b7` (AC_COA) · sourceField `6a8551af9b6999a714d268e1` |
 | `expense_account` | `6a8551af9b6999a714d268e2` | Relation (subType 1) | → ws `6a85516e1049edca1eecd9b7` (AC_COA) · sourceField `6a8551af9b6999a714d268e3` |
-| `item_type` | `6a85e4cd055f2288c5b77685` | Dropdown (subType 0) | optionset `b6d21a09-f425-491c-9c2c-0c0d832a4ecf` · keys: `f9a1e0c2-6418-42f7-8afc-777e9fb8053a`=Goods · `b705d9f2-e0f5-44c1-8299-1e5fc621d1e8`=Service |
+| `item_type` | `6a8ec5108b6633ef76f1231f` | Dropdown (subType 0) | optionset `b6d21a09-f425-491c-9c2c-0c0d832a4ecf` · keys: `f9a1e0c2-6418-42f7-8afc-777e9fb8053a`=Goods · `b705d9f2-e0f5-44c1-8299-1e5fc621d1e8`=Service |
 | `is_active` | `6a85e4cd055f2288c5b77686` | Checkbox (subType 0) |  |
 
 #### FR-05.5 สกุลเงิน — **Worksheet `AC_CURRENCY`** · ws `6a8545261049edca1eecd818` · alias `ac_currency` · view `6a8545261049edca1eecd81c`
@@ -486,7 +496,7 @@
 | `source_doc_type` | `6a85fb7033560633b8cd9f56` | SingleSelect (subType 0) | options: `9167f8e3-be47-42fb-93d4-b5855e1cdcfd` = AC_AP · `41d6a7c8-8d13-430e-96be-9269cb9242a4` = AC_AR · `6dc4c5b9-5749-44bd-895c-bb0dc458d891` = AC_PAY · `d7a78710-41c5-4286-92ce-472ca7db6199` = AC_DEPR · `87c9789e-d222-411d-ae5d-51f2d29b7419` = AC_CLOSE · `ec6ec0cd-e223-4b5b-a6ea-1d70f2f45fcd` = Manual |
 | `voucher_no` | `6a85ff5933560633b8cd9f83` | Text (subType 0) | **isTitle = True** |
 | status → alias `status1` ⚠️ | `6a86016b1049edca1eed028a` | Dropdown (subType 0) | optionset (dataSource) `0bdd7e11-c2bc-44cb-a25a-34009a1436a2` · options: `3536165d-460c-4942-8bec-6f381209d8da` = Draft · `982090bd-bec8-4cec-a0e5-7b4de07d4d13` = Pending approval · `69d8e25d-e949-49a6-aba6-11e1732f59d1` = Approved · `a234503a-f4fd-4d8a-86c3-34a2d9ed219f` = Posted · `e0474c62-202d-4a41-98ff-7c4cf417eec8` = Cancelled · `8ce6c682-5c42-42f3-b6a9-62ea17a12205` = Reversed · **ระวัง: alias คือ `status1` ไม่ใช่ `status`** |
-| `source_module` | `6a86021833560633b8cd9fb1` | Dropdown (subType 0) | optionset (dataSource) `098ff000-5d07-4c73-9622-c37e691f9f75` · options: `3f9b4640-60f2-4387-8c90-7308a66579ed` = Manual · `add7f979-fa25-4dda-8a1d-6ca4de96c53d` = Scan · `d07bebc6-0e9a-4b76-8fbe-fcb1ac87bda1` = Procurement · `c2b119a5-2d34-4af6-905d-ed52e76869d1` = Finance · `901a32f6-b514-431d-820f-0dd88248cbd8` = Asset · `914f5226-dc4c-4572-bd4d-18bb278414b5` = Payroll · `23db6df8-38f9-4a85-ad34-87b20386d265` = Tax · `5d980264-7b9a-49d9-9c6c-2e6daa1946e7` = Period close |
+| `source_module` | `6a8ee2729762533b5b718321` | Dropdown (subType 0) | optionset (dataSource) `098ff000-5d07-4c73-9622-c37e691f9f75` · options: `3f9b4640-60f2-4387-8c90-7308a66579ed` = Manual · `add7f979-fa25-4dda-8a1d-6ca4de96c53d` = Scan · `d07bebc6-0e9a-4b76-8fbe-fcb1ac87bda1` = Procurement · `c2b119a5-2d34-4af6-905d-ed52e76869d1` = Finance · `901a32f6-b514-431d-820f-0dd88248cbd8` = Asset · `914f5226-dc4c-4572-bd4d-18bb278414b5` = Payroll · `23db6df8-38f9-4a85-ad34-87b20386d265` = Tax · `5d980264-7b9a-49d9-9c6c-2e6daa1946e7` = Period close |
 | `attachments` | `6a86021833560633b8cd9fb2` | Attachment (subType 3) |  |
 | `total_debit` | `6a8603f4055f2288c5b777d2` | Rollup (subType 5) | rolls up relation field `$6a85fb399b6999a714d2a558$` (AC_VOUCHER_LINE) · sourceField `6a85fb399b6999a714d2a55b` (debit) |
 | `total_credit` | `6a8604c08b36df988c176286` | Rollup (subType 5) | rolls up relation field `$6a85fb399b6999a714d2a558$` (AC_VOUCHER_LINE) · sourceField `6a85fb399b6999a714d2a55c` (credit) |
@@ -699,7 +709,7 @@
 | `wht_base` `biz_apl_wht_base` | `6a8ead448b6633ef76f1200a` | Number | **ต่างจากฐาน VAT** (BR-07) |
 | `line_wht` `biz_apl_line_wht` | `6a8ead448b6633ef76f1200b` | Number | |
 | `vat_rate_percent` `biz_apl_vat_rate_percent` | `6a8ead448b6633ef76f1200c` | Number | **สำเนาอัตราที่ใช้จริง** — ห้าม lookup แบบ sync |
-| `wht_borne_by` `biz_apl_wht_borne_by` | `6a8ead448b6633ef76f1200d` | Dropdown | → `OS_WHT_BORNE_BY` `ce278c49-…` · บังคับ **TC-18** |
+| `wht_borne_by` `biz_apl_wht_borne_by` | `6a8ec520353e1b0e4a506d56` | Dropdown | → `OS_WHT_BORNE_BY` `ce278c49-…` · บังคับ **TC-18** |
 
 **Form rules**
 
@@ -747,7 +757,7 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
-| `req_status` `biz_preq_status` | `6a8ead839762533b5b717035` | Dropdown | → **`OS_PAYREQ_STATUS` `4ab44bf7-1c5f-48c1-9669-8ac180dc4fc0`** (สร้างใหม่ 26 ส.ค.) |
+| `req_status` `biz_preq_status` | `6a8ec5be353e1b0e4a506d75` | Dropdown | → **`OS_PAYREQ_STATUS` `4ab44bf7-1c5f-48c1-9669-8ac180dc4fc0`** (สร้างใหม่ 26 ส.ค.) |
 | `request_amount` `biz_preq_amount` | `6a8ead839762533b5b717036` | Number | ยอดที่ขอเบิกรวม |
 | `submitted_flag` `biz_preq_submitted_flag` | `6a8ead839762533b5b717037` | Number · default 0 | |
 | `paid_flag` `biz_preq_paid_flag` | `6a8ead839762533b5b717038` | Number · default 0 | กันสร้างใบสำคัญจ่ายซ้ำ |
@@ -773,7 +783,7 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
-| `pay_status` `biz_pay_status` | `6a8ead8f1378964f998490f6` | Dropdown | → **`OS_PAY_STATUS` `d2d61597-824a-42b6-a9bd-5d98a856516e`** (สร้างใหม่ 26 ส.ค.) |
+| `pay_status` `biz_pay_status` | `6a8ec5c28b6633ef76f1232f` | Dropdown | → **`OS_PAY_STATUS` `d2d61597-824a-42b6-a9bd-5d98a856516e`** (สร้างใหม่ 26 ส.ค.) |
 | `period` `biz_pay_period` | `6a8ead8f1378964f998490f7` | Relation subType 1 | → AC_PERIOD · บังคับ BR-03 |
 | `doc_type` `biz_pay_doc_type` | `6a8ead8f1378964f998490f9` | Relation subType 1 | → AC_DOC_TYPE |
 | `total_gross` `biz_pay_total_gross` | `6a8ead8f1378964f998490fb` | Number | |
@@ -818,7 +828,7 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
-| `settle_status` `biz_stl_status` | `6a8ead961378964f9984911e` | Dropdown | → **`OS_SETTLE_STATUS` `b028f1d7-ec71-465a-afd0-ba9c0fe09788`** (สร้างใหม่ 26 ส.ค.) |
+| `settle_status` `biz_stl_status` | `6a8ec5c5ae2a0e3743a0b583` | Dropdown | → **`OS_SETTLE_STATUS` `b028f1d7-ec71-465a-afd0-ba9c0fe09788`** (สร้างใหม่ 26 ส.ค.) |
 | `finance_ref` `biz_stl_finance_ref` | `6a8ead961378964f9984911f` | Text | เลขอ้างอิงจากโมดูลการเงิน · ใช้ทำ idempotency ของ WF-AC-04 |
 
 **Form rules**
@@ -861,10 +871,10 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
-| `form_type` `biz_wht_form_type` | `6a8ead9f9762533b5b717052` | Dropdown | → `OS_FORM_TYPE` `7b605ddd-…` (ค่าเป็นอักษรโรมัน `P.N.D.3` / `P.N.D.53`) |
-| `payee_legal_form` `biz_wht_payee_legal_form` | `6a8ead9f9762533b5b717053` | Dropdown | → `OS_LEGAL_FORM` `b97a1a08-…` · สำเนา ณ วันที่ออกใบรับรอง |
-| `wht_status` `biz_wht_status` | `6a8ead9f9762533b5b717054` | Dropdown | → **`OS_WHT_STATUS` `b2f5604d-d432-434f-aae9-16ae87732eb9`** (สร้างใหม่ 26 ส.ค.) |
-| `borne_by` `biz_wht_borne_by` | `6a8ead9f9762533b5b717055` | Dropdown | → `OS_WHT_BORNE_BY` `ce278c49-…` |
+| `form_type` `biz_wht_form_type` | `6a8ec5ceae2a0e3743a0b588` | Dropdown | → `OS_FORM_TYPE` `7b605ddd-…` (ค่าเป็นอักษรโรมัน `P.N.D.3` / `P.N.D.53`) |
+| `payee_legal_form` `biz_wht_payee_legal_form` | `6a8ec5ceae2a0e3743a0b589` | Dropdown | → `OS_LEGAL_FORM` `b97a1a08-…` · สำเนา ณ วันที่ออกใบรับรอง |
+| `wht_status` `biz_wht_status` | `6a8ec5ceae2a0e3743a0b58a` | Dropdown | → **`OS_WHT_STATUS` `b2f5604d-d432-434f-aae9-16ae87732eb9`** (สร้างใหม่ 26 ส.ค.) |
+| `borne_by` `biz_wht_borne_by` | `6a8ec5ceae2a0e3743a0b58b` | Dropdown | → `OS_WHT_BORNE_BY` `ce278c49-…` |
 | `voucher` `biz_wht_voucher` | `6a8ead9f9762533b5b717056` | Relation subType 1 | → AC_VOUCHER |
 | `pay_ref` `biz_wht_pay_ref` | `6a8ead9f9762533b5b717058` | Relation subType 1 | → AC_PAY (แทน `source_id` ที่เป็น Text) |
 
@@ -907,8 +917,8 @@
 
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
-| `vat_side` `biz_vd_vat_side` | `6a8ead518b6633ef76f1201e` | Dropdown | → `OS_VAT_SIDE` `32f06106-…` · 🔑 แยกภาษีซื้อ/ขายได้แล้ว |
-| `claim_status` `biz_vd_claim_status` | `6a8ead518b6633ef76f1201f` | Dropdown | → `OS_VAT_DOC_STATUS` `162d4782-…` · 🔑 คุม tax point + กันใช้เครดิตซ้ำ |
+| `vat_side` `biz_vd_vat_side` | `6a8ec598353e1b0e4a506d5f` | Dropdown | → `OS_VAT_SIDE` `32f06106-…` · 🔑 แยกภาษีซื้อ/ขายได้แล้ว |
+| `claim_status` `biz_vd_claim_status` | `6a8ec598353e1b0e4a506d60` | Dropdown | → `OS_VAT_DOC_STATUS` `162d4782-…` · 🔑 คุม tax point + กันใช้เครดิตซ้ำ |
 | `accrual_period` `biz_vd_accrual_period` | `6a8ead518b6633ef76f12020` | Relation subType 1 | → AC_PERIOD · งวดที่ตั้งค้างจ่าย (ต่างจาก `claim_period`) |
 | `deferred_flag` `biz_vd_deferred_flag` | `6a8ead518b6633ef76f12022` | Number · **default 0** | ยังอยู่ในบัญชีภาษีซื้อรอเรียกคืน |
 | `transfer_voucher` `biz_vd_transfer_voucher` | `6a8ead518b6633ef76f12023` | Relation subType 1 | → AC_VOUCHER · ใบสำคัญโอนภาษีซื้อ (event `VAT_TRANSFER`) |
@@ -962,9 +972,9 @@
 | ✅ ฟิลด์ที่สร้างแล้ว | Field ID | type | หมายเหตุ |
 |---|---|---|---|
 | `amended_filings` `biz_tf_amended_filings` | `6a8678261049edca1eed0727` | Relation subType 2 | ✅ **เปลี่ยนชื่อจาก `子` แล้ว** — reverse ของ `original_filing` |
-| `form_type` `biz_tf_form_type` | `6a8ead611378964f9984907a` | Dropdown | → `OS_FORM_TYPE` `7b605ddd-…` |
-| `filing_type` `biz_tf_filing_type` | `6a8ead611378964f9984907b` | Dropdown | → `OS_FILING_TYPE` `072eb596-…` · Normal / Additional · **TC-22** |
-| `filing_status` `biz_tf_filing_status` | `6a8ead611378964f9984907c` | Dropdown | → `OS_FILING_STATUS` `edb8daeb-…` |
+| `form_type` `biz_tf_form_type` | `6a8ec5a8353e1b0e4a506d67` | Dropdown | → `OS_FORM_TYPE` `7b605ddd-…` |
+| `filing_type` `biz_tf_filing_type` | `6a8ec5a8353e1b0e4a506d68` | Dropdown | → `OS_FILING_TYPE` `072eb596-…` · Normal / Additional · **TC-22** |
+| `filing_status` `biz_tf_filing_status` | `6a8ec5a8353e1b0e4a506d69` | Dropdown | → `OS_FILING_STATUS` `edb8daeb-…` |
 | `period` `biz_tf_period` | `6a8ead611378964f9984907d` | Relation subType 1 | → AC_PERIOD (แทน `tax_month` ที่เป็น Text) |
 | `output_vat` `biz_tf_output_vat` | `6a8ead611378964f9984907f` | Number | |
 | `input_vat` `biz_tf_input_vat` | `6a8ead611378964f99849080` | Number | |

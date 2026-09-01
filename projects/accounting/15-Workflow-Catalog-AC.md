@@ -192,7 +192,7 @@
 - **จังหวะการออก:** ขึ้นกับ `AC_DOC_SETTING.wht_timing` `6a85229a8b36df988c1721d9`
   - **At payment `998bd1a6-1d3b-4b57-9b8e-9587624b3614` (ค่า default ตาม A-10)** → เรียกจาก **WF-AC-14 / WF-AC-04** ตอนออกใบสำคัญจ่าย · `AC_WHT.source_type` `6a8677f1055f2288c5b77d35` = `3b14bfb0-dc38-4f87-918d-b59a97755a66` (PAY)
   - At invoice `250c24af-…` → trigger จาก `ac_ap` เมื่อ `ap_status` = Recognised · `source_type` = `4572f17b-f93e-4dac-8531-909f7c31a223` (AP)
-- **Nodes:** Branch อ่าน `wht_timing` → Get associated records `ac_ap_line` filter `wht_type` `6a8673e78b36df988c176b8f` is not empty → **จัดกลุ่มตาม `income_type`** (หนึ่งใบรับรองต่อคู่ค้าต่อประเภทเงินได้ต่อวันจ่าย) → Get Multiple Records `ac_wht_rate` `6a8545688b36df988c172471` filter `income_type` + `payee_legal_form` `6a85e519055f2288c5b7768d` = partner › `legal_form` `6a85e486055f2288c5b77672` + `effective_from` ≤ วันจ่าย → **Function calculation:** ถ้า `wht_borne_by` 🆕 = Payer → gross-up `base = net / (1 − rate/100)` มิฉะนั้น `base = line_amount` → Create Record `ac_wht` (`base_amount` `6a8677f1055f2288c5b77d2e`, `wht_rate` `…d2f`, `wht_amount` `…d30`, `pay_date` `…d2b`, `income_type` `…d2c`, `partner` `…d28`) → เดินเลขที่จาก `ac_doc_number_rule` → Update `wht_no` `6a8677f1055f2288c5b77d27`
+- **Nodes:** Branch อ่าน `wht_timing` → Get associated records `ac_ap_line` filter `wht_type` `6a8673e78b36df988c176b8f` is not empty → **จัดกลุ่มตาม `income_type`** (หนึ่งใบรับรองต่อคู่ค้าต่อประเภทเงินได้ต่อวันจ่าย) → Get Multiple Records `ac_wht_rate` `6a8545688b36df988c172471` filter `income_type` + `payee_legal_form` `6a8ec8529762533b5b717e6a` = partner › `legal_form` `6a8ec8539762533b5b717e72` + `effective_from` ≤ วันจ่าย → **Function calculation:** ถ้า `wht_borne_by` 🆕 = Payer → gross-up `base = net / (1 − rate/100)` มิฉะนั้น `base = line_amount` → Create Record `ac_wht` (`base_amount` `6a8677f1055f2288c5b77d2e`, `wht_rate` `…d2f`, `wht_amount` `…d30`, `pay_date` `…d2b`, `income_type` `…d2c`, `partner` `…d28`) → เดินเลขที่จาก `ac_doc_number_rule` → Update `wht_no` `6a8677f1055f2288c5b77d27`
 - **DoD:** TC-18 ผ่าน — กรณี gross-up ฐานถูกคำนวณใหม่ และใบรับรองตรงกับ GL
 
 ---
@@ -422,7 +422,7 @@
    - path `pass` → **Update Record** `claim_status` = Awaiting tax invoice `d4514d7d-…` · `deferred_flag` = 1 → **Terminate**
 5. **Update Record** — `claim_status` = Tax invoice received `73da6436-e9f7-48bf-826b-96841a7d6419`
 6. **Get Multiple Records** — `ac_period` `6a8434d5055f2288c5b6d4b8` filter `date_from` `6a8434d58b36df988c16ed68` `lte` `tax_point_date` `6a8677f933560633b8cda343` **AND** `date_to` `…ed69` `gte` `tax_point_date`
-7. **Branch** — node 6 › `tax_period_status` `6a851f70055f2288c5b73ee0` equals Open `d41e3a2e-684b-4533-9913-09a04302626e`
+7. **Branch** — node 6 › `tax_period_status` `6a8ee2c68b6633ef76f1288e` equals Open `d41e3a2e-684b-4533-9913-09a04302626e`
    - path `pass` → **Update Record** `claim_period` `6a8677f933560633b8cda348` = node 6
    - path `overrule` → **Get Multiple Records** `ac_period` filter `tax_period_status` = Open **AND** `date_from` > node 6 › `date_from` เรียงจากน้อยไปมาก เอาแถวแรก → **Update Record** `claim_period` = แถวนั้น → **Send Internal Notification** บันทึกเหตุผลให้ AC-R2 (บังคับ **TC-21**)
 8. **Branch** — `deferred_flag` equals 1
@@ -484,7 +484,7 @@
 ### WF-AC-20 ผ่านรายการสมุดรายวันเงินเดือน `<TBD>` ⬜
 
 - **ชนิด / Surface:** `webhook` · **Browser** (JSON Parsing)
-- **Nodes:** Trigger by webhook → JSON Parsing → Branch idempotency (`ac_voucher.source_doc_id` `6a85fb2e055f2288c5b7775e` ซ้ำ → Terminate) → Create Record `ac_voucher` (`source_module` `6a86021833560633b8cd9fb1` = Payroll `914f5226-dc4c-4572-bd4d-18bb278414b5`) → Loop Create `ac_voucher_line` ตามที่ HRMS ส่งมา → Branch ตรวจ `balance_diff` = 0 → Update `status1` = Approved (ให้ WF-AC-02 รับช่วง) · ถ้าไม่สมดุล → Notification ถึง AC-R2 และคงสถานะ Draft
+- **Nodes:** Trigger by webhook → JSON Parsing → Branch idempotency (`ac_voucher.source_doc_id` `6a85fb2e055f2288c5b7775e` ซ้ำ → Terminate) → Create Record `ac_voucher` (`source_module` `6a8ee2729762533b5b718321` = Payroll `914f5226-dc4c-4572-bd4d-18bb278414b5`) → Loop Create `ac_voucher_line` ตามที่ HRMS ส่งมา → Branch ตรวจ `balance_diff` = 0 → Update `status1` = Approved (ให้ WF-AC-02 รับช่วง) · ถ้าไม่สมดุล → Notification ถึง AC-R2 และคงสถานะ Draft
 - **Pitfall:** ข้อมูลเงินเดือนเป็นข้อมูลส่วนบุคคล (NFR-02) — ห้ามใส่รายละเอียดรายบุคคลลง `description` ให้ลงเป็นยอดรวมตามบัญชี
 
 ---
