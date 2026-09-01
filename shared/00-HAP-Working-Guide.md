@@ -345,4 +345,6 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 
 `[V]` 🔴 **`record update <ws_id> <ROW_ID>` ต้องใช้ `rowId` แบบ UUID ไม่ใช่ `_id` แบบ 24-hex** — ถ้าใส่ `_id` จะได้ `{"resultCode": 4}` **โดยไม่มีข้อความ error ใด ๆ** และ record ไม่ถูกแก้ · `record list` คืนทั้งสองคีย์ (`_id` = 24-hex, `rowId` = UUID) จึงหยิบผิดได้ง่ายมาก · `record create` คืน `rowid` (UUID) มาให้ใช้ต่อได้เลย · **กฎ: เจอ `resultCode: 4` ให้สงสัยรูปแบบ id ก่อนสงสัย permission/business rule**
 
+`[V]` 🔴🔴 **`hap worksheet record list` คืนแค่ 20 แถวเป็นค่าเริ่มต้น (`--page-size` default = 20)** — ไม่มีอะไรบอกว่าถูกตัด ⇒ **ห้ามใช้ผลจากคำสั่งนี้นับจำนวนแถว** และห้ามสรุปว่า "ตารางมีแค่เท่านี้" · ต้องใส่ `-n <มาก ๆ>` และ**วนหน้าจนกว่าจะได้น้อยกว่า page size** · เจอจริง: seed 24 แถวแล้วนับได้ 20 · `hr_holiday` ที่เคยรายงานว่า "20 แถว" จริง ๆ มี 21 · อยู่ตระกูลเดียวกับ `get_workflow_list`/`hap workflow list` ที่ผลว่างหรือสั้นไม่ใช่หลักฐาน
+
 `[V]` **`record create/update --no-workflow` ถูกปฏิเสธ ไม่ใช่ถูกเพิกเฉย** — CLI ตอบเป็น `ValueError` พร้อมบอกให้ปิด workflow ก่อน (`hap workflow publish <id> --disable`) แล้วค่อยแก้ · ต่างจาก MCP `triggerWorkflow:false` ที่รับพารามิเตอร์ไปเงียบ ๆ
