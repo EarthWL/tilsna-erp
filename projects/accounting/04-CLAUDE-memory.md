@@ -277,7 +277,7 @@ _อัปเดตล่าสุด: 28 ส.ค. 2569 (รอบดึกท�
 - ✅ ฟิลด์ `approver_user`/`approver_orgrole` สร้างแล้วแต่ยังไม่ได้ใช้
 - ✅ **ผูก shared optionset กับฟิลด์ผ่าน API ได้ตอน `addFields`** — แต่ผูกเข้ากับฟิลด์ที่มีอยู่แล้วไม่ได้เลย
 - ✅ `Attachment` สร้างผ่าน API ได้จริง · `editFields` เปลี่ยนชื่อ reverse-relation ได้
-- 🔴 **ฟิลด์ธงทุกตัวที่สร้างใหม่ตั้ง default 0 ไว้แล้ว**
+- 🔴 **ฟิลด์ธงตั้ง default 0 ไว้แล้ว — แต่ default ไม่ช่วยอะไรกับ record ที่ workflow/API สร้าง** (แก้ 1 ก.ย. 2569) · ทดสอบจริง: ตั้ง default `0` บน `posted_flag` แล้วสร้างใบสำคัญด้วย `create_record` โดยไม่ส่งฟิลด์นั้น ⇒ **ได้ค่าว่าง ไม่ใช่ 0** ⇒ **default ช่วยเฉพาะฟอร์มที่คนกรอก** · กฎที่ใช้ได้จริงคือ (1) workflow ที่สร้าง record ต้องเขียนค่าธงเอง (2) ทุก branch ที่อ่านธงต้องทนค่าว่าง — ดู `00-HAP-Working-Guide.md` §4 · **ตรวจแล้ว 1 ก.ย. 2569: ไม่มีธงค่าว่างค้างอยู่เลยทั้งโมดูล** (ใบสำคัญ 5/5 มีค่า · อีก 5 ตารางที่มีฟิลด์ธงยังไม่มี record สักแถว)
 - ⚠️ `AC_VOUCHER.balance_diff` เป็น **Formula field** ที่ใช้ได้อยู่ — **ห้ามแตะ**
 - ✅ **`get_role_list` บน tenant นี้คืน custom role ครบ**
 - 🔴 **`editFields.options` บนฟิลด์ SingleSelect/MultipleSelect เพิ่มตัวเลือกซ้อนทับ**
