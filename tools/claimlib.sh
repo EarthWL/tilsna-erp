@@ -12,9 +12,22 @@ active_claims() {
   local root; root="$(repo_root)"
   local dir="$root/shared/claims"
   [ -d "$dir" ] || return 0
+  # 🔴 แก้ 1 ก.ย. 2569: เดิม CLAIM อ่านด้วยตำแหน่งฟิลด์ตายตัว ($3=app $4=task $5=objects)
+  #   แต่ preflight เขียน "CLAIM <iso> $APP $TASK $OBJS" — ถ้า $APP ว่างจะได้ช่องว่างซ้อน
+  #   awk ยุบช่องว่าง ⇒ ฟิลด์เลื่อนหมด: task ไปอยู่ $3 และ objects ไปอยู่ $4
+  #   ผลคือ (ก) c[] ถูกคีย์ด้วย objects จึงไม่มีวัน match closed[] ที่คีย์ด้วย task
+  #          ⇒ CLAIM นั้นถูกปล่อยแล้วก็ยัง "active" จนหมดอายุ TTL
+  #        (ข) preflight อ่านกลับได้ objs="" ⇒ objects_overlap ไม่มีวันชน
+  #          ⇒ **ใบจองนั้นไม่กันอะไรเลย อีกฝั่งเดินทับได้โดยไม่มีคำเตือน**
+  #   ตอนนี้อ่านตาม NF จึงรองรับทั้งบรรทัดเก่า (NF==4) และบรรทัดใหม่ (NF>=5)
   awk '
+    function rest(from,  i,s2) { s2=$from; for(i=from+1;i<=NF;i++) s2=s2" "$i; return s2 }
     FNR==1 { split(FILENAME,p,"/"); agent=p[length(p)]; sub(/\.log$/,"",agent) }
-    $1=="CLAIM" { c[$4]=agent"|"$2"|"$3"|"$4"|"$5; next }
+    $1=="CLAIM" {
+      if (NF>=5) { app=$3; task=$4; objs=rest(5) }
+      else       { app="-"; task=$3; objs=(NF>=4? $4 : "") }
+      c[task]=agent"|"$2"|"app"|"task"|"objs; next
+    }
     $1=="RELEASE" || $1=="HANDOFF" || $1=="EXPIRED" { closed[$3]=1 }
     END { for (t in c) if (!(t in closed)) print c[t] }
   ' "$dir"/*.log 2>/dev/null

@@ -3,7 +3,9 @@
 # exit 0 = ได้สิทธิ์ · exit 1 = ชน/ล้มเหลว → agent ต้องหยุดและรายงานผู้ใช้
 set -uo pipefail
 . "$(dirname "$0")/claimlib.sh"
-AGENT="$1"; TASK="$2"; APP="$3"; OBJS="$4"; ROOT="$(repo_root)"
+# 🔴 APP ว่างเคยทำให้บรรทัด CLAIM มีช่องว่างซ้อน แล้วฟิลด์เลื่อนทั้งบรรทัด (ดู claimlib.sh)
+#    ⇒ ใบจองนั้นไม่กันอะไรเลย · บังคับให้มีค่าเสมอ ใช้ "-" แทนเมื่อไม่ระบุแอป
+AGENT="$1"; TASK="$2"; APP="${3:--}"; [ -z "$APP" ] && APP="-"; OBJS="$4"; ROOT="$(repo_root)"
 LOG="$ROOT/shared/claims/$AGENT.log"; mkdir -p "$(dirname "$LOG")"; touch "$LOG"
 
 for attempt in 1 2 3; do
@@ -22,7 +24,8 @@ for attempt in 1 2 3; do
   while IFS='|' read -r ag iso app task objs; do
     [ -z "${ag:-}" ] && continue
     [ "$ag" = "$AGENT" ] && continue
-    [ "$app" != "$APP" ] && continue
+    # "-" = ไม่ระบุแอป ⇒ ถือว่าเทียบได้กับทุกแอป (ไม่งั้นใบจองที่ไม่ระบุแอปจะถูกข้าม = ไม่กันอะไร)
+    [ "$app" != "-" ] && [ "$APP" != "-" ] && [ "$app" != "$APP" ] && continue
     if objects_overlap "$objs" "$OBJS"; then CONFLICT="$ag ถือ $task ($objs) ตั้งแต่ $iso"; break; fi
   done < <(active_claims)
   [ -n "$CONFLICT" ] && { echo "PREFLIGHT BLOCK: $CONFLICT"; echo "→ หยุดและรายงานผู้ใช้ ห้ามยิงคำสั่งใด ๆ ใส่แอป"; exit 1; }
