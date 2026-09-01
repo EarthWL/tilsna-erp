@@ -278,6 +278,7 @@
 | WF-AC-20 ผ่านรายการสมุดรายวันเงินเดือน | `webhook` | MCP | `<TBD>` | ⬜ | FR-17 |
 | WF-AC-21 ตั้งสินทรัพย์และตัดจำหน่าย | `worksheet_event` (update) | MCP | `<TBD>` | ⬜ | FR-13 |
 | WF-AC-22 ปรับปรุงอัตราแลกเปลี่ยนปลายงวด | `schedule` | MCP | `<TBD>` | ⬜ | FR-15 |
+| WF-AC-23 เครื่องคิดภาษีระดับบรรทัด (AP) | `worksheet_event` (update) | MCP | `6a96a250730d20c5b799f265` | ✅ **สร้างและ publish แล้ว 1 ก.ย. 2569** · สายลูก `6a96a28a730d20c5b799f480` (publish v4) · TC-16/17/18 ผ่านครบ |
 
 > **Surface default = MCP** · เขียน **Browser** เฉพาะ workflow ที่ใช้ trigger นอก 4 ชนิด (`worksheet_event` / `schedule` / `date_field` / `webhook`) หรือ node นอก 17 ชนิดที่ MCP สร้างได้ (Loop, Terminate, Send API Request, JSON Parsing, Print Record, AI nodes …) — และเมื่อเป็นแบบนั้นให้ทำ **ทั้ง workflow** ใน Browser ห้ามแบ่งกราฟเดียวข้าม surface
 > ⚠️ **WF-AC-02 ใช้ node Loop** ซึ่ง MCP สร้างไม่ได้ → ดูทางเลี่ยงใน `15-Workflow-Catalog-AC.md` §3 WF-AC-02
