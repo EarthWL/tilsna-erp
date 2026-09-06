@@ -29,7 +29,8 @@ _เวอร์ชัน 1.2 · อัปเดต 27 ส.ค. 2569 (เพิ�
 | trigger นอก 4 ชนิด (Personnel / External User / PBP / Subprocess / Custom Action) | Browser | [S] |
 | node นอก 17 ชนิด (Loop / Terminate / Send API Request / JSON Parsing / Print / AI / SMS …) | Browser | [S] |
 | bind ฟิลด์กับ shared optionset · print template · external portal · field default/validation | Browser | [V] จากโปรเจกต์ WFH |
-| **Business Rule (Interaction/Style/Validation/Lock) · Dynamic Default (Query worksheet) · Unique Index** | Browser | **[V] 27 ส.ค. — ดูข้อจำกัดใหม่ใน §4** |
+| **Business Rule (Interaction/Validation/Lock)** | **hap CLI** `worksheet save-rule` | **[V] 6 ก.ย. — ดู §15** · ข้อจำกัด "อ้าง relation field ไม่ได้" ของ §4 ข้ามได้ด้วย Lookup field (§15.3) · 🔴 พิสูจน์ผลต้องเปิดฟอร์มจริง (§15.5) |
+| **Dynamic Default (Query worksheet) · Unique Index** | Browser | **[V] 27 ส.ค. — ดูข้อจำกัดใน §4** |
 | กด approve / reject / recall | Browser (To-do) หรือ org-auth API (gated) | [V] |
 | หา `userId` / `departmentId` จาก**ชื่อคน** | UI หรือ org-auth API | **[V] — `find_member` ถูกถอดออกจาก connector แล้ว** |
 | สร้าง**แอปใหม่** | UI หรือ org-auth API | [V] — connector ไม่มี `create_app` |
@@ -787,6 +788,86 @@ hap worksheet add-fields <parent_ws> --controls '[{
 `app-editor plan/apply` คืน `worksheet '<id>' not found in app <app_id>` ทุก op เพราะ `app-editor inspect` คืน `"worksheets": []` — แอปนี้เก็บ worksheet ไว้ใต้ group (item type 2) ซึ่ง inspect ไม่ไล่ลงไป ⇒ **field.update / field.delete ต้องทำเองด้วย `worksheet update-fields`** (อ่าน `worksheet fields --raw` → แก้ → เขียนกลับทั้งชุด)
 
 ยืนยันแล้วว่า `update-fields` แบบอ่าน-แก้-เขียนกลับ **ไม่ทำ relation/ข้อมูลหาย**: หลังเขียนกลับ rollup ยังคำนวณค่าเดิมถูกต้องทั้ง 3 record
+
+---
+
+---
+
+## 15. Business Rules — สร้างผ่าน CLI ได้ · และวิธีข้ามข้อจำกัด "อ้าง relation field ไม่ได้" · 6 ก.ย. 2569
+
+**สรุปหัวเรื่อง:** §1 เดิมบอกว่า Business Rule ต้องทำใน Browser — **ไม่จริงอีกต่อไป** `hap worksheet save-rule` สร้างได้ครบ และ **ตั้ง Dynamic Value ได้โดยไม่ต้องเจอ UI quirk Down+Enter ของ §4** [V]
+
+### 15.1 คำสั่งและ payload
+
+```bash
+hap worksheet save-rule <ws_id> \
+  --name "BR-19.2 จำนวนเงินเกินวงเงินสูงสุดต่อครั้ง" \
+  --type 1 --check-type 1 --hint-type 0 \
+  --filters '<FilterCondition[]>' --rule-items '<RuleItem[]>'
+```
+
+- `--type` · `0` = interaction · `1` = validation · `2` = lock
+- `--rule-id` ใส่เมื่อจะแก้ของเดิม · ไม่ใส่ = สร้างใหม่ · คืน `ruleId` กลับมาเป็น string
+- ❗ `worksheet rules` / `worksheet save-rule` **ไม่รับ `-a/--app`** เหมือน `add-fields`
+- `--filters` ใช้โครงเดียวกับ view filter: อาร์เรย์ 1 ตัวที่ `isGroup: true` แล้วเงื่อนไขจริงอยู่ใน `groupFilters` (`spliceType 1` = AND ระหว่างกัน)
+
+### 15.2 `ruleItems[].type` — เท่าที่ยืนยันแล้ว
+
+| `type` | ความหมาย | ต้องมี |
+|---|---|---|
+| 1 | แสดงฟิลด์ | `controls[]` |
+| 2 | ซ่อนฟิลด์ | `controls[]` |
+| 6 | ข้อความ error (ใช้กับ rule ชนิด validation) | `controls[]` + `message` |
+| 7 | ทุกฟิลด์อ่านอย่างเดียว | `controls: []` |
+
+ค่าอื่น (เช่น "บังคับกรอก") **ยังไม่ยืนยัน — อย่าเดา** ถ้าต้องการผลแบบ "บังคับแนบไฟล์" ให้เขียนเป็น **validation** แทน (เงื่อนไข "ต้องแนบ = จริง **และ** ไฟล์ว่าง" → `type 6` ข้อความบล็อก) ซึ่งได้ผลเทียบเท่าและใช้เฉพาะ type ที่รู้แน่
+
+### 15.3 🟢 ทางแก้ข้อจำกัด §4 "Business Rule อ้าง Relation field ของฟอร์มปัจจุบันไม่ได้"
+
+ข้อจำกัดใน §4 เป็นข้อจำกัดของ **field picker ในหน้าจอ** ไม่ใช่ของ engine — ทางออกที่พิสูจน์แล้ว:
+
+1. สร้าง **Lookup (type 30)** บนตารางลูก ดึงค่าที่ต้องเทียบข้ามมาเป็น "ฟิลด์ท้องถิ่น" ก่อน
+2. เขียน rule เทียบสองฟิลด์ท้องถิ่นตามปกติ
+
+```bash
+hap worksheet add-fields <ws> --controls '[{
+  "type": 30, "controlName": "(ระบบ) วงเงินสูงสุดต่อครั้ง",
+  "dataSource": "$<relation_controlId บนตารางนี้>$",
+  "sourceControlId": "<controlId ของฟิลด์บนตารางปลายทาง>",
+  "sourceControlType": 6, "enumDefault": 0, "dot": 2,
+  "advancedSetting": {"sorttype": "en", "datamask": "0"}
+}]'
+```
+
+ยืนยันด้วยของจริง: `hr_claim` ดึง `max_per_claim` (Number) และ `require_receipt` (Checkbox) จาก `hr_welfare_scheme` มาได้ค่า `1500.00` / `1` ⇒ กฎ BR-19.2 และ BR-19.3 ทำงานได้ทั้งที่ต้นทางอยู่คนละตาราง
+
+⚠️ **Lookup คำนวณแบบ lazy เหมือน Rollup (§14.3)** — record ที่มีอยู่ก่อนสร้างฟิลด์จะยังว่างจนกว่าจะเขียน relation field ของ record นั้นซ้ำ
+
+### 15.4 Dynamic Value ผ่าน CLI
+
+เทียบฟิลด์กับฟิลด์ ใส่ `dynamicSource` ในเงื่อนไข (ไม่ต้องตั้ง `isDynamicsource`):
+
+```json
+{"controlId": "<ฟิลด์ซ้ายมือ>", "dataType": 6, "spliceType": 1, "filterType": 13,
+ "dynamicSource": [{"rcid": "", "cid": "<ฟิลด์ที่เอามาเทียบ>", "staticValue": "", "isAsync": false, "type": 0}]}
+```
+
+`filterType 13` = `>` · ยืนยันว่าเทียบตัวเลขถูกจริงจากหน้าจอ
+
+⚠️ **`dataType` ที่ส่งไปถูกเซิร์ฟเวอร์เขียนทับ** — ส่ง `6` ให้ฟิลด์ Rollup อ่านกลับมาได้ `2` (text) แต่ **การเปรียบเทียบยังเป็นตัวเลขถูกต้อง** ⇒ อย่าตกใจตอนอ่านกลับ และอย่าพยายาม "แก้" ให้เป็น 6
+
+### 15.5 🔴🔴 `checkType: 1` **ไม่บล็อกการเขียนผ่าน API/CLI**
+
+`--check-type 1` แปลว่า "ตรวจทั้งหน้าบ้านและหลังบ้าน" แต่ **หลังบ้าน = endpoint ของการ submit ฟอร์ม ไม่ใช่ open API**
+
+ยิงจริง: ทำให้ `จำนวนเงินที่ขอเบิก` (1,700) เกิน `วงเงินสูงสุดต่อครั้ง` (1,500) แล้วสั่ง `hap worksheet record update` บน record นั้น → **`resultCode: 1` สำเร็จ ไม่มี error** แต่พอเปิด record เดียวกันในหน้าจอแล้วแก้ฟิลด์ใด ๆ → **ขึ้นแถบแดงบล็อกทันที**
+
+⇒ **ห้ามใช้ API/CLI เป็นเครื่องพิสูจน์ว่า Business Rule ทำงาน** — ผลลัพธ์จะดู "ผ่าน" เสมอไม่ว่ากฎจะถูกหรือผิด · ต้องเปิดฟอร์มจริงในหน้าจอ (ตรงกับกฎเดิมใน §4 ที่ให้ทดสอบด้วย Role Debugging)
+⇒ ในทางกลับกัน **workflow และ seed script เขียนข้อมูลที่ละเมิดกฎฟอร์มได้เสมอ** เหมือนที่ workflow ข้าม `required` (§2 ข้อ 29) — ถ้าต้องการกันจริงที่ระดับข้อมูล ต้องมี gate ใน workflow ด้วย ไม่ใช่พึ่ง Business Rule อย่างเดียว
+
+### 15.6 relation field ต้องตั้ง `showControls` ไม่งั้นตารางฝังในฟอร์มว่าง
+
+relation ที่ `showtype: "5"` (แสดงเป็นตารางในฟอร์ม) ถ้า `showControls` เป็น `[]` หน้าฟอร์มจะขึ้น **"No visible fields"** ทั้งที่นับจำนวนแถวได้ถูก (`Total 2 view(s)`) — ตั้งด้วย `update-fields` โดยใส่ controlId ของคอลัมน์ที่ต้องการจากตารางลูก
 
 ---
 
