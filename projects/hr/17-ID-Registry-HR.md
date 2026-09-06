@@ -539,3 +539,29 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 **หลักการที่ใช้:** กลุ่ม = ไอคอนตระกูล `sys_folder-*_office` (โฟลเดอร์) · worksheet = ไอคอนรูปธรรม ⇒ แยก "กล่อง" กับ "ของในกล่อง" ได้ด้วยสายตา
 **ค่าเดิมก่อนแก้:** `HR-00` = `sys_11_2_maintenance_line` · อีก 7 กลุ่ม = `table`
 ✅ ตรวจหลังยิง: ชื่อกลุ่มครบถูกต้องทั้ง 8 · จำนวน worksheet ในแต่ละกลุ่มไม่เปลี่ยน (10 · 7 · 2 · 3 · 7 · 6 · 2 · 0) · เปิดหน้าจอดูด้วยตาแล้ว
+
+---
+
+### 🆕 ปุ่ม Custom Action ฝั่ง HR (HR/ACTION-BUTTONS — สร้าง 4 ปุ่มใหม่ 6 ก.ย. 2569)
+
+> เดิมมีปุ่มแค่ **3 ปุ่มใน 2 ตาราง** จาก 37 ตาราง · ตอนนี้ **7 ปุ่มใน 5 ตาราง**
+> ปุ่มทุกปุ่มมี **workflow ผูกติดมา 1 ตัว** — วิธีสร้าง + กับดักอยู่ใน `../../shared/00-HAP-Working-Guide.md` §12
+
+| worksheet | ปุ่ม | btnId | processId ของปุ่ม | ทำอะไร | โผล่เมื่อ |
+|---|---|---|---|---|---|
+| `hr_pay_period` | **สร้างสลิปทั้งงวด** | `6a9d0e754a22ad87b727a2a7` | `6a9d0e75d91d10186d8bc22b` | ตั้ง `biz_period_status` = Calculating ⇒ **WF-HR-07 รับช่วงสร้างสลิปให้ทุกคน** | สถานะ = Open |
+| `hr_job_requisition` | **ส่งขออนุมัติอัตรากำลัง** | `6a9d0f8df363582dd3792f32` | `6a9d0f8d2fe3e8d6b3b711a8` | `req_status` → Pending supervisor · `req_submitted_flag` = 1 | สถานะ = Draft |
+| `hr_appraisal` | **ส่งแบบประเมินให้หัวหน้า** | `6a9d0f904a22ad87b727a2a9` | `6a9d0f902fe3e8d6b3b711cc` | `appraisal_status` → Supervisor review · ประทับ `apr_submitted_at` | สถานะ = Self assessment |
+| `hr_candidate` | **ปฏิเสธผู้สมัคร** | `6a9d0f934a73a3142151a3f3` | `6a9d0f932fe3e8d6b3b711f8` | `cand_stage` → Rejected | ขั้นตอน ∈ Applied · Screening · Interview 1 · Interview 2 · Offered |
+
+**ปุ่มเดิมที่มีอยู่ก่อนแล้ว:** `hr_leave_request` → ส่งคำขอ `6a8fb8391378964f9984a0b3` · ยกเลิกใบลา `6a8fb839353e1b0e4a507c36` · `hr_ot_request` → ส่งขอล่วงเวลา `6a8fde0aae2a0e3743a0c62f`
+
+#### หลักฐานการยิงจริง (กดบนหน้าจอจริง)
+
+| ปุ่ม | ผลที่ได้ |
+|---|---|
+| **สร้างสลิปทั้งงวด** | สร้างงวดทดสอบ `ZZTEST-BTN มกราคม 2562` (2019-01-01→31) สถานะ Open → **ปุ่มโผล่** → กด → กล่องยืนยันภาษาไทยขึ้นถูกต้อง → กดยืนยัน → สถานะเปลี่ยนเป็น **Calculating** → **WF-HR-07 ยิงต่อเอง** → เกิดสลิป **1 ใบ = EMP-0001 เท่านั้น** (กรอง `hire_date ≤ วันสิ้นงวด` ถูกต้องจากพนักงาน 10 คน) · `biz_generated_flag`=1 · `biz_headcount`=1 · `_createdBy`/`_updatedBy` ของสลิป = **`user-workflow`** ✅ **พิสูจน์ปุ่ม → workflow → workflow ต่อกันเป็นทอด** · ลบข้อมูลทดสอบครบแล้ว |
+| **ส่งแบบประเมินให้หัวหน้า** | กดบนแบบประเมินของ TEST-EMP1 → สถานะ **Self assessment → Supervisor review** · `apr_submitted_at` ถูกประทับ `2026-09-06 15:02:31` · `_updatedBy` = **`user-workflow`** ✅ · **คืนค่าเดิมแล้ว** (Self assessment · ล้างวันที่ส่ง) |
+| **ส่งขออนุมัติอัตรากำลัง** · **ปฏิเสธผู้สมัคร** | ⬜ **ยังไม่ได้กดจริง** — ตรวจแล้วว่า config ปุ่มถูก (`showType 2` · `isAllView 1` · `enableConfirm` · filter ตรง) และ workflow `enabled=True publishStatus=2` พร้อม node เขียนฟิลด์ถูกตัว แต่ **ยังไม่มีหลักฐานการกดจริง** |
+
+✅ ตรวจหลังทดสอบ: งวดจ่าย 1 · สลิป 8 · ผู้สมัคร 6 · แบบประเมิน 10 — **กลับสู่ baseline ครบทุกตาราง**

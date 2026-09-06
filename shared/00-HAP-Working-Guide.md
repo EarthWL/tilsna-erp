@@ -270,7 +270,7 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 | M-04 | ~~`delete_process_node` แล้วสร้างใหม่ ระบบเชื่อม `prevNode` ให้ไหม~~ **ตอบแล้ว: `prevNode` ของ node ถัดไป auto-relink เอง แต่ filter/condition ที่อ้าง nodeId เดิมของ node อื่นไม่ auto-relink ต้องรื้อสร้างใหม่ทั้ง downstream chain** | **[V] 27 ส.ค.** |
 | M-05 | `create_view` + `create_role.recordPermissionInViews` ทำ field-filtered visibility ครบวงจรไหม | ปิดช่องว่างที่เคยต้องพึ่ง Browser |
 | M-06 | ปุ่ม `triggerWorkflow` ที่ auto-gen workflow มี trigger alias ใช้ได้ไหม | เคสเดียวที่ `triggerAlias` อาจใช้ไม่ได้ |
-| M-07 | ~~`create_custom_actions` / `create_chart` / `create_view` เรียกแล้วได้ object จริงไหม~~ **ตอบแล้วบางส่วน: `view` / `chart` / `custom-page save` สร้าง object จริงและอ่านกลับได้ (ผ่าน `hap` CLI)** · `create_custom_actions` ยังไม่พิสูจน์ | **[V] 6 ก.ย. — ดู §8** |
+| M-07 | ~~`create_custom_actions` / `create_chart` / `create_view` เรียกแล้วได้ object จริงไหม~~ ✅ **ปิดครบทั้งชุดแล้ว: view · chart · custom-page · ปุ่ม custom action สร้างได้จริงและใช้งานได้จริงทั้งหมด** (ผ่าน `hap` CLI) | **[V] 6 ก.ย. — view/chart/page ดู §8 · ปุ่มดู §12** |
 | M-08 | `get_single`/`get_multiple` filter รูปแบบอื่น (`belongs`/`subordinate_contains`) ที่ยังไม่ได้พิสูจน์ตรง ๆ ใช้ได้จริงหรือไม่ (ปัจจุบันพิสูจน์แล้วเฉพาะ `contains` สำหรับ reverse-relation และ `in` สำหรับ relation-to-relation ที่ field ชนิดเดียวกัน — ดู §2 ข้อ 16) | กระทบทุก workflow ที่ต้อง cross-reference relation |
 | M-09 🆕 | Dynamic Default มีวิธีอ้างอิง Relation field ของฟอร์มปัจจุบันแบบอื่นที่ไม่ใช่ "Query worksheet" หรือไม่ (เช่น formula/expression mode ถ้ามี) | ถ้ามี = ไม่ต้องย้าย DV ทุกเคสไป workflow |
 
@@ -503,6 +503,8 @@ hap icon list -n 50 -p 2    # ไล่ดูทั้งแคตตาล็�
 
 ผลลัพธ์เป็นตาราง `Icon | Keywords` โดย keyword เป็นภาษาจีน (`sys_4_1_calendar` → `日历 日程 时间`) ⇒ **ค้นด้วยคำอังกฤษได้ผลบางส่วน ค้นด้วยคำจีนแม่นกว่า**
 
+> ⚠️ **แคตตาล็อกใน CLI มี 426 ชื่อ = subset ของ 997 ชื่อที่ icon picker บนหน้าจอมี** (agent-ac นับไว้ใน `MIGRATION.md` D-52) ⇒ ถ้าหาไม่เจอใน CLI **ยังมีสิทธิ์มีอยู่จริง** ให้ไปดึงจาก DOM ตามด้านล่าง
+
 หากอยากได้ชุดเต็มพร้อมกันทีเดียว (997 ชื่อ) ยังดึงจาก DOM ของ icon picker ได้: เปิด **Edit Name and Icon** → แท็บ **Default** → รันใน console ของหน้านั้น
 
 ```js
@@ -551,9 +553,18 @@ done < icons.tsv
 hap --json app info -a "$APP"
 ```
 
-### 11.5 ไอคอนของ **กลุ่ม/section** — CLI ทำไม่ได้ · ต้องยิง API เอง
+### 11.5 ไอคอนของ **กลุ่ม** กับของ **section จริง** — คนละเรื่องกัน
 
-`[V]` **`hap app edit-section` เปลี่ยนได้แค่ชื่อ** (`-n/--name` เท่านั้น ไม่มี `--icon`) และ **ใช้ได้เฉพาะ section ระดับบนสุด** — เรียกกับ **child section** จะได้ `Error: The app does not exist` ซึ่ง **เป็นข้อความที่ชี้ผิดทางโดยสิ้นเชิง** (แอปมีอยู่จริง แค่คำสั่งนี้ไม่รองรับกลุ่มลูก)
+🔴🔴 **แก้ข้อผิดพลาดของหัวข้อนี้เอง (6 ก.ย. 2569 รอบค่ำ)** — เดิมเขียนว่า "CLI เปลี่ยนไอคอนกลุ่มไม่ได้" **ผิด** · agent-ac ชี้จุดที่เข้าใจผิดใน `MIGRATION.md` D-52 และ **ทดสอบซ้ำเองแล้วว่าจริง**
+
+**ต้นเหตุที่เข้าใจผิด: "กลุ่ม" กับ "section" ไม่ใช่ของชนิดเดียวกัน**
+
+| สิ่งที่เห็นบนไซด์บาร์ | จริง ๆ คืออะไร | เปลี่ยนไอคอนยังไง |
+|---|---|---|
+| `HR-00 Configuration` · `AC-01 ข้อมูลหลัก` ("กลุ่ม") | **item ชนิด 2 ที่อยู่ใน section** — id ทรงเดียวกับ worksheet | ✅ **`hap worksheet update <groupId> --icon <ชื่อ> -a <appId>`** — ใช้คำสั่งเดียวกับ worksheet เลย |
+| `บัญชี (AC)` · `ทรัพยากรบุคคลฯ (HR)` (**section จริง** มีแค่ 2 อันในแอปนี้) | section ของแอป | ต้องยิง `HomeApp/UpdateAppSection` (ดูด้านล่าง) |
+
+`[V]` **`hap app edit-section` เปลี่ยนได้แค่ชื่อ** (`-n/--name` เท่านั้น ไม่มี `--icon`) และรับเฉพาะ **section จริง** — ส่ง id ของ "กลุ่ม" เข้าไปจะได้ `Error: The app does not exist` · **ข้อความนี้ชี้ผิดทาง**: ไม่ใช่ว่าแอปไม่มี แต่เป็นเพราะ id ที่ส่งไปไม่ใช่ section · **เจอ error นี้เมื่อไร ให้สงสัยว่าส่ง id ผิดชนิดก่อนเสมอ**
 
 `[V]` **ตั้งไอคอนได้ตอนสร้างเท่านั้น** ผ่าน `--sections-json`:
 
@@ -562,7 +573,7 @@ hap app add-section <appId> --parent-id <parentSectionId> \
   --sections-json '[{"name":"HR-07 Dashboard","icon":"sys_folder-chart-bar_office"}]'
 ```
 
-`[V]` **ถ้ากลุ่มมีอยู่แล้ว ทางเดียวคือยิง endpoint ภายในของหน้าเว็บ** (รันใน console ของแท็บที่ล็อกอินอยู่ — ใช้คุกกี้ session ไม่ต้องมี API key):
+`[V]` **สำหรับ section จริง 2 อัน (และเป็นทางที่ใช้ได้กับกลุ่มด้วย แม้จะยากกว่าจำเป็น)** — ยิง endpoint ภายในของหน้าเว็บ รันใน console ของแท็บที่ล็อกอินอยู่ (ใช้คุกกี้ session ไม่ต้องมี API key):
 
 ```js
 await fetch('/wwwapi/HomeApp/UpdateAppSection', {
@@ -589,9 +600,70 @@ await fetch('/wwwapi/HomeApp/UpdateAppSection', {
 
 ⇒ `state: 1` **ไม่พอ** ต้องเช็ค `data.data === true` และอ่าน `iconUrl` กลับจาก `hap app info` เสมอ
 
-**ยิงจริงแล้ว 8/8 กลุ่มของ HR** (6 ก.ย. 2569) · ตรวจหลังยิง: ชื่อกลุ่มครบถูกต้องทั้ง 8 และ **จำนวน worksheet ในแต่ละกลุ่มไม่เปลี่ยน** (10 · 7 · 2 · 3 · 7 · 6 · 2 · 0)
+**ยิงจริงแล้ว 8/8 กลุ่มของ HR ด้วยวิธีนี้** (6 ก.ย. 2569) · ตรวจหลังยิง: ชื่อกลุ่มครบถูกต้องทั้ง 8 และ **จำนวน worksheet ในแต่ละกลุ่มไม่เปลี่ยน** (10 · 7 · 2 · 3 · 7 · 6 · 2 · 0)
+
+> ⚠️ **แต่ถ้าเป็น "กลุ่ม" ให้ใช้ `hap worksheet update --icon` แทน** — สั้นกว่า ไม่ต้องเปิดเบราว์เซอร์ และไม่ต้องส่งชื่อเดิมกลับไป · เก็บ `UpdateAppSection` ไว้ใช้กับ section จริงเท่านั้น
+> 🧪 **ทดสอบยืนยันเอง 6 ก.ย.**: `hap worksheet update 6a9cece1db26b712423ce585 --icon sys_folder-info_office -a <app>` → อ่านกลับได้ `sys_folder-info_office` แล้วคืนค่าเดิมสำเร็จ (id นั้นคือกลุ่ม `HR-07 Dashboard`)
 
 > 💡 **แพทเทิร์นที่อ่านง่าย:** ให้ **กลุ่มใช้ไอคอนตระกูล `sys_folder-*_office`** (โฟลเดอร์) และให้ **worksheet ใช้ไอคอนรูปธรรม** ⇒ สายตาแยก "กล่อง" กับ "ของในกล่อง" ได้ทันที
+
+---
+
+## 12. ปุ่ม Custom Action — ยืนยันจริง 6 ก.ย. 2569 (ปิด M-07 ครบทั้งชุด)
+
+`[V]` **`hap worksheet create-custom-action` สร้างปุ่มได้จริง และปุ่มโผล่บนหน้าจอจริง** — ยิงจริง 4 ปุ่ม บน 4 worksheet ของ HR · **ปิดคำถาม M-07 ตัวสุดท้าย** (`create_custom_actions` เป็นชิ้นเดียวที่ยังค้างหลังปิด view/chart ไปแล้วใน §8)
+
+### 12.1 แพทเทิร์นปุ่มที่ทำงานได้จริง — ปุ่มคือ "ตัวจุด workflow"
+
+ปุ่มทุกปุ่ม **สร้าง workflow ผูกติดมาให้อัตโนมัติ 1 ตัว** และคำสั่งคืน `processId` + `triggerNodeId` มาให้ต่อทันที:
+
+```bash
+hap worksheet create-custom-action <ws_id> -a <app_id> --action-spec '{
+  "name":"สร้างสลิปทั้งงวด", "desc":"...", "type":"triggerWorkflow", "isAllView":1
+}'
+# → {"actionId":"...", "processId":"...", "triggerNodeId":"..."}
+```
+
+จากนั้นใส่ node เข้า workflow ของปุ่มด้วย `batch_create_process_nodes` (trigger alias = **`trigger`** · `target` = `{kind:'record', node:{nodeAlias:'trigger'}}`) แล้ว `publish_process`
+
+`[V]` 🟢 **ปุ่มยิง workflow ต่อกันเป็นทอด ๆ ได้** — พิสูจน์แล้ว: กดปุ่มเดียว → workflow ของปุ่มเปลี่ยน `biz_period_status` เป็น Calculating → **WF-HR-07 (worksheet_event) รับช่วงต่อทันที** สร้างสลิปให้พนักงานที่เข้าเงื่อนไข · `_createdBy` ของสลิป = **`user-workflow`** · นี่คือวิธีทำให้ workflow ที่ trigger ด้วย record-event **กดสาธิตได้ด้วยปุ่มเดียว**
+
+### 12.2 🔴 `--action-spec` ทิ้ง `enableWhen` และ `confirm` เงียบ ๆ
+
+ส่ง `enableWhen` + `confirm` + `confirmMsg` ไปครบ · คำสั่งตอบสำเร็จพร้อม `actionId` · แต่ **อ่านกลับแล้วได้ `showType: 0` และ `filters: []`** = ปุ่มโผล่ตลอดเวลา ไม่มีเงื่อนไข ไม่มีกล่องยืนยัน
+
+**ทางแก้: ยิงซ้ำด้วย `--config` (wire form) พร้อม `--btn-id` ของปุ่มเดิม**
+
+```bash
+hap worksheet create-custom-action <ws_id> -a <app_id> --btn-id <actionId> --config '{
+  "name":"...", "desc":"...",
+  "clickType":2, "workflowType":1, "isAllView":1, "showType":2,
+  "enableConfirm":true, "confirmMsg":"...", "sureName":"...", "cancelName":"ยกเลิก",
+  "filters":[ <wire filter array> ],
+  "advancedSetting":{"detailviews":"[]","listviews":"[]"}
+}'
+```
+
+🔴 **ต้องมี `--btn-id` เสมอ** — ไม่ใส่ = ได้ปุ่มใหม่ + workflow ใหม่อีกชุด ของเดิมกลายเป็นขยะ
+
+`[V]` **`clickType` ที่ส่งไปถูกเซิร์ฟเวอร์เขียนทับ** — ส่ง `2` (ยืนยันสองชั้น) แต่อ่านกลับได้ `1` เสมอสำหรับปุ่มชนิด `triggerWorkflow` · **กล่องยืนยันมาจาก `enableConfirm: true` ไม่ใช่จาก `clickType`** — ยืนยันด้วยตาว่ากล่อง confirm พร้อมข้อความไทยที่ตั้งไว้ขึ้นจริง
+
+### 12.3 คีย์ 3 ตัวที่ตัดสินว่าปุ่ม "โผล่หรือไม่โผล่"
+
+| คีย์ | ต้องเป็น | ถ้าผิด |
+|---|---|---|
+| `isAllView` | **1** | ปุ่มผูกกับ view ที่ไม่ได้กำหนด = ไม่โผล่ (ตรงกับที่บัญชีบันทึกไว้ในกับดักข้อ 20) |
+| `showType` | **2** = โผล่เมื่อเข้าเงื่อนไข · `1` = โผล่ตลอด · **`0` = ค่าที่ `--action-spec` ทิ้งไว้** | `0` + `filters` ว่าง ⇒ ไม่มีการกรองเลย |
+| `filters` | wire filter array (โครงเดียวกับ view — group ครอบ condition) | ว่าง = ปุ่มโผล่ทุกสถานะ รวมสถานะที่ไม่ควรกดได้ |
+
+> เงื่อนไข "โผล่เมื่อสถานะเป็นค่าใดค่าหนึ่งในหลายค่า" ใช้ **condition เดียว `filterType: 2` แล้วใส่ key หลายตัวใน `values`** — กฎเดียวกับ §8.2 ห้ามแตกเป็นหลาย condition (จะถูก AND แล้วปุ่มไม่โผล่เลย)
+
+### 12.4 เช็กลิสต์หลังสร้างปุ่ม
+
+1. `hap worksheet custom-actions <ws_id>` → ตรวจ `showType` · `isAllView` · `enableConfirm` · `filters` ว่าตรงที่ตั้งใจ
+2. `hap workflow structure <processId>` → ตรวจว่า node เขียนฟิลด์ถูกตัว
+3. `hap workflow get <processId>` → ต้องได้ `enabled=True` `publishStatus=2`
+4. **เปิดหน้าจอกดจริง 1 ครั้ง** แล้วอ่าน `_updatedBy` ของ record — ต้องเป็น `user-workflow`
 
 ---
 
