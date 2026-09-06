@@ -73,3 +73,4 @@ HANDOFF 2026-09-06T07:18:23Z HR/ROLE-PROBE /sessions/rcw-01px9yezy7lzvpdq5uyzvw9
 CLAIM 2026-09-06T07:42:39Z deca7391-1761-424b-9af3-c8d043004ad3 HR/P6-CLAIM projects/hr/*,handoff/HR-*,hr_claim,hr_claim_line,hr_welfare_scheme,hr_welfare_balance
 HANDOFF 2026-09-06T08:02:16Z HR/P6-CLAIM /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-P6-CLAIM.md
 CLAIM 2026-09-06T08:08:58Z deca7391-1761-424b-9af3-c8d043004ad3 HR/P6-RULES projects/hr/*,handoff/HR-*,shared/*,hr_claim,hr_claim_line,hr_welfare_balance
+HANDOFF 2026-09-06T08:22:06Z HR/P6-RULES /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-P6-RULES.md
