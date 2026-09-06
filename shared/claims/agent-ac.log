@@ -87,3 +87,4 @@ CLAIM 2026-09-06T08:50:08Z deca7391-1761-424b-9af3-c8d043004ad3 AC/WF-BATCH wf-a
 HANDOFF 2026-09-06T09:13:56Z AC/WF-BATCH /sessions/rcw-01fy2jp7j1sqyjjcapwmcqcv/mnt/TILSNA/ac/handoff/AC-WF-BATCH.md
 CLAIM 2026-09-06T10:27:24Z deca7391-1761-424b-9af3-c8d043004ad3 AC/ASSET-DISPOSAL ac_asset_disposal,ac_asset_book,ac_asset_category,ac_voucher,ac_gl
 CLAIM 2026-09-06T10:27:35Z deca7391-1761-424b-9af3-c8d043004ad3 AC/ASSET-DISPOSAL ac_asset_disposal,ac_asset_book,ac_asset_category,ac_voucher,ac_gl
+HANDOFF 2026-09-06T10:45:56Z AC/ASSET-DISPOSAL /sessions/rcw-01fy2jp7j1sqyjjcapwmcqcv/mnt/TILSNA/ac/handoff/AC-ASSET-DISPOSAL.md
