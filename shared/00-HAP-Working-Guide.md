@@ -720,6 +720,76 @@ for r in rs:
 
 ---
 
+---
+
+## 14. Rollup (type 37) — สร้างผ่าน CLI ได้ · `enumDefault` คือฟังก์ชันรวม · 6 ก.ย. 2569
+
+**สรุปหัวเรื่อง:** BuildSpec เดิมเขียนว่า Rollup ต้องสร้างใน Browser เท่านั้น — **ไม่จริง** `hap worksheet add-fields` สร้างได้และคำนวณจริง ยืนยันด้วยเคสหลายบรรทัด (1,200 + 300 = 1,500) [V]
+
+### 14.1 payload ที่ใช้ได้จริง
+
+```bash
+hap worksheet add-fields <parent_ws> --controls '[{
+  "type": 37,
+  "controlName": "จำนวนเงินที่ขอเบิก",
+  "dataSource": "$<relation_controlId_บน_parent>$",
+  "sourceControlId": "<controlId ของฟิลด์ตัวเลขบน child>",
+  "enumDefault": 5,
+  "dot": 2,
+  "advancedSetting": {"summaryresult": "1"}
+}]'
+```
+
+- `dataSource` ต้องครอบด้วย `$…$` และเป็น **relation control บนตารางแม่** (ไม่ใช่ worksheetId ของตารางลูก)
+- `sourceControlId` = ฟิลด์บนตารางลูกที่จะเอามารวม
+- ❗ `add-fields` **ไม่รับ `-a/--app`** (ต่างจากคำสั่ง worksheet อื่น) — ใส่แล้ว error `No such option: -a`
+
+### 14.2 🔴 `enumDefault` = ฟังก์ชันรวม — ยิงจริงครบทุกค่า
+
+ทดสอบด้วยใบเบิกที่มี 2 บรรทัด (1,200 และ 300) แล้วอ่านค่าที่คำนวณกลับมา:
+
+| `enumDefault` | ผลที่ได้ | ความหมาย |
+|---|---|---|
+| 0 | `2.0000` | COUNT (นับจำนวนบรรทัด) |
+| 1 | `750.0000` | **AVG** (ค่าเฉลี่ย) |
+| 2 | `1200.0000` | MAX |
+| 3 | `300.0000` | MIN |
+| 4 | `` (ว่าง) | ❌ ไม่คำนวณ — ค่าที่ใช้ไม่ได้ |
+| **5** | **`1500.0000`** | ✅ **SUM (ผลรวม) — ค่าที่ต้องใช้** |
+| 6 | `2.0000` | COUNT (นับค่าที่ไม่ว่าง) |
+
+🔴 **กับดักตัวจริง:** สัญชาตญาณจะเดาว่า `enumDefault: 1` = SUM (เพราะ 1 = ตัวแรก) — **ผิด** มันคือ AVG และแพลตฟอร์มก็ยอมรับเงียบ ๆ ไม่มี error ให้เห็น
+🔴 **การทดสอบด้วยใบที่มีบรรทัดเดียวจับ bug นี้ไม่ได้** — 2,400 บรรทัดเดียว SUM ก็ 2,400 AVG ก็ 2,400 ต้องทดสอบด้วยเคส ≥2 บรรทัดที่ค่าไม่เท่ากันเสมอ
+
+`advancedSetting.summaryresult` **ไม่ใช่** ฟังก์ชันรวม — ลองค่า 0/1/2/3/4/5 แล้วผลลัพธ์เท่ากันหมด (มีผลกับการแสดงทศนิยมเท่านั้น: `"1"` คืน 4 ตำแหน่ง ค่าอื่นคืนตาม `dot`)
+
+### 14.3 🔴 Rollup คำนวณแบบ lazy — ต้อง "แตะ" record ลูกถึงจะอัปเดต
+
+ลำดับเหตุการณ์ที่ยืนยันแล้ว:
+
+1. สร้าง record ลูกใหม่พร้อม relation → **rollup บนแม่ยังว่าง** (`''`)
+2. แก้ field ธรรมดาบน record ลูก (เช่น จำนวนเงิน) → **ยังว่าง**
+3. เขียนค่า **relation field** บน record ลูกซ้ำ (`update` field `<child_relation_id>` = `[parent_rowid]`) → **คำนวณทันที** ✅
+4. แก้ record แม่เอง → **ไม่ทำให้ rollup คำนวณใหม่**
+
+⇒ หลังเปลี่ยน `enumDefault` ของ rollup ที่มีข้อมูลอยู่แล้ว **ต้องวนเขียน relation field ของทุก record ลูกซ้ำ** ไม่งั้นจะยังเห็นค่าที่คำนวณด้วยฟังก์ชันเดิม (คิดว่าแก้ไม่ติด)
+
+### 14.4 🔴 relation ที่สร้างตอน `create_worksheet` ไม่ใช่ตัวเดียวกับที่ rollup ใช้ได้
+
+`hr_claim_line` มี relation `ใบเบิก` (`…a353`) ที่สร้างพร้อม worksheet — ตั้ง `bidirectional: "1"` แล้วแต่ **คู่ตรงข้ามบนตารางแม่ไม่ถูกสร้างจริง** (`sourceControlId` ชี้ไป controlId ที่ไม่มีอยู่) จึงเอามาเป็น `dataSource` ของ rollup ไม่ได้
+
+ต้องสร้างคู่ relation ใหม่ด้วย MCP `addFields` + `sourceField` บนตารางแม่ → ได้คู่ `…a373` (แม่) ⇄ `…a374` (ลูก) แล้วจึงชี้ rollup ไปที่ `$…a373$`
+
+ผลข้างเคียง: record ลูกจะมี relation **สองตัว** ที่ชี้แม่คนเดียวกัน และ **ตัวเก่าไม่ป้อน rollup** → อาการคือ "ผูกบรรทัดครบแล้วแต่ rollup ยังเป็น 0/ว่าง" วิธีแก้คือลบ relation ตัวเก่าทิ้งด้วย `update-fields` (อ่าน controls สดมาทั้งชุด → ตัดตัวที่ไม่ใช้ → เขียนกลับ) แล้วผูกใหม่ผ่านตัวที่ถูกต้อง
+
+### 14.5 `hap app-editor` ใช้กับแอปนี้ไม่ได้ (สำหรับ field ops)
+
+`app-editor plan/apply` คืน `worksheet '<id>' not found in app <app_id>` ทุก op เพราะ `app-editor inspect` คืน `"worksheets": []` — แอปนี้เก็บ worksheet ไว้ใต้ group (item type 2) ซึ่ง inspect ไม่ไล่ลงไป ⇒ **field.update / field.delete ต้องทำเองด้วย `worksheet update-fields`** (อ่าน `worksheet fields --raw` → แก้ → เขียนกลับทั้งชุด)
+
+ยืนยันแล้วว่า `update-fields` แบบอ่าน-แก้-เขียนกลับ **ไม่ทำ relation/ข้อมูลหาย**: หลังเขียนกลับ rollup ยังคำนวณค่าเดิมถูกต้องทั้ง 3 record
+
+---
+
 ## ที่มา
 
 - ยิงจริงบนแอป `API-Lab` (24 + 26 ส.ค. 2569) — รายละเอียดใน `nocoly-api-lab/03-RTM-Status.md` §E

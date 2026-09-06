@@ -11,7 +11,8 @@ _แยกออกจาก `02-BuildSpec-FRS.md` เมื่อ 31 ส.ค. 2
 
 > 🔴🔴 **`create_worksheet` (สร้างตารางใหม่) พังทั้งระบบตั้งแต่ 26 ส.ค. 2569** — ทุกครั้ง (ทดสอบ 6 payload ต่างกัน ข้าม connector/แอป) คืน error `Validation failed: structuredContent does not match tool outputSchema... required property 'appId' not found` และไม่สร้างตารางเลย · **วิธีแก้ที่ยืนยันแล้วว่าใช้ได้:** (1) `create_app_items` (`type:"worksheet"`) → ได้ worksheet เปล่าพร้อม field default 3 ตัว (名称/描述/附件 = wsid+1/+2/+3 ในเลขฐาน 16) (2) `get_worksheet_structure` ยืนยัน ID field default (3) `update_worksheet.removeFields` ลบ field default ทั้ง 3 (4) `update_worksheet.addFields` เติมฟิลด์จริงทั้งหมด (5) `get_worksheet_structure` verify — **ใช้วิธีนี้สร้างครบทั้ง 10 ตาราง HR-00 + hr_ot_request/hr_attendance + hr_pay_component/hr_pay_period/hr_salary_structure สำเร็จแล้ว** ดู Known Issues ในนี้และ CLAUDE-memory
 > **type ต้องเป็น enum ที่ `addFields` รับจริง**: `Text` `Number` `SingleSelect` `MultipleSelect` `Date` `DateTime` `Collaborator` `Relation` `Checkbox` `Role` (+ `Attachment` `Rating` `Time` best-effort) — **ยืนยันแล้วว่า `Checkbox`/`Role` สร้างผ่าน `addFields` ได้จริง** (แก้ไขจากที่เข้าใจผิดก่อนหน้านี้ว่าต้อง Browser)
-> ชนิดอื่น (`Department` `SubTable` `Formula` `AutoNumber` `Location` `Rollup`) 🔴 ยังไม่ทดสอบ/ยังต้อง **สร้างใน Browser** แล้วอ่าน ID กลับด้วย `get_worksheet_structure`
+> ชนิดอื่น (`Department` `SubTable` `Formula` `AutoNumber` `Location`) 🔴 ยังไม่ทดสอบ/ยังต้อง **สร้างใน Browser** แล้วอ่าน ID กลับด้วย `get_worksheet_structure`
+> ✅ **`Rollup` (type 37) แก้แล้ว 6 ก.ย. 2569 — สร้างผ่าน `hap worksheet add-fields` ได้จริง** ยืนยันด้วยการคำนวณจริง · ⚠️ `enumDefault: 5` คือ SUM (ค่า 1 คือ AVG) ดู `../../shared/00-HAP-Working-Guide.md` §14
 > 🔴 **`Dropdown` ที่ผูก shared optionset (เช่น 24 ชุด OS_HR_* ใน `02-BuildSpec-FRS.md` §1.6) ผูกผ่าน API ไม่ได้เลย** ทั้ง `create_worksheet` และ `addFields` — `addFields` ให้แค่ `options[]` inline (สร้าง option ใหม่เฉพาะฟิลด์ ไม่ใช่ผูกกับ optionset ที่มีอยู่) — **การผูก shared optionset ทำได้แค่ตอนสร้างฟิลด์ใหม่ใน Browser UI เท่านั้น** ยืนยันซ้ำหลายรอบล่าสุดถึง P5-1 (27 ส.ค. 2569)
 > `subType` ที่ใช้บ่อย: Relation `1` = เดี่ยว · `2` = หลายรายการ/ย้อนกลับ · Date `3` = Y-M-D · DateTime `1` = Y-M-D h:m · Text `1` = หลายบรรทัด (ใช้ `config:{textMode:"multiLine"}`)
 
@@ -689,7 +690,7 @@ BR-10.1 interaction `att_status` = On leave → ซ่อน `late_minutes` · B
 | สวัสดิการ | `welfare_scheme` | `Relation` | subType 1 → `hr_welfare_scheme` · required | |
 | ผู้ใช้สิทธิ (ตนเอง/ผู้ติดตาม) | `beneficiary` | `Relation` | subType 1 → `hr_dependent` | ว่าง = ตนเอง |
 | วันที่เกิดค่าใช้จ่าย | `expense_date` | `Date` | subType 3 · required | |
-| **จำนวนเงินที่ขอเบิก** | `claim_amount` | `Number` | precision 2 · default 0 | 🔴 **Rollup** จาก `hr_claim_line.line_amount` (filter คงที่ได้ ⇒ ใช้ Rollup ได้) · 🔴 **ห้ามใส่ลง `editFields`** |
+| **จำนวนเงินที่ขอเบิก** | (ไม่มี alias) | `Rollup` (37) | `dot: 2` · `enumDefault: 5` = SUM | ✅ **สร้างแล้ว `6a9d1a154a22ad87b727a37a`** ผ่าน CLI · รวม `จำนวนเงิน` (`…a357`) ผ่าน relation `$…a373$` · 🔴 **ห้ามใส่ลง `editFields`** — แก้ต้องใช้ `update-fields` ทั้งชุด |
 | วงเงินคงเหลือขณะยื่น | `balance_snapshot` | `Number` | precision 2 | Dynamic default · Query worksheet |
 | **สถานะใบเบิก** | `claim_status` | `Dropdown` | → `OS_HR_REQUEST_STATUS` `8ea16e5f-c099-45e2-9734-b553ea40b8d0` | default Draft · read-only |
 | ผู้อนุมัติที่ระบบกำหนด | `approver_user` | `Collaborator` | subType 0 | |
@@ -712,7 +713,7 @@ BR-10.1 interaction `att_status` = On leave → ซ่อน `late_minutes` · B
 | BR-19.2 | validation | `claim_amount` > `welfare_scheme.max_per_claim` (เมื่อมีค่า) | Block |
 | BR-19.3 | interaction | `welfare_scheme.require_receipt` = จริง | required `receipts` |
 | BR-19.4 | interaction | `claim_status` ≠ Draft | Set all read-only |
-| RU-19.1 | Rollup | `hr_claim_line` → Sum(`line_amount`) → `claim_amount` | filter คงที่ |
+| RU-19.1 | Rollup | `hr_claim_line` → Sum(`จำนวนเงิน` `…a357`) → `จำนวนเงินที่ขอเบิก` `6a9d1a154a22ad87b727a37a` | ✅ **ยิงจริงผ่าน 6 ก.ย. 2569** — 1,200+300 = 1,500 |
 | DV-19.1 | Dynamic default · Query worksheet | เมื่อเลือก `welfare_scheme` | เติม `balance_snapshot` และ `approver_user` |
 
 **DoD:** **AC-10** ผ่านครบ — บล็อกเมื่อเกินวงเงิน · อนุมัติแล้ววงเงินลด · เกิด `ac_pay_req` 1 ใบ (ยิงซ้ำต้องไม่เกิดใบที่สอง)

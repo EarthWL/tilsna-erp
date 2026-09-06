@@ -44,7 +44,7 @@
 |---|---|---|
 | `get_workflow_list` ว่าง → สรุปว่า "ไม่มี workflow" | คืนเฉพาะ PBP (ยืนยันแล้วในแอปนี้) | ดูหน้า Automated Workflow หรือ `get_workflow_structure` ด้วย processId ที่รู้ |
 | ใส่ `filter` ใน trigger ของ `worksheet_event` | 🔴 workflow **ไม่ทำงานเลยและไม่มี error** (ยิงจริงในแอปนี้) | ใส่ `triggerFields` อย่างเดียว แล้วเอาเงื่อนไขไปไว้ใน branch node แรก |
-| ใส่ฟิลด์ **Rollup** ลง `update_worksheet.editFields` | 🔴 กลายเป็น "จำนวนบันทึก" และหยุดคำนวณ ซ่อมได้เฉพาะผ่านหน้าจอ | แก้ฟิลด์ Rollup **ผ่านหน้าจอเท่านั้น** |
+| ใส่ฟิลด์ **Rollup** ลง `update_worksheet.editFields` | 🔴 กลายเป็น "จำนวนบันทึก" และหยุดคำนวณ | **สร้างใหม่**: `hap worksheet add-fields --controls` (type 37 · `enumDefault: 5` = SUM) ✅ 6 ก.ย. 2569 · **แก้ของเดิม**: `worksheet update-fields` อ่าน controls สดมาทั้งชุด → แก้ → เขียนกลับ (อย่าใช้ `editFields`) — ดู `../../shared/00-HAP-Working-Guide.md` §14 |
 | ใส่ฟิลด์ **Dropdown ที่ผูก optionset ส่วนกลาง** ลง `editFields` | 🔴 การผูกหลุด **ถาวร** ผูกกลับไม่ได้ทั้ง API และหน้าจอ | แก้ผ่านหน้าจอ · ถ้าหลุดแล้วต้องลบฟิลด์แล้วสร้างใหม่ |
 | ผูก shared optionset เข้ากับ Dropdown ผ่าน `addFields`/`create_worksheet` | 🔴 **ทำไม่ได้เลยในทุกกรณี** (ยืนยันซ้ำหลายรอบใน HR — ต่างจากที่เคยเข้าใจผิดว่าโมดูลบัญชีทำได้) `addFields` รับได้แค่ `options[]` inline เท่านั้น | สร้างเป็น **inline options** (label อังกฤษให้ตรงกับ optionset กลาง) แล้วไปผูกจริงใน **Browser UI** ภายหลัง |
 | ส่ง `subType` กับฟิลด์ **Number** | รั่วลง `unit` เป็นขยะท้ายตัวเลข | ไม่ส่ง `subType` |
