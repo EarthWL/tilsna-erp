@@ -420,3 +420,52 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | view 2 ตัวเขียนเงื่อนไข "Late" + "Absent" เป็นสอง condition | ถูก AND ⇒ 0 แถว | รวมเป็น condition เดียว `filterType 2` หลายค่าใน `values` → 4 แถว |
 | chart `จำนวนพนักงานตามระดับตำแหน่ง` ชี้ `filter.viewId` = `…7185c4` ซึ่งไม่มีจริง | scope ผิด | `chart update` เป็น `…7185c5` (view "ทั้งหมด" จริง) |
 | chart ขยะ `Add new…` 10 อัน จากการเรียก `chart list` | รกหน้าจอ | `chart delete -y` ทั้งหมด |
+
+---
+
+### 🆕 ID Workflow WF-HR-07 (P5-8 — สร้าง+publish+**ยิงจริงผ่านแบบแยกแยะได้** 6 ก.ย. 2569)
+
+| object | id | หมายเหตุ |
+|---|---|---|
+| **Main** WF-HR-07 สร้างสลิปทั้งงวด | `6a9cfbd42fe3e8d6b3b6a47f` | v1 · trigger = `worksheet_event` update บน `hr_pay_period` · triggerFields = `[biz_period_status]` |
+| **Inner** WF-HR-07 inner — สร้างสลิปรายคน | `6a9cfc1e8475f61d4c71f668` | 🔴 **ต้อง publish ก่อน main เสมอ** ไม่งั้น main จะได้ `NodeAppIsNull` (`../../shared/00-HAP-Working-Guide.md` §10.1) |
+
+#### node ตามลำดับ
+
+| alias | nodeId | ชนิด | ทำอะไร |
+|---|---|---|---|
+| `trigger` | `6a9cfbd42fe3e8d6b3b6a47c` | trigger | งวดจ่ายเปลี่ยน `biz_period_status` |
+| `find_slips` | `6a9cfbdf8475f61d4c71f503` | get_multiple | หาสลิปที่ผูกกับงวดนี้อยู่แล้ว (`biz_pay_period` = trigger › rowid) |
+| `cnt_slips` | `6a9cfbdf8475f61d4c71f504` | rollup count | นับผลจาก `find_slips` |
+| `gate` | `6a9cfbdf8475f61d4c71f505` | branch firstMatch | path `do_gen`: `biz_period_status` = **Calculating** **และ** `cnt_slips` **< 1** · path `skip_gen`: fallback ไม่ทำอะไร |
+| `mark` | `6a9cfbf88475f61d4c71f593` | update_record | ตั้ง `biz_generated_flag` = 1 บนงวด |
+| `find_emp` | `6a9cfbf88475f61d4c71f594` | get_multiple | `emp_status` **in** (Probation·Active·On leave) **และ** `hire_date` **≤** trigger › `biz_period_to` |
+| `loop_emp` | `6a9cfc1e8475f61d4c71f666` | sub_process `sequential_each` | วนสร้างสลิปทีละคน · ส่งพารามิเตอร์ `period_rowid` เข้า inner |
+| `cnt_emp` | `6a9cfc2f8475f61d4c71f8f9` | rollup count | นับพนักงานที่เข้าเงื่อนไข |
+| `upd_head` | `6a9cfc2f8475f61d4c71f8fa` | update_record | เขียน `biz_headcount` กลับที่งวด |
+| `notify` | `6a9cfc2f8475f61d4c71f8fb` | send_internal_notice | แจ้งผู้สั่งงาน (ชื่องวด · จำนวนราย · ช่วงวันที่) |
+
+#### หลักฐานการยิงจริง (6 ก.ย. 2569)
+
+สร้างงวดทดสอบ **`ZZTEST-WF07 มกราคม 2562`** ช่วง 2019-01-01 → 2019-01-31 แล้วเปลี่ยนสถานะเป็น Calculating:
+
+| ตรวจ | ผลที่ได้ |
+|---|---|
+| จำนวนสลิปที่เกิด | **1 ใบ = EMP-0001 เท่านั้น** จากพนักงาน 10 คน ✅ **เป็นการทดสอบที่แยกแยะได้จริง** — อีก 9 คนเริ่มงานหลัง 2019-01-31 จึงถูกตัดออกถูกต้อง |
+| `_createdBy` / `_updatedBy` ของสลิป | **`user-workflow`** ✅ |
+| ค่าที่เขียน | `biz_payslip_status` = Draft · `biz_recalc_flag` = 1 · `biz_pay_period` sid ชี้งวดถูกต้อง · `biz_employee` sid ชี้ EMP-0001 |
+| งวดหลังรัน | `biz_generated_flag` = 1 · `biz_headcount` = 1 ✅ |
+| **ยิงซ้ำ** (Open → Calculating อีกครั้ง) | **สลิปยังเป็น 1 ใบ ไม่เพิ่ม** ✅ |
+| เก็บกวาด | ลบสลิปทดสอบและงวดทดสอบแล้ว (soft delete) — กลับสู่ 1 งวด / 8 สลิป เท่าเดิม |
+
+#### 🔴 จุดที่ **เบี่ยงจากสเปก** ใน `22-Workflow-Catalog-HR.md` (จงใจ พร้อมเหตุผล)
+
+| สเปกเดิม | ที่ทำจริง | ทำไม |
+|---|---|---|
+| gate ด้วย `biz_generated_flag` **not equal to** 1 | gate ด้วย **จำนวนสลิปที่มีอยู่จริง < 1** | `≠` เป็นเท็จเมื่อธงว่าง = **D-19** และงวดที่ผู้ใช้เพิ่งสร้างจะมีธงว่างเสมอ · การนับไม่มีสถานะว่าง (`../../shared/00-HAP-Working-Guide.md` §10.3) · ยังตั้งธง = 1 ไว้ให้คนอ่านออก แต่ธงไม่ใช่ตัวตัดสิน |
+| เงื่อนไข `termination_date` **is empty OR** ≥ `biz_period_from` | **ตัดออก** | OR ซ้อนใน AND ถูกแบนราบเงียบ ๆ (กับดักบัญชีข้อ 29) · พนักงานที่พ้นสภาพมี `emp_status` = Resigned/Terminated/Retired ซึ่ง filter `emp_status` ตัดออกอยู่แล้ว |
+
+#### ⚠️ ที่ยังไม่ได้พิสูจน์
+
+- **`biz_cost_center`** — workflow เขียนค่าจาก `sub_trigger › cost_center` แต่ **EMP-0001 ไม่มี cost_center** ⇒ ผลออกมาว่างเพราะต้นทางว่าง **ไม่ใช่เพราะ workflow ผิด** · ยังไม่มีหลักฐานว่า copy relation→relation ทำงาน — ต้องทดสอบกับพนักงานที่มี cost_center
+- **`biz_recalc_flag` = 1 ตั้งใจให้ไปยิง WF-HR-08 ต่อ** ซึ่ง **ยังไม่ได้สร้าง** ⇒ ตอนนี้ธงถูกตั้งไว้เฉย ๆ ไม่มีอะไรมารับช่วง สลิปจึงยังเป็น Draft ยอด 0 ทุกใบ
