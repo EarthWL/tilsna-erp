@@ -82,3 +82,4 @@ CLAIM 2026-09-06T06:57:17Z deca7391-1761-424b-9af3-c8d043004ad3 AC/DEMO-PACK ac_
 HANDOFF 2026-09-06T07:24:30Z AC/DEMO-PACK /sessions/rcw-01fy2jp7j1sqyjjcapwmcqcv/mnt/TILSNA/ac/handoff/AC-DEMO-PACK.md
 CLAIM 2026-09-06T07:44:55Z deca7391-1761-424b-9af3-c8d043004ad3 AC/FIXED-ASSETS ac_asset_book,ac_depr_schedule,ac_depr,ac_asset_disposal,ac_cn,ac_dn,ac_bl
 CLAIM 2026-09-06T08:28:38Z deca7391-1761-424b-9af3-c8d043004ad3 AC/FA-CNDN ac_asset_book,ac_depr_schedule,ac_depr,ac_asset_disposal,ac_cn,ac_dn,ac_bl,ac_voucher,ac_gl
+HANDOFF 2026-09-06T08:32:44Z AC/FA-CNDN /sessions/rcw-01fy2jp7j1sqyjjcapwmcqcv/mnt/TILSNA/ac/handoff/AC-FA-CNDN.md
