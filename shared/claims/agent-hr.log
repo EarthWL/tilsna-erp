@@ -70,3 +70,4 @@ CLAIM 2026-09-06T06:55:32Z deca7391-1761-424b-9af3-c8d043004ad3 HR/ACTION-BUTTON
 HANDOFF 2026-09-06T07:09:26Z HR/ACTION-BUTTONS /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-ACTION-BUTTONS.md
 CLAIM 2026-09-06T07:15:05Z deca7391-1761-424b-9af3-c8d043004ad3 HR/ROLE-PROBE projects/hr/*,shared/00-HAP-Working-Guide.md,handoff/HR-*,ROLES
 HANDOFF 2026-09-06T07:18:23Z HR/ROLE-PROBE /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-ROLE-PROBE.md
+CLAIM 2026-09-06T07:42:39Z deca7391-1761-424b-9af3-c8d043004ad3 HR/P6-CLAIM projects/hr/*,handoff/HR-*,hr_claim,hr_claim_line,hr_welfare_scheme,hr_welfare_balance
