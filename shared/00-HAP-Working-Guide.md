@@ -871,6 +871,77 @@ relation ที่ `showtype: "5"` (แสดงเป็นตารางใ�
 
 ---
 
+---
+
+## 16. บทเรียนจากการสร้าง WF-HR-11 — 4 กับดักที่ทำให้ workflow "รันสำเร็จแต่ได้ตัวเลขผิด" · 6 ก.ย. 2569
+
+ทั้ง 4 ข้อนี้ **`validate_process` และ `publish_process` ผ่านหมด** ไม่มี error สักตัว — เจอได้จากการยิงจริงแล้วอ่านตัวเลขกลับเท่านั้น
+
+### 16.1 🔴🔴 node `compute` อ่านฟิลด์ **Rollup (type 37)** ของ record ไม่ได้ — ได้ 0 เงียบ ๆ
+
+`$trigger-<rollup fieldId>$` ใน `formulaValue` **ประเมินเป็น 0/ว่าง** ทั้งที่ record มีค่า `2800.0000` จริง (อ่านผ่าน `record get` ยืนยันแล้ว) · ผลคือสูตร `used + claim_amount` ได้ `used + 0` ⇒ วงเงินไม่ลดเลย แต่ workflow รายงานว่าสำเร็จและ `_updatedBy` เป็น `user-workflow` ครบ
+
+**ทางแก้ที่พิสูจน์แล้ว:** อย่าอ่าน Rollup — ให้ workflow **รวมเอง** ด้วย node ชนิด `rollup`
+
+```json
+{"nodeType": "rollup", "config": {
+  "method": "sum",
+  "worksheetId": "<ตารางลูก>", "fieldId": "<ฟิลด์ตัวเลขบนตารางลูก>",
+  "filter": {"logic":"and","items":[{
+     "left": {"kind":"field","node":{"nodeAlias":"<node นี้เอง>"},"fieldId":"<relation field บนตารางลูก>"},
+     "op": "contains",
+     "right": [{"kind":"field","node":{"nodeAlias":"trigger"},"fieldId":"rowid"}]}]}}}
+```
+
+ผลอ่านด้วย `$<alias>-number_fx_id$` — ยืนยันแล้วได้ 2,800 ถูกต้อง
+
+### 16.2 🔴🔴 `op:"contains"` บน relation แบบ **เดี่ยว** คอมไพล์เป็น `conditionId 3` ซึ่ง **ไม่แมตช์อะไรเลย**
+
+ต้องเป็น **`conditionId 33`** (= เท่ากับ record ที่อ้างจาก node อื่น) ตามที่ §เงื่อนไข ระบุไว้
+
+- relation **หลายค่า** (`enumDefault: 2` เช่น reverse-relation) — `contains` คอมไพล์เป็น 33 ถูกต้องอยู่แล้ว ✅
+- relation **ค่าเดียว** (`enumDefault: 1` เช่น relation ปกติบนตารางลูก) — `contains` คอมไพล์เป็น **3** ❌ ได้ผลว่างทุกครั้ง ไม่ error
+
+**กฎ:** หลังสร้าง filter ที่อ้าง relation ผ่าน MCP **ต้องอ่านกลับด้วย `hap workflow node get` แล้วเช็คว่า `conditionId` เป็น `33`** ถ้าได้ `3` ให้แก้เป็น `33` แล้วเซฟกลับ (วิธีแก้ในข้อ 16.4)
+
+### 16.3 🔴🔴 node `compute` ประเมิน **ตอนถูกอ้างถึง** ไม่ใช่ตอนไหลผ่าน ⇒ ลำดับ node กำหนดคำตอบ
+
+ยืนยันซ้ำจากบทเรียน WF-HR-02 แต่รอบนี้เห็นตัวเลขชัด:
+
+ลำดับเดิม `calc_used → calc_remaining → upd_bal → upd_claim` ⇒ `upd_bal` เขียน `used = 2800` ลงแถววงเงิน **แล้ว `upd_claim` อ้าง `calc_remaining` อีกครั้ง** ⇒ `calc_used` ประเมินใหม่จาก `used` ที่กลายเป็น 2,800 แล้ว ได้ 5,600 ⇒ `calc_remaining` = 3,000 − 5,600 = **−2,600** เขียนลงใบเบิก ขณะที่แถววงเงินได้ 200 ถูกต้อง — **ตัวเลขสองที่ขัดกันเองในรันเดียว**
+
+**กฎ:** node ที่ **เขียนทับ record ที่ `compute` อ่านอยู่ ต้องอยู่หลังผู้ใช้ผลลัพธ์ทุกตัว** · ลำดับที่ถูกคือ `calc → เขียนที่อื่นให้ครบ → เขียนทับต้นทางเป็นขั้นสุดท้าย`
+
+### 16.4 🔴 MCP `Filter` AST แบบ `and[A, or[B,C]]` ถูกแบนเป็น **OR-of-AND** ⇒ ตรรกะกลับด้าน
+
+HAP เก็บเงื่อนไขเป็น `[[...],[...]]` โดย **อาเรย์นอก = OR · อาเรย์ใน = AND** · ส่ง `and[A, or[B,C]]` ไปแล้วได้ `[[A],[B,C]]` = `A OR (B AND C)` — **ไม่ใช่** `A AND (B OR C)` ที่ต้องการ
+
+**ทางแก้:** เขียนแบบกระจาย (distributed) เองตั้งแต่แรก — `or[ and[A,B], and[A,C] ]` ⇒ ได้ `[[A,B],[A,C]]` ตรงกับที่ WF-HR-02 เก็บไว้
+
+ถ้าพลาดไปแล้ว **แก้ในที่ได้ ไม่ต้องรื้อ node**:
+
+```bash
+hap workflow node save <pid> <branch-path-nodeId> --type 2 --config '{"operateCondition": [[A,B],[A,C]]}'
+```
+
+⚠️ node ที่ต้องแก้คือ **branch path** (`typeId 2`) ไม่ใช่ตัว branch เอง (`typeId 1`) — ดู `flowIds` ของ branch เพื่อหา id ของแต่ละ path
+
+### 16.5 ✅ สิ่งที่ทำได้จริง (แก้ความเข้าใจเดิมของสกิล)
+
+สกิล `nocoly-hybrid-builder-v2` เขียนว่า *"There is no in-place node edit — delete and recreate"* — **ไม่จริงสำหรับ hap CLI**
+
+| ต้องการ | คำสั่งที่ใช้ได้ |
+|---|---|
+| แก้เงื่อนไข branch path | `workflow node save <pid> <nid> --type 2 --config '{"operateCondition": …}'` |
+| แก้สูตร compute | อ่าน `node get` → แก้ `formulaValue` + `formulaMap` → `node save --type 9 --config <ทั้งก้อน>` |
+| แก้ข้อความแจ้งเตือน | เหมือนกัน แต่ `--type 27` แก้ `sendContent` + `formulaMap` |
+| แทรก node กลางสาย | MCP `batch_create_process_nodes` + `prevNode` — ต่อสายให้ถูกอัตโนมัติ ✅ |
+| ย้ายลำดับ node | ไม่มีคำสั่ง move — ใช้ `node delete` (ต่อสายให้เองถูกต้อง) แล้วสร้างใหม่ที่ตำแหน่งใหม่ |
+
+`formulaMap` ต้องอัปเดตคู่กับ `formulaValue` เสมอ (คีย์ `<nodeId>` และ `<nodeId>-<fieldId>`) ไม่งั้นหน้าจอจะแสดงตัวแปรเป็นข้อความดิบ
+
+---
+
 ## ที่มา
 
 - ยิงจริงบนแอป `API-Lab` (24 + 26 ส.ค. 2569) — รายละเอียดใน `nocoly-api-lab/03-RTM-Status.md` §E

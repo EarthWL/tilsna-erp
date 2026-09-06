@@ -687,3 +687,45 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 #### แก้เพิ่ม: `showControls` ของ relation `รายการค่าใช้จ่าย`
 
 `6a9d1a084a22ad87b727a373` เดิมเป็น `[]` ⇒ ตารางฝังในฟอร์มขึ้น **"No visible fields"** ทั้งที่นับได้ 2 แถว · ตั้งเป็น `ลำดับที่` · `รายการค่าใช้จ่าย` · `ประเภทค่าใช้จ่าย` · `จำนวนเงิน` · `เลขที่ใบเสร็จ` แล้ว — ✅ ยืนยันด้วยตาว่าตารางแสดง 2 บรรทัดพร้อมคอลัมน์ครบ
+
+---
+
+### 🆕 WF-HR-11 อนุมัติใบเบิก + ตัดวงเงิน (HR/P6-5-WF11 — 6 ก.ย. 2569)
+
+**processId `6a9d2996d91d10186d8c6edf`** · publish v4 · trigger `worksheet_event` update บน `hr_claim` · `triggerFields = [สถานะใบเบิก 6a9d19c5f363582dd3793041]`
+
+| ลำดับ | alias | nodeId | ชนิด | ทำอะไร |
+|---|---|---|---|---|
+| 1 | `gate` | `6a9d29af2fe3e8d6b3b7c7ff` | branch | container |
+| 1a | `do_deduct` | `6a9d29af2fe3e8d6b3b7c809` | branch path | `[[สถานะ=Approved, ธง≠1],[สถานะ=Approved, ธงว่าง]]` — เขียนแบบกระจายเอง |
+| 1b | `skip` | `6a9d29af2fe3e8d6b3b7c80d` | branch path | fallback ไม่ทำอะไร |
+| 2 | `upd_flag` | `6a9d29af2fe3e8d6b3b7c800` | update_record | ตั้ง `(ระบบ) ตัดวงเงินแล้ว` = 1 **ก่อนคำนวณ** (กันตัดซ้ำ) |
+| 3 | `get_bal` | `6a9d29af2fe3e8d6b3b7c801` | get_single | `hr_welfare_balance` · `wb_employee` = trigger.พนักงาน **และ** `wb_welfare_scheme` = trigger.สวัสดิการ (`conditionId 33` ทั้งคู่) · เรียง `benefit_year` มาก→น้อย · `ifEmpty: stop` |
+| 4 | `get_emp` | `6a9d29af2fe3e8d6b3b7c802` | get_single | `hr_employee` ที่ reverse-relation `6a95c129353e1b0e4a515ac3` ชี้มาที่ `get_bal.rowid` |
+| 5 | `sum_lines` | `6a9d2a772fe3e8d6b3b7cd1e` | rollup (sum) | รวม `จำนวนเงิน` ของ `hr_claim_line` ที่ `…a374` = trigger.rowid — **แทนการอ่านฟิลด์ Rollup ซึ่งอ่านไม่ได้** |
+| 6 | `calc_used` | `6a9d29af2fe3e8d6b3b7c803` | compute | `get_bal.วงเงินที่ใช้ไป + sum_lines.number_fx_id` |
+| 7 | `calc_remaining` | `6a9d29af2fe3e8d6b3b7c804` | compute | `get_bal.วงเงินสิทธิ − calc_used` |
+| 8 | `upd_claim` | `6a9d29af2fe3e8d6b3b7c806` | update_record | ใบเบิก: `วงเงินคงเหลือขณะยื่น` = calc_remaining · `วันที่อนุมัติ` = `nowTime` |
+| 9 | `notify_emp` | `6a9d29af2fe3e8d6b3b7c807` | send_internal_notice | ถึง `get_emp.emp_user` |
+| 10 | `upd_bal2` | `6a9d2c318475f61d4c7326ad` | update_record | **ขั้นสุดท้าย** เขียน `วงเงินที่ใช้ไป`/`วงเงินคงเหลือ` กลับแถววงเงิน |
+
+🔴 **ลำดับ 8–10 สลับไม่ได้** — ถ้า `upd_bal2` มาก่อน `upd_claim` ค่า compute จะถูกประเมินใหม่จากวงเงินที่เพิ่งเขียนไป แล้วใบเบิกจะได้ **−2,600** แทน **200** (ยิงจริงเจอมาแล้ว) ดู `../../shared/00-HAP-Working-Guide.md` §16.3
+
+#### หลักฐานการยิงจริง (3 การทดสอบที่แยกแยะได้)
+
+| การทดสอบ | ก่อน | หลัง | ผล |
+|---|---|---|---|
+| **ตัดวงเงินจริง** — CLM-2569-0003 (EMP-0008 / ค่าตัดแว่น 2,800) Draft→Approved | วงเงิน `EMP-0008-WF-GLASS-2026` ใช้ไป 0 / คงเหลือ 3,000 · ธง 0 · snapshot ตั้งไว้ 9,999 | **ใช้ไป 2,800 · คงเหลือ 200** `_updatedBy` = **`user-workflow`** · ธง 1 · snapshot **200** · `วันที่อนุมัติ` 2026-09-06 17:03:24 | ✅ |
+| **ยิงซ้ำไม่ตัดซ้ำ** — ใบเดิม Approved→Pending HR→Approved (ธงเป็น 1 แล้ว) | ใช้ไป 2,800 / คงเหลือ 200 | **คง 2,800 / 200 ไม่ขยับ** | ✅ |
+| **เลือกแถววงเงินถูกใบ** — CLM-2569-0002 (EMP-0003 / ค่ารักษาพยาบาล 2,400) →Approved | `EMP-0003-WF-MED-2026` ใช้ไป 6,200 / คงเหลือ 13,800 | **ใช้ไป 8,600 · คงเหลือ 11,400** · แถว `EMP-0005-WF-DENTAL-2026` **ยังคง 0 / 5,000 ไม่ถูกแตะ** | ✅ |
+
+⬜ **ยังไม่ทดสอบ:** เส้น `ifEmpty: stop` (ใบเบิกที่ไม่มีแถววงเงินรองรับ) · การแจ้งเตือนถึงพนักงานยังไม่ได้ยืนยันว่าถึงผู้รับจริง
+
+#### แถววงเงินที่เพิ่มใหม่ (เติมช่องว่างของชุด demo)
+
+| wb_name | rowid | วงเงินสิทธิ |
+|---|---|---|
+| EMP-0005-WF-DENTAL-2026 | `a14557b9-cef9-4dd4-9995-ac9b148f98bb` | 5,000 |
+| EMP-0008-WF-GLASS-2026 | `bba60ad5-3450-4219-a87b-b105eaa765ac` | 3,000 |
+
+**สถานะข้อมูล demo หลังทดสอบ:** CLM-2569-0001 = Pending supervisor (ยังไม่ตัดวงเงิน) · CLM-2569-0002 · CLM-2569-0003 = Approved **ตัดวงเงินจริงโดย workflow แล้วทั้งคู่**
