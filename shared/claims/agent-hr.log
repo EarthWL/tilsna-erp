@@ -88,3 +88,4 @@ HANDOFF 2026-09-06T22:23:07Z HR/UI-POLISH /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w
 CLAIM 2026-09-06T22:33:34Z deca7391-1761-424b-9af3-c8d043004ad3 HR/WF-IDEMPOTENCY projects/hr/*,handoff/HR-*,shared/*,hr_claim,hr_welfare_balance,hr_leave_balance,hr_leave_request
 HANDOFF 2026-09-06T22:40:29Z HR/WF-IDEMPOTENCY /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-WF-IDEMPOTENCY.md
 CLAIM 2026-09-06T22:44:01Z deca7391-1761-424b-9af3-c8d043004ad3 HR/D64-AC-COLUMNS projects/hr/*,handoff/HR-*,ac_period,ac_cost_center,ac_coa,ac_voucher
+HANDOFF 2026-09-06T22:47:02Z HR/D64-AC-COLUMNS /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-D64-AC-COLUMNS.md
