@@ -667,6 +667,59 @@ hap worksheet create-custom-action <ws_id> -a <app_id> --btn-id <actionId> --con
 
 ---
 
+## 13. 🔴🔴 Role — `worksheetPermissions` **ตั้งผ่าน API ไม่ติดเลย** (6 ก.ย. 2569)
+
+### 13.1 สิ่งที่พบ
+
+**สร้าง role ผ่าน API ได้จริง แต่ permission matrix ที่ส่งไปถูกทิ้งทั้งก้อน** — role ที่ได้จะมีสิทธิ์ **`read 20 / edit 20 / delete 20` เท่ากันหมดทุก worksheet ในแอป** ไม่ว่าจะส่งอะไรไป
+
+ลองครบ **3 ทาง ผลเหมือนกันทั้ง 3**:
+
+| ทาง | ผลตอบกลับ | ผลจริง |
+|---|---|---|
+| `hap app role create --worksheet-permissions-json '<37 worksheet>'` | สำเร็จ คืน role object | ❌ ได้ `(20,20,20)` × **87 worksheet ทั้งแอป** |
+| `hap app role set-permissions <app> <role> --permission-way 0 -P '<...>'` | `Permissions updated.` | ❌ ไม่เปลี่ยนอะไรเลย |
+| MCP `create_role` + `worksheetPermissions[]` | `success: true` | ❌ เหมือนกัน |
+
+อ่านกลับยืนยัน **2 ทางอิสระ** — `hap app role permissions` และ MCP `get_role_details` — ตรงกันว่าเป็น `(20,20,20)` ทั้ง 87 รายการ · `permissionScope` / `permissionWay` ที่อ่านกลับได้เป็น `null`
+
+### 13.2 🔴 ทำไมเรื่องนี้อันตราย
+
+`(20,20,20)` = **"ของตัวเอง: ดู/แก้/ลบได้"** บน **ทุก worksheet ของทั้งแอป** ⇒
+
+- role ที่ตั้งใจให้ **อ่านอย่างเดียว** (ผู้ตรวจสอบภายใน · ผู้บริหาร) **ลบระเบียนของตัวเองได้**
+- role ที่ตั้งใจให้เห็นเฉพาะโมดูลตัวเอง **เห็นและแก้ข้ามโมดูลได้** (HR เห็นตารางบัญชี และกลับกัน)
+- ข้อกำหนดแยกอำนาจ (SoD) และ "ห้ามลบเอกสารที่อนุมัติแล้ว" **ไม่มีผลบังคับจริงเลย**
+
+**และมันเงียบสนิท** — ไม่มี error ไม่มี warning · ถ้าไม่อ่านกลับมาเทียบทีละ worksheet จะไม่มีทางรู้
+
+> ✅ **ตรวจแล้วบนแอปนี้ (6 ก.ย. 2569): role ของโมดูลบัญชีทั้ง 8 ตัวก็เป็นแบบเดียวกัน** — `AC-R5 Internal Auditor` ที่ควรอ่านอย่างเดียว อ่านกลับได้ `(20,20,20)` × 87 · **และมีสมาชิกผูกอยู่จริงแล้ว** ⇒ แจ้งฝั่งบัญชีแล้ว
+
+### 13.3 กฎที่ต้องใช้ตั้งแต่นี้ไป
+
+1. **ห้ามถือว่า role ที่สร้างผ่าน API มีสิทธิ์ตามที่ส่งไป** — ต้องอ่านกลับด้วย `hap app role permissions <roleId> -a <appId>` แล้ว**เทียบทีละ worksheet** ก่อนพูดว่าเสร็จ
+2. **ถ้าตั้ง matrix ไม่ติด อย่าปล่อย role ทิ้งไว้** — role ที่ชื่อบอกว่า "พนักงาน" แต่สิทธิ์จริงคือแก้/ลบได้ทั้งแอป **อันตรายกว่าไม่มี role เลย** เพราะคนจะผูกสมาชิกเข้าไปด้วยความเข้าใจผิด · รอบนี้เลือก **ลบทิ้งทั้ง 8 ตัวที่เพิ่งสร้าง** แล้วบันทึกว่าเป็นงานที่ต้องทำผ่านหน้าจอ
+3. **การตั้ง permission matrix = งาน Browser** จนกว่าจะพิสูจน์ได้ว่ามี API ทางอื่น — เข้า Setting drawer ของแต่ละ worksheet ในหน้า role แล้วกด radio scope เอง (ตรงกับที่บัญชีเคยบันทึกไว้ว่า checkbox "View/Edit All" ≠ `recordDataScope 100`)
+
+### 13.4 สคริปต์ตรวจ role ทั้งแอป
+
+```bash
+hap --json app role list -a "$APP" | python3 -c "
+import json,sys,subprocess,collections
+d=json.load(sys.stdin)
+rs=d.get('roles') or d.get('data') or d
+for r in rs:
+    p=json.loads(subprocess.run(['hap','--json','app','role','permissions',r['id'],'-a','$APP'],
+                 capture_output=True,text=True).stdout)
+    sh=(p.get('data') or p).get('sheets') or []
+    c=collections.Counter((s['recordDataScope']['read'],s['recordDataScope']['edit'],s['recordDataScope']['delete']) for s in sh)
+    print(f\"{r['name'][:38]:40s} {len(sh):3d} sheets  {dict(c)}\")
+"
+# ทุก role ที่ออกมาเป็น {(20,20,20): <จำนวน worksheet ทั้งแอป>} คือ role ที่ยังไม่ได้ตั้งสิทธิ์จริง
+```
+
+---
+
 ## ที่มา
 
 - ยิงจริงบนแอป `API-Lab` (24 + 26 ส.ค. 2569) — รายละเอียดใน `nocoly-api-lab/03-RTM-Status.md` §E

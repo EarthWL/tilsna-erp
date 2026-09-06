@@ -430,7 +430,7 @@
 
 | รหัส | สถานะ | ทำอย่างไรบน Nocoly / Gap | วิธี verify |
 |---|---|---|---|
-| NFR-HR-01 สิทธิ์และขอบเขตข้อมูล | ⬜ | `create_role` + `worksheetPermissions[]` ตาม §1.7 · scope "ของตนเอง" ผูกกับ `_owner` / `_createdBy` · "ผู้ใต้บังคับบัญชา" ใช้ scope 30 หรือ View filter | `get_role_details` + **เข้าระบบด้วยบัญชีทดสอบจริงของแต่ละบทบาท** (Gap G-06) |
+| NFR-HR-01 สิทธิ์และขอบเขตข้อมูล | ⛔ **6 ก.ย. 2569 — `create_role.worksheetPermissions` ไม่ถูกนำไปใช้เลย (`../../shared/00-HAP-Working-Guide.md` §13) ⇒ ต้องตั้งผ่านหน้าจอ** | `create_role` + `worksheetPermissions[]` ตาม §1.7 · scope "ของตนเอง" ผูกกับ `_owner` / `_createdBy` · "ผู้ใต้บังคับบัญชา" ใช้ scope 30 หรือ View filter | `get_role_details` + **เข้าระบบด้วยบัญชีทดสอบจริงของแต่ละบทบาท** (Gap G-06) |
 | NFR-HR-02 ปิดบังข้อมูลอ่อนไหว | ⬜ | ตั้ง field-level visibility ใน role (🔴 **UI เท่านั้น**) ตามตารางใน §1.7 | Role Debugging → เปิดฟอร์ม → ฟิลด์ต้องไม่ปรากฏ · ทดสอบการส่งออกด้วย |
 | NFR-HR-03 audit trail | ⬜ | `get_record_logs` + `_updatedBy` มีทุก worksheet โดยอัตโนมัติ · **Application Logs** ใน org console สำหรับ "ใครดู/พิมพ์/ดาวน์โหลด" — ไม่ต้องสร้างตาราง log เอง | `get_record_logs(hr_salary_structure, rowid)` เห็นค่าก่อน-หลัง (**AC-18**) |
 | NFR-HR-04 SLA | ⬜ | WF-HR-06 · ค่า SLA อ่านจาก `hr_setting.approval_sla_days` | **AC-14** |
