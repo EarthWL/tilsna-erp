@@ -494,7 +494,23 @@ curl -s -o /dev/null -w '%{http_code}\n' \
 
 > ตัวแปรของไอคอนเดียวกันใช้ได้หลายชื่อ: `4_1_calendar` · `sys_4_1_calendar` · `sys_4_1_calendar_line` ล้วน 200
 
-**ไม่มีคำสั่ง CLI ที่ลิสต์ไอคอนได้** และ endpoint `POST /wwwapi/AppManagement/GetIcon` ตอบ `Service exception` เมื่อยิง body ว่าง · `/file/mdpub/customIcon/icon.json` = 404
+✅ **มีคำสั่ง CLI อยู่แล้ว — `hap icon`** (ค้นพบทีหลัง · ตอนแรกเอกสารนี้เขียนผิดว่า "ไม่มี")
+
+```bash
+hap icon search <คำ>        # ค้นด้วยคำอังกฤษหรือจีน เช่น calendar / people / folder
+hap icon list -n 50 -p 2    # ไล่ดูทั้งแคตตาล็อกทีละหน้า
+```
+
+ผลลัพธ์เป็นตาราง `Icon | Keywords` โดย keyword เป็นภาษาจีน (`sys_4_1_calendar` → `日历 日程 时间`) ⇒ **ค้นด้วยคำอังกฤษได้ผลบางส่วน ค้นด้วยคำจีนแม่นกว่า**
+
+หากอยากได้ชุดเต็มพร้อมกันทีเดียว (997 ชื่อ) ยังดึงจาก DOM ของ icon picker ได้: เปิด **Edit Name and Icon** → แท็บ **Default** → รันใน console ของหน้านั้น
+
+```js
+[...document.querySelectorAll('.contentCon li > span')].map(s => s.className.trim())
+// className ของ span = ชื่อไฟล์ .svg ตรงตัว
+```
+
+endpoint ที่ picker ใช้คือ `POST /wwwapi/AppManagement/GetIcon` body `{"projectId":"<org id>","iconType":true,"keyword":"","isLine":false}` — ยิง body ว่างจะได้ `Service exception` · `/file/mdpub/customIcon/icon.json` = 404
 
 **วิธีที่ใช้ได้จริง — ดึงจาก DOM ของ icon picker** (เปิดจากไซด์บาร์ → เมนู `...` ของ worksheet → **Edit Name and Icon** → แท็บ **Default**) แล้วรันใน console ของหน้านั้น:
 
@@ -534,6 +550,48 @@ done < icons.tsv
 # verify: อ่าน iconUrl กลับมาเทียบกับ icons.tsv ทีละตัว (อย่าเชื่อ "true")
 hap --json app info -a "$APP"
 ```
+
+### 11.5 ไอคอนของ **กลุ่ม/section** — CLI ทำไม่ได้ · ต้องยิง API เอง
+
+`[V]` **`hap app edit-section` เปลี่ยนได้แค่ชื่อ** (`-n/--name` เท่านั้น ไม่มี `--icon`) และ **ใช้ได้เฉพาะ section ระดับบนสุด** — เรียกกับ **child section** จะได้ `Error: The app does not exist` ซึ่ง **เป็นข้อความที่ชี้ผิดทางโดยสิ้นเชิง** (แอปมีอยู่จริง แค่คำสั่งนี้ไม่รองรับกลุ่มลูก)
+
+`[V]` **ตั้งไอคอนได้ตอนสร้างเท่านั้น** ผ่าน `--sections-json`:
+
+```bash
+hap app add-section <appId> --parent-id <parentSectionId> \
+  --sections-json '[{"name":"HR-07 Dashboard","icon":"sys_folder-chart-bar_office"}]'
+```
+
+`[V]` **ถ้ากลุ่มมีอยู่แล้ว ทางเดียวคือยิง endpoint ภายในของหน้าเว็บ** (รันใน console ของแท็บที่ล็อกอินอยู่ — ใช้คุกกี้ session ไม่ต้องมี API key):
+
+```js
+await fetch('/wwwapi/HomeApp/UpdateAppSection', {
+  method: 'POST', headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    appId: '<appId>',
+    appSectionId: '<sectionId>',
+    appSectionName: '<ชื่อเดิม — ต้องส่งกลับไปด้วย ไม่งั้นชื่อเพี้ยน>',
+    icon: 'sys_folder-user_office'
+  })
+})
+// สำเร็จ = {"data":{"code":1,"data":true},"state":1}
+```
+
+🔴 **กับดักของ endpoint นี้ — ต้องอ่านผลลัพธ์ ไม่ใช่แค่ HTTP 200:**
+
+| body ที่ส่ง | ผลลัพธ์ | เกิดอะไรจริง |
+|---|---|---|
+| `appSectionId` + `appSectionName` + **`icon`** | `data: true` | ✅ เปลี่ยนจริง |
+| `appSectionId` + `appSectionName` + **`iconUrl`** | `data: true` | ✅ เปลี่ยนจริง (ใช้ URL เต็มก็ได้) |
+| ส่ง **`icon` และ `iconUrl` พร้อมกัน** | **`data: false`** | 🔴 **ไม่ทำอะไรเลย** — ต้องเลือกส่งอย่างใดอย่างหนึ่ง |
+| ใช้ชื่อคีย์ `name` แทน `appSectionName` | `Service exception` | ❌ |
+| ใช้ชื่อคีย์ `sectionId` แทน `appSectionId` | `Service exception` | ❌ |
+
+⇒ `state: 1` **ไม่พอ** ต้องเช็ค `data.data === true` และอ่าน `iconUrl` กลับจาก `hap app info` เสมอ
+
+**ยิงจริงแล้ว 8/8 กลุ่มของ HR** (6 ก.ย. 2569) · ตรวจหลังยิง: ชื่อกลุ่มครบถูกต้องทั้ง 8 และ **จำนวน worksheet ในแต่ละกลุ่มไม่เปลี่ยน** (10 · 7 · 2 · 3 · 7 · 6 · 2 · 0)
+
+> 💡 **แพทเทิร์นที่อ่านง่าย:** ให้ **กลุ่มใช้ไอคอนตระกูล `sys_folder-*_office`** (โฟลเดอร์) และให้ **worksheet ใช้ไอคอนรูปธรรม** ⇒ สายตาแยก "กล่อง" กับ "ของในกล่อง" ได้ทันที
 
 ---
 

@@ -519,3 +519,23 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | HR-06 | วงเงินสวัสดิการคงเหลือ | `6a95c0de9762533b5b7250a1` | `sys_wallet_finance` |
 
 **คืนค่าเดิมถ้าต้องการ:** ทุกตารางเดิมเป็น `table` ยกเว้น 5 ตารางที่เป็น `8_4_folder` (`สัญญาจ้าง` · `เหตุการณ์การจ้าง` · `ผู้ติดตามและผู้ใช้สิทธิลดหย่อน` · `บัญชีธนาคารพนักงาน` · `การตั้งค่าโมดูลบุคคล`)
+
+#### ไอคอนของกลุ่ม (section) ฝั่ง HR — ตั้งครบ 8/8 เมื่อ 6 ก.ย. 2569
+
+> 🔴 **CLI ทำไม่ได้** — `hap app edit-section` มีแค่ `--name` และใช้กับ child section ไม่ได้เลย (ตอบ `Error: The app does not exist` ซึ่งชี้ผิดทาง)
+> ทางที่ใช้จริง: `POST /wwwapi/HomeApp/UpdateAppSection` `{appId, appSectionId, appSectionName, icon}` จาก console ของแท็บที่ล็อกอินอยู่ · **ต้องส่งชื่อเดิมกลับไปด้วย** และ **ห้ามส่ง `icon` กับ `iconUrl` พร้อมกัน** (จะได้ `data:false` = ไม่ทำอะไร) · รายละเอียดใน `../../shared/00-HAP-Working-Guide.md` §11.5
+
+| กลุ่ม | sectionId | ไอคอน |
+|---|---|---|
+| HR-00 Configuration | `6a8ee66ce56d2e6eb7bd6cb4` | `sys_folder-settings_office` |
+| HR-01 Master Data | `6a8ee66ce56d2e6eb7bd6cb5` | `sys_folder-user_office` |
+| HR-02 Time and Attendance | `6a8ee66ce56d2e6eb7bd6cb6` | `sys_folder-check_office` |
+| HR-03 Leave | `6a8ee66ce56d2e6eb7bd6cb7` | `sys_folder-bookmark_office` |
+| HR-04 Payroll | `6a8ee66ce56d2e6eb7bd6cb8` | `sys_folder-money_office` |
+| HR-05 Talent (Recruitment, Performance, Training) | `6a8ee66ce56d2e6eb7bd6cb9` | `sys_folder-starred_office` |
+| HR-06 Welfare and Claims | `6a8ee66ce56d2e6eb7bd6cba` | `sys_folder-shared_office` |
+| HR-07 Dashboard | `6a9cece1db26b712423ce585` | `sys_folder-chart-bar_office` |
+
+**หลักการที่ใช้:** กลุ่ม = ไอคอนตระกูล `sys_folder-*_office` (โฟลเดอร์) · worksheet = ไอคอนรูปธรรม ⇒ แยก "กล่อง" กับ "ของในกล่อง" ได้ด้วยสายตา
+**ค่าเดิมก่อนแก้:** `HR-00` = `sys_11_2_maintenance_line` · อีก 7 กลุ่ม = `table`
+✅ ตรวจหลังยิง: ชื่อกลุ่มครบถูกต้องทั้ง 8 · จำนวน worksheet ในแต่ละกลุ่มไม่เปลี่ยน (10 · 7 · 2 · 3 · 7 · 6 · 2 · 0) · เปิดหน้าจอดูด้วยตาแล้ว
