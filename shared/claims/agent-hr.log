@@ -82,3 +82,4 @@ EXPIRED 2026-09-06T21:25:22Z AC/FIXED-ASSETS by=agent-hr was=agent-ac
 CLAIM 2026-09-06T21:25:22Z deca7391-1761-424b-9af3-c8d043004ad3 HR/SEED-EMPTY projects/hr/*,handoff/HR-*,hr_employment_event,hr_dependent,hr_bank_account,hr_pnd1_filing,hr_wht_cert
 HANDOFF 2026-09-06T21:32:13Z HR/SEED-EMPTY /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-SEED-EMPTY.md
 CLAIM 2026-09-06T21:42:14Z deca7391-1761-424b-9af3-c8d043004ad3 HR/RELATION-COLUMNS projects/hr/*,handoff/HR-*,shared/*,hr_*
+HANDOFF 2026-09-06T21:56:28Z HR/RELATION-COLUMNS /sessions/rcw-01px9yezy7lzvpdq5uyzvw9w/mnt/TILSNA/hr/handoff/HR-RELATION-COLUMNS.md
