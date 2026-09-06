@@ -63,7 +63,7 @@ _อัปเดตล่าสุด: 31 สิงหาคม 2569 (ต่อ�
 | **G-01** | `ac_voucher.source_doc_type` `6a85fb7033560633b8cd9f56` ไม่มีค่าสำหรับ HR | ใช้ `source_module` = Payroll แทนได้ชั่วคราว |
 | **G-03** | `OS_FORM_TYPE` `7b605ddd-…` ไม่มี ภ.ง.ด.1 | สร้าง `OS_HR_FILING_FORM` แยก **ห้ามแก้ optionset เดิมที่ผูก 4 ตารางของบัญชี** |
 | **G-05** | ยังไม่ยืนยันอัตราประกันสังคม เพดานฐาน และขั้นบันไดภาษีที่บังคับใช้ | ยอดสลิปอาจผิด — เก็บเป็น record แบบมีวันที่มีผล จึงแก้ทีหลังได้ |
-| **G-07** | `create_view` / `create_custom_actions` / `create_chart` **มี tool แต่ยังไม่เคยเรียกสำเร็จในแอปนี้** | Surface = `MCP (unverified)` · **ทุก DoD ต้องมีขั้นเปิดหน้าจอดูว่าโผล่จริง** |
+| **G-07** | ~~`create_view` / `create_custom_actions` / `create_chart` ยังไม่เคยเรียกสำเร็จ~~ **6 ก.ย. 2569: view / chart / custom-page ทำได้จริงผ่าน `hap` CLI** (15 view + 10 chart + แดชบอร์ด HR) · `create_custom_actions` ยังไม่พิสูจน์ | ✅ ใช้ CLI สร้างได้เลย · 🔴 **แต่ต้องอ่านกลับทุกครั้ง** — ระบบรับ `controlId` ปลอม / option key ที่ไม่มีจริง / `filter.viewId` ปลอม **ไปเงียบ ๆ** และ `chart list` บน worksheet ที่ยังไม่มี chart จะ **สร้าง** chart ขยะให้ 2 อัน (`../shared/00-HAP-Working-Guide.md` §8) |
 
 ---
 

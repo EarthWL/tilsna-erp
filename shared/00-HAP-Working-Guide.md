@@ -270,11 +270,74 @@ output field คงที่: `rollup` และ `compute(number/dateDiff)` → 
 | M-04 | ~~`delete_process_node` แล้วสร้างใหม่ ระบบเชื่อม `prevNode` ให้ไหม~~ **ตอบแล้ว: `prevNode` ของ node ถัดไป auto-relink เอง แต่ filter/condition ที่อ้าง nodeId เดิมของ node อื่นไม่ auto-relink ต้องรื้อสร้างใหม่ทั้ง downstream chain** | **[V] 27 ส.ค.** |
 | M-05 | `create_view` + `create_role.recordPermissionInViews` ทำ field-filtered visibility ครบวงจรไหม | ปิดช่องว่างที่เคยต้องพึ่ง Browser |
 | M-06 | ปุ่ม `triggerWorkflow` ที่ auto-gen workflow มี trigger alias ใช้ได้ไหม | เคสเดียวที่ `triggerAlias` อาจใช้ไม่ได้ |
-| M-07 | `create_custom_actions` / `create_chart` / `create_view` เรียกแล้วได้ object จริงไหม | **มีหลักฐานค้าน** — REST route ชื่อเดียวกันตอบ 405 body ว่าง |
+| M-07 | ~~`create_custom_actions` / `create_chart` / `create_view` เรียกแล้วได้ object จริงไหม~~ **ตอบแล้วบางส่วน: `view` / `chart` / `custom-page save` สร้าง object จริงและอ่านกลับได้ (ผ่าน `hap` CLI)** · `create_custom_actions` ยังไม่พิสูจน์ | **[V] 6 ก.ย. — ดู §8** |
 | M-08 | `get_single`/`get_multiple` filter รูปแบบอื่น (`belongs`/`subordinate_contains`) ที่ยังไม่ได้พิสูจน์ตรง ๆ ใช้ได้จริงหรือไม่ (ปัจจุบันพิสูจน์แล้วเฉพาะ `contains` สำหรับ reverse-relation และ `in` สำหรับ relation-to-relation ที่ field ชนิดเดียวกัน — ดู §2 ข้อ 16) | กระทบทุก workflow ที่ต้อง cross-reference relation |
 | M-09 🆕 | Dynamic Default มีวิธีอ้างอิง Relation field ของฟอร์มปัจจุบันแบบอื่นที่ไม่ใช่ "Query worksheet" หรือไม่ (เช่น formula/expression mode ถ้ามี) | ถ้ามี = ไม่ต้องย้าย DV ทุกเคสไป workflow |
 
 **จุดที่เอกสาร hap-skills ขัดกันเอง** — SingleSelect เป็น type **9** (view-plugin + apiv3-data) หรือ **11** (api-website) · header เป็น `HAP-Appkey` หรือ `AppKey` · V3 มี `belongsto` หรือไม่มี · base URL: **บน Nocoly คือ `/api/v3/app/...`** ไม่ใช่ `/v3/app/...` **[V]**
+
+---
+
+## 8. View / Chart / Custom page — ยืนยันจริง 6 ก.ย. 2569 (แอป ERP TILSNA, โมดูล HR)
+
+`[V]` **สร้าง view / chart / custom page ผ่าน `hap` CLI ได้จริง** — ปิดคำถาม M-07 ที่เคยเขียนว่า "มีหลักฐานค้าน (REST 405)" · หลักฐาน: สร้าง 15 view (table / kanban / hierarchy / gallery / calendar / gantt), 10 chart (column / pie / funnel / ranking / number) และ custom page `แดชบอร์ด HR` ที่วาง 10 chart แล้วอ่านกลับได้ครบด้วย `worksheet view list|info`, `worksheet chart get`, `custom-page info` (`version` เพิ่มจาก 0 → 1)
+
+### 8.1 กับดัก: อ้างของที่ไม่มีจริง แล้วระบบ "รับ" เงียบ ๆ
+
+`[V]` 🔴🔴 **filter ของ view รับ `controlId` ที่ไม่มีอยู่บน worksheet โดยไม่ error** — view ถูกสร้างสำเร็จ คืน `viewId` ปกติ แต่เงื่อนไขผูกกับ field ที่ไม่มี ⇒ กรองผิด/ว่าง · เจอจริง: ใส่ `6a8fcd7f353e1b0e4a507d47` แทน `...d44` (`hr_att_status`) · **ต้องอ่านกลับด้วย `worksheet view info` แล้วเทียบ `controlId` กับรายการ field จริงเสมอ**
+
+`[V]` 🔴🔴 **filter ของ view รับ option key ที่ไม่มีใน option set ของ field นั้นโดยไม่ error** — view สร้างสำเร็จ แต่ตอนใช้งาน**คืน 0 แถวเงียบ ๆ** · เจอจริง 3 view (`รออนุมัติ`, `มาสาย / ขาดงาน`, `OT ที่อนุมัติแล้ว`) ที่ใช้ key ซึ่งไม่มีในฟิลด์สถานะเลย · **กฎ: ต้อง dump option key จาก `hap worksheet fields <ws> --raw` ณ เวลาที่สร้าง ห้ามใช้ key จาก map ที่ cache ไว้** (แผนที่ที่ cache ไว้เมื่อ 1 ก.ย. ยังถูก แต่ key ที่ใช้จริงตอนสร้าง view กลับผิด — แปลว่าจุดพลาดคือ "ไม่ได้อ่านตอนสร้าง")
+
+`[V]` 🔴 **`filter.viewId` ของ chart รับ viewId ที่ไม่มีจริงโดยไม่ error** — เจอจริง: chart `จำนวนพนักงานตามระดับตำแหน่ง` ชี้ `6a8efa5e9762533b5b7185c4` ขณะที่ view "ทั้งหมด" จริงคือ `...c5` (`view info` ตอบ `Service exception` เมื่อถามด้วย id ปลอม = วิธีตรวจ) · แก้ด้วย `chart get` → แก้ค่า → `chart update` (ต้องส่ง config ทั้งก้อนกลับ)
+
+### 8.2 กับดัก: หลาย condition ใน `groupFilters` เป็น AND ไม่ใช่ OR
+
+`[V]` 🔴🔴 **สอง condition ใน `groupFilters` ถูก AND เข้าด้วยกัน** — เขียน "สถานะ = Late" + "สถานะ = Absent" เป็นสอง condition ⇒ view คืน **0 แถว** (เป็นไปไม่ได้ที่ค่าเดียวจะเท่ากับสองค่า) ทั้งที่มีข้อมูลตรงเงื่อนไข 4 แถว · **วิธีที่ถูก: ใช้ condition เดียว `filterType: 2` แล้วใส่ key หลายค่าใน `values` (และ `value` เป็น JSON string ของ list เดียวกัน)** · หลังแก้: 0 → 4 แถวทั้งสอง view
+
+### 8.3 กับดัก: `chart list` บน worksheet ที่ยังไม่มี chart จะ**สร้าง** chart ให้ 2 อัน
+
+`[V]` 🔴🔴 **`hap worksheet chart list <ws>` เป็นคำสั่งอ่าน แต่มี side effect** — ถ้า worksheet นั้นยังไม่มี chart เลย ระบบจะ seed chart เริ่มต้นให้ 2 อันชื่อ `Add new<ชื่อ worksheet>` (reportType 10) และ `Add new (daily)<ชื่อ worksheet>` (reportType 1) · พิสูจน์: เรียก list บน `hr_welfare_scheme` แล้วได้ chart id `6a9cec4c…` ซึ่ง timestamp ในตัว id = **9 วินาทีก่อนหน้า** (เวลาที่เรียกคำสั่งพอดี) · เจอซ้ำบน 5 worksheet · **ผลข้างเคียง: "ตรวจสอบ" ด้วยการ list ทำให้เกิดขยะที่ต้องลบทิ้ง — ใช้ `chart get <reportId>` ตรวจแทนเมื่อรู้ id แล้ว** · ลบขยะได้ด้วย `hap worksheet chart delete <reportId> -y`
+
+### 8.4 การ verify view ทำไม่ได้ด้วย `record list --view-id` ทุกชนิด
+
+`[V]` **`hap worksheet record list <ws> --view-id <v>` คืน 0 แถวสำหรับ view บางชนิด แม้ข้อมูลมีจริง** — ไม่ใช่ view พัง แต่เป็นข้อจำกัดของ API path นี้:
+
+| viewType | ชนิด | `record list --view-id` | หมายเหตุ |
+|---|---|---|---|
+| 0 (ไม่มี group) | ตาราง | ✅ ได้จำนวนจริง | ใช้ verify ได้ |
+| 0 + `advancedSetting.groupsetting` | ตารางแบบจัดกลุ่ม | ❌ คืน 0 | **พิสูจน์แล้ว: ลบ `groupsetting` ออก → 0 → 14 แถวทันที** |
+| 1 | Kanban | ❌ คืน 0 | ต้องตรวจด้วยตาบน UI |
+| 2 | ผังลำดับชั้น | ⚠️ คืนเฉพาะ node ระดับบน (10 คน → 2) | ปกติ |
+| 3 | Gallery / การ์ด | ✅ ได้จำนวนจริง | |
+| 4 | ปฏิทิน | ✅ ได้จำนวนจริง | |
+| 5 | Gantt | ❌ คืน 0 | ต้องตรวจด้วยตาบน UI |
+
+**กฎ:** อย่าสรุปว่า view เสียเพราะ `record list --view-id` คืน 0 — ต้องดูชนิด view ก่อน · และอย่าสรุปว่า view "ผ่าน" เพราะสร้างสำเร็จ — ต้องนับแถวจริงสำหรับชนิดที่นับได้
+
+### 8.5 สูตรที่ใช้ได้จริง
+
+```bash
+# view: สร้างแล้วอ่านกลับทันที
+hap worksheet view create <ws> --name "..." --view-type 1 --view-control <controlId>
+hap --json worksheet view info <ws> <viewId>      # ตรวจ controlId / option key / viewControl
+
+# view: แก้เฉพาะบางแอตทริบิวต์ (ที่เหลือคงเดิม)
+hap worksheet view update <ws> <viewId> --view-json '{"filters": [...]}' --edit-attrs filters
+hap worksheet view update <ws> <viewId> --view-json '{"advancedSetting": {...}}'     --edit-attrs advancedSetting --edit-ad-keys groupsetting
+
+# chart: ต้องมี filter scope เสมอ (CLI backfill ให้ถ้าไม่ใส่) — normType 1=sum 2=max 3=min 4=avg 5=count
+hap worksheet chart create <ws> --name "..." --report-type 1 -j '{"xaxes":{...},"yaxisList":[{...}],"filter":{"filterRangeId":"ctime","rangeType":0,"today":false}}'
+hap --json worksheet chart get <reportId>          # ตรวจว่า controlName ถูก backfill = id ถูกจริง
+
+# custom page: สร้าง section → สร้าง page → save layout (grid 48 คอลัมน์)
+hap app add-section <appId> -n "HR-07 Dashboard" --parent-id <sectionId>
+hap custom-page create <appId> "แดชบอร์ด HR" --section-id <newSectionId>
+hap custom-page save <pageId> --version 0 --components '[{"type":1,"value":"<reportId>", ...}]'
+```
+
+`[V]` **`chart get` เป็นเครื่องมือ verify ที่ดีเพราะ server backfill `controlName` ให้** — ถ้า `controlId` ที่ส่งไปไม่มีจริง `controlName` จะว่าง ⇒ ใช้แยก "id ถูก" กับ "id มั่ว" ได้โดยไม่ต้องเทียบเอง
+
+`[V]` **`custom-page save` ต้องส่ง `--version` ให้ตรงกับ version ปัจจุบันของ page** (page ที่เพิ่งสร้าง = 0) และ **save ทับทั้งหน้า** — ถ้าจะเพิ่ม component ต้องอ่าน `custom-page info` มาต่อท้ายก่อน
 
 ---
 

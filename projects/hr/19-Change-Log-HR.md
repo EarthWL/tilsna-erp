@@ -11,6 +11,7 @@ _แยกออกจาก `05-Roadmap-Tracker.md` §12 เมื่อ 31 ส
 
 | วันที่ | ผู้/agent | การเปลี่ยนแปลง |
 |---|---|---|
+| 6 ก.ย. 2569 | agent-hr | **HR/DEMO-VIEWS** — สร้างชั้นนำเสนอทั้งชุดผ่าน `hap` CLI: **15 view** (table/kanban/hierarchy/gallery/calendar/gantt), **10 chart** (column/pie/funnel/ranking/number) และ **custom page `แดชบอร์ด HR`** ใต้ section ใหม่ `HR-07 Dashboard` · **ปิดคำถาม M-07** — `create_view`/`create_chart`/`custom-page save` สร้าง object จริงและอ่านกลับได้ (เดิมเขียนว่า "มีหลักฐานค้าน") · ตรวจสอบย้อนทุกชิ้นแล้วพบและแก้จุดผิด 4 กลุ่ม: option key ที่ไม่มีจริงใน filter ของ 3 view (คืน 0 แถวเงียบ ๆ) · เงื่อนไข 2 ค่าที่ถูก AND แทน OR ใน 2 view (0 → 4 แถว) · `filter.viewId` ปลอมใน 1 chart · chart ขยะ 10 อันที่เกิดจาก `chart list` · บทเรียนใหม่ 5 ข้อเขียนลง `shared/00-HAP-Working-Guide.md` §8 (รวมกับดักร้ายแรง: **`chart list` เป็นคำสั่งอ่านที่สร้าง chart**) · เอกสารใหม่ `28-Demo-Views-Charts-HR.md` (เส้นทางนำเสนอ + สิ่งที่ยังต้องดูด้วยตา) |
 | 26 ส.ค. 2569 | `nocoly-build-docs` | สร้างชุดเอกสารครั้งแรก · ดึงโครงสร้างจริงของโมดูลบัญชี 6 ตารางมาผูกเป็นจุดเชื่อม · ระบุ Gap G-01…G-08 · ยังไม่มี object ของ HR บนเซิร์ฟเวอร์ |
 | 26 ส.ค. 2569 | build agent (MCP) | **P1-1 เสร็จ** — สร้างกลุ่ม HR + HR-00…HR-06 ครบ 8 กลุ่มผ่าน `create_app_sections` · ยืนยันด้วย `get_app_info` |
 | 26 ส.ค. 2569 | build agent (MCP) | **P1-2 เสร็จ** — สร้าง optionset ใหม่ 24 ชุดผ่าน `create_optionset` ครบทุกตัว · ยืนยันด้วย `get_optionset_list` · คัดลอก ID + option key ทุกตัวลง `02-BuildSpec-FRS.md` §1.6 / §1.6.1 แล้ว |

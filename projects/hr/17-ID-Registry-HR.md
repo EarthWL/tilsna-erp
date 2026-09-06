@@ -359,3 +359,64 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 | **WF-HR-16** | เปลี่ยน `cand_stage` → `Interview 1` → นัดสัมภาษณ์ 2 นัดที่ `notified_flag` **ว่าง** ถูกตั้งเป็น `1` ทั้งคู่ · `stage_changed_at` ถูกประทับเวลา · เพิ่มนัดที่ 3 (ยังไม่แจ้ง) แล้วเปลี่ยนเป็น `Interview 2` → นัดที่ 3 ถูกแจ้งและตั้งธง ส่วน 1–2 คงเป็น 1 ✅ |
 
 > ✅ **ทั้ง 3 ตัวใส่ gate กันค่าว่างตามบทเรียน D-19 ตั้งแต่แรก** — และ WF-HR-16 ได้ทดสอบเส้นทางค่าว่างจริง เพราะ `notified_flag` ของนัดที่สร้างใหม่**ว่าง** (ไม่ใช่ 0) ตามที่ `defaultValue` ไม่ persist
+
+---
+
+### 🆕 ID View / Chart / Custom page ชุด Demo (HR/DEMO-VIEWS — สร้าง+ตรวจสอบ 6 ก.ย. 2569)
+
+> วิธีตรวจซ้ำ: `hap --json worksheet view info <ws_id> <view_id>` และ `hap --json worksheet chart get <report_id>`
+> 🔴 **ห้ามใช้ `hap worksheet chart list` เพื่อตรวจ** — บน worksheet ที่ยังไม่มี chart คำสั่งนี้ **สร้าง** chart ขยะให้ 2 อัน (ดู `00-HAP-Working-Guide.md` §8.3)
+
+#### View (15 รายการ — ของใหม่รอบนี้ทั้งหมด)
+
+| worksheet | view | viewId | viewType | นับแถวจริง |
+|---|---|---|---|---|
+| `hr_candidate` | กระดานสรรหา (Kanban) | `6a9cea7ef363582dd3792c51` | 1 kanban (`cand_stage`) | — (API นับไม่ได้) |
+| `hr_employee` | ผังองค์กร (Org Chart) | `6a9cea9df363582dd3792c53` | 2 hierarchy (`supervisor`) | 2 node ระดับบน |
+| `hr_employee` | ทำเนียบพนักงาน (การ์ด) | `6a9cea9df363582dd3792c55` | 3 gallery | 10 |
+| `hr_employee` | พนักงานทดลองงาน | `6a9cea9d4a22ad87b7279fa8` | 0 table | 1 |
+| `hr_leave_request` | ปฏิทินการลา | `6a9ceaa7f363582dd3792c57` | 4 calendar | 14 |
+| `hr_leave_request` | กระดานสถานะใบลา | `6a9ceaa74a73a3142151a125` | 1 kanban (`leave_status`) | — |
+| `hr_leave_request` | รออนุมัติ | `6a9ceaa74a73a3142151a127` | 0 table | 4 |
+| `hr_employment_contract` | ไทม์ไลน์สัญญาจ้าง (Gantt) | `6a9ceab14720c515252ab4a7` | 5 gantt | — |
+| `hr_employment_contract` | สัญญาที่มีกำหนดสิ้นสุด | `6a9ceab14720c515252ab4a9` | 0 table | 2 |
+| `hr_attendance` | ปฏิทินลงเวลา | `6a9ceab94720c515252ab4ab` | 4 calendar | 41 |
+| `hr_attendance` | มาสาย / ขาดงาน | `6a9ceae1f363582dd3792c5b` | 0 table | 4 |
+| `hr_ot_request` | กระดานสถานะใบขอ OT | `6a9ceaea4720c515252ab4ad` | 1 kanban (`hr_ot_status`) | — |
+| `hr_ot_request` | OT ที่อนุมัติแล้ว | `6a9ceaea4a73a3142151a129` | 0 table | 2 |
+| `hr_appraisal` | กระดานความคืบหน้าการประเมิน | `6a9ceaf54720c515252ab4af` | 1 kanban (`appraisal_status`) | — |
+| `hr_appraisal` | ประเมินเสร็จแล้ว (เรียงคะแนน) | `6a9ceaf54720c515252ab4b1` | 0 table | 4 |
+| `hr_payslip` | สลิปงวด ส.ค. 2569 | `6a9ceafaf363582dd3792c5d` | 0 table | 8 |
+| `hr_leave_balance` | สิทธิคงเหลือรายคน | `6a9ceb014720c515252ab4b3` | 0 table | 36 |
+| `hr_welfare_balance` | วงเงินสวัสดิการคงเหลือ | `6a9ceb074a73a3142151a12b` | 0 table | 14 |
+
+#### Chart (10 รายการ)
+
+| worksheet | chart | reportId | reportType | ค่าที่วัด |
+|---|---|---|---|---|
+| `hr_employee` | จำนวนพนักงานทั้งหมด (KPI) | `6a9ceca140cf7aec60e9eddf` | 10 number | COUNT record |
+| `hr_employee` | จำนวนพนักงานตามระดับตำแหน่ง | `6a9ceb0e40cf7aec60e9eddb` | 1 column | COUNT × `job_level` |
+| `hr_payslip` | ยอดจ่ายสุทธิรวมทั้งงวด | `6a9ceb57720a3fbb2b182cab` | 10 number | SUM `biz_net_pay` |
+| `hr_leave_request` | สัดส่วนใบลาตามสถานะ | `6a9ceb44720a3fbb2b182ca6` | 3 pie | COUNT × `leave_status` |
+| `hr_leave_request` | วันลาสะสมตามประเภทการลา | `6a9ceb4a720a3fbb2b182ca8` | 1 column | SUM วัน × ประเภทการลา |
+| `hr_attendance` | สถิติการมาทำงานรายวัน | `6a9ceb50720a3fbb2b182ca9` | 1 column | COUNT × `hr_att_status` |
+| `hr_ot_request` | ชั่วโมง OT รวมตามพนักงาน | `6a9cec9ee29effb3d6a57a6b` | 16 ranking | SUM `hr_ot_hours` × พนักงาน |
+| `hr_candidate` | ผู้สมัครตามขั้นตอนการคัดเลือก | `6a9ceb3e40cf7aec60e9eddd` | 6 funnel | COUNT × `cand_stage` |
+| `hr_appraisal` | คะแนนประเมินเฉลี่ยตามรอบ | `6a9ceca240cf7aec60e9ede0` | 1 column | AVG `final_score` × รอบ |
+| `hr_welfare_balance` | วงเงินสวัสดิการ ใช้ไป vs คงเหลือ | `6a9cec9fe29effb3d6a57a6c` | 1 column | SUM `used_amount` / `remaining_amount` × สวัสดิการ |
+
+#### Section / Custom page
+
+| object | id | หมายเหตุ |
+|---|---|---|
+| section `HR-07 Dashboard` | `6a9cece1db26b712423ce585` | child section ใต้ `ทรัพยากรบุคคลฯ (HR)` = `6a8ee668e56d2e6eb7bd6cb3` |
+| custom page `แดชบอร์ด HR` | `6a9cece5db26b712423ce586` | version 1 · 10 component (chart ทั้งหมดข้างบน) · layout grid 48 คอลัมน์ 2 ชิ้น/แถว |
+
+#### ⚠️ แก้จุดผิดที่พบระหว่างตรวจสอบ (ทั้งหมดแก้แล้ว)
+
+| จุดผิด | อาการ | แก้อย่างไร |
+|---|---|---|
+| view 3 ตัวใช้ option key ที่ไม่มีจริง | คืน 0 แถวเงียบ ๆ | `view update --edit-attrs filters` ด้วย key จาก `worksheet fields --raw` |
+| view 2 ตัวเขียนเงื่อนไข "Late" + "Absent" เป็นสอง condition | ถูก AND ⇒ 0 แถว | รวมเป็น condition เดียว `filterType 2` หลายค่าใน `values` → 4 แถว |
+| chart `จำนวนพนักงานตามระดับตำแหน่ง` ชี้ `filter.viewId` = `…7185c4` ซึ่งไม่มีจริง | scope ผิด | `chart update` เป็น `…7185c5` (view "ทั้งหมด" จริง) |
+| chart ขยะ `Add new…` 10 อัน จากการเรียก `chart list` | รกหน้าจอ | `chart delete -y` ทั้งหมด |
