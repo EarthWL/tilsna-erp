@@ -469,3 +469,53 @@ _แยกออกจาก `04-CLAUDE-memory.md` เมื่อ 30 ส.ค. 2
 
 - **`biz_cost_center`** — workflow เขียนค่าจาก `sub_trigger › cost_center` แต่ **EMP-0001 ไม่มี cost_center** ⇒ ผลออกมาว่างเพราะต้นทางว่าง **ไม่ใช่เพราะ workflow ผิด** · ยังไม่มีหลักฐานว่า copy relation→relation ทำงาน — ต้องทดสอบกับพนักงานที่มี cost_center
 - **`biz_recalc_flag` = 1 ตั้งใจให้ไปยิง WF-HR-08 ต่อ** ซึ่ง **ยังไม่ได้สร้าง** ⇒ ตอนนี้ธงถูกตั้งไว้เฉย ๆ ไม่มีอะไรมารับช่วง สลิปจึงยังเป็น Draft ยอด 0 ทุกใบ
+
+---
+
+### 🆕 ไอคอนของ worksheet ฝั่ง HR (HR/WS-ICONS — ตั้งครบ 37/37 เมื่อ 6 ก.ย. 2569)
+
+> ก่อนหน้านี้ **32 ตารางใช้ `table` เหมือนกันหมด** + 5 ตารางใช้ `8_4_folder` ⇒ ไซด์บาร์แยกไม่ออกตอนนำเสนอ
+> ตั้งผ่าน `hap worksheet update <ws_id> --icon <ชื่อ> -a <app_id>` · **ตรวจชื่อไอคอนด้วย HTTP 200 ก่อนยิงทุกตัว** และอ่าน `iconUrl` กลับมาเทียบทีละตาราง (วิธี + กับดักอยู่ใน `../../shared/00-HAP-Working-Guide.md` §11)
+> ✅ ยืนยันแล้วว่า **ชื่อตาราง · `entityName` · `alias` · จำนวนฟิลด์ · จำนวน record ไม่เปลี่ยน** และ **ไอคอนไม่ซ้ำกันเลยทั้ง 37 ตัว**
+
+| กลุ่ม | worksheet | worksheet_id | ไอคอน |
+|---|---|---|---|
+| HR-00 | การตั้งค่าโมดูลบุคคล | `6a8eebbd353e1b0e4a507477` | `sys_gear1_office` |
+| HR-00 | วันหยุดประจำปี | `6a8eebf7353e1b0e4a5074b5` | `sys_4_1_calendar` |
+| HR-00 | กะการทำงาน | `6a8eebf79762533b5b7184c5` | `sys_4_2_clock` |
+| HR-00 | ประเภทการลา | `6a8eebf89762533b5b7184cf` | `sys_15_8_beach` |
+| HR-00 | อัตราค่าล่วงเวลา | `6a8eebf88b6633ef76f129d6` | `sys_4_3_alarm_clock` |
+| HR-00 | อัตราประกันสังคม | `6a8eebf8353e1b0e4a5074c1` | `sys_10_3_security_checked` |
+| HR-00 | ขั้นบันไดภาษีเงินได้บุคคลธรรมดา | `6a8eebf8ae2a0e3743a0bcec` | `sys_percentage_finance` |
+| HR-00 | ค่าลดหย่อนภาษี | `6a8eebf8353e1b0e4a5074cb` | `sys_coupon_finance` |
+| HR-00 | กฎการอนุมัติของโมดูลบุคคล | `6a8eebf81378964f998499f8` | `sys_1_7_approval` |
+| HR-00 | นโยบายสิทธิการลา | `6a8eebf88b6633ef76f129e1` | `sys_12_2_book` |
+| HR-01 | ตำแหน่งงาน | `6a8ef9901378964f99849a6d` | `sys_8_3_briefcase` |
+| HR-01 | ระดับพนักงาน | `6a8ef9909762533b5b71859a` | `sys_hierarchy_symbol` |
+| HR-01 | ทะเบียนพนักงาน | `6a8efa5e9762533b5b7185c1` | `sys_1_10_people` |
+| HR-01 | สัญญาจ้าง | `6a8efd1e9762533b5b718618` | `sys_signature_symbol` |
+| HR-01 | เหตุการณ์การจ้าง | `6a8efd1e8b6633ef76f12ad4` | `sys_timeline_symbol` |
+| HR-01 | ผู้ติดตามและผู้ใช้สิทธิลดหย่อน | `6a8efd1eae2a0e3743a0bd93` | `sys_6_1_user_group` |
+| HR-01 | บัญชีธนาคารพนักงาน | `6a8efd1fae2a0e3743a0bd9d` | `sys_bank-statement_finance` |
+| HR-02 | บันทึกลงเวลา | `6a8fcd67353e1b0e4a507d32` | `sys_todo_office` |
+| HR-02 | ใบขออนุมัติล่วงเวลา | `6a8fcca48b6633ef76f13033` | `sys_money-time_symbol` |
+| HR-03 | สิทธิและยอดคงเหลือการลา | `6a8f2dba353e1b0e4a507757` | `sys_balance_activity` |
+| HR-03 | ใบลา | `6a8f2dbaae2a0e3743a0beaa` | `sys_stay-home_people` |
+| HR-03 | รายการเคลื่อนไหวสิทธิลา | `6a8f2dba9762533b5b718675` | `sys_transactions_symbol` |
+| HR-04 | องค์ประกอบค่าจ้าง | `6a8ff2868b6633ef76f13871` | `sys_1_4_calculator` |
+| HR-04 | งวดจ่ายเงินเดือน | `6a8ff2878b6633ef76f1387b` | `sys_bill_finance` |
+| HR-04 | โครงสร้างเงินเดือน | `6a8ff287353e1b0e4a508550` | `sys_chart-bar_finance` |
+| HR-04 | สลิปเงินเดือน | `6a904c85353e1b0e4a50ba05` | `sys_cheque_office` |
+| HR-04 | รายการในสลิปเงินเดือน | `6a904c858b6633ef76f16a0b` | `sys_bullet-list_office` |
+| HR-04 | การยื่นภาษีเงินได้หัก ณ ที่จ่าย (เงินเดือน) | `6a904e72ae2a0e3743a0fd06` | `sys_1_6_document` |
+| HR-04 | หนังสือรับรองการหักภาษี ณ ที่จ่าย | `6a904e73353e1b0e4a50ba83` | `sys_certificate_object` |
+| HR-05 | ใบขออัตรากำลัง | `6a95c1349762533b5b7250b5` | `sys_1_5_create_new` |
+| HR-05 | ผู้สมัคร | `6a95c137ae2a0e3743a1887f` | `sys_search_people` |
+| HR-05 | การสัมภาษณ์ | `6a95c1399762533b5b7250c1` | `sys_interview_people` |
+| HR-05 | รอบประเมินผล | `6a95c13b1378964f99857909` | `sys_2_3_statistics` |
+| HR-05 | แบบประเมินผล | `6a95c13d1378964f99857913` | `sys_form_symbol` |
+| HR-05 | รายการประเมิน | `6a95c140353e1b0e4a515ae6` | `sys_10_5_star` |
+| HR-06 | สวัสดิการ | `6a95c0db8b6633ef76f1fcf9` | `sys_14_1_gift` |
+| HR-06 | วงเงินสวัสดิการคงเหลือ | `6a95c0de9762533b5b7250a1` | `sys_wallet_finance` |
+
+**คืนค่าเดิมถ้าต้องการ:** ทุกตารางเดิมเป็น `table` ยกเว้น 5 ตารางที่เป็น `8_4_folder` (`สัญญาจ้าง` · `เหตุการณ์การจ้าง` · `ผู้ติดตามและผู้ใช้สิทธิลดหย่อน` · `บัญชีธนาคารพนักงาน` · `การตั้งค่าโมดูลบุคคล`)

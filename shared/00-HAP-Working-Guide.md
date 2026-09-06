@@ -457,6 +457,86 @@ for v in cond.get('conditionValues') or []:
 
 ---
 
+## 11. ไอคอนของ worksheet — เปลี่ยนผ่าน CLI ได้ · 6 ก.ย. 2569
+
+### 11.1 `[V]` คำสั่งที่ใช้ได้จริง
+
+```bash
+hap worksheet update <worksheet_id> --icon <ชื่อไอคอน> -a <app_id>
+```
+
+ยิงจริง **37 ครั้งบน worksheet ของ HR ทั้งหมด สำเร็จ 37/37** อ่านกลับด้วย `hap app info` ตรงทุกตัว · ส่ง `--icon` เดี่ยว ๆ ได้ **ไม่ต้องส่ง `--name` มาด้วย** และตรวจแล้วว่า **ชื่อตาราง · `entityName` · `alias` · จำนวนฟิลด์ · จำนวน record ไม่ถูกแตะเลย**
+
+> `--icon-color` มีเฉพาะตอน `worksheet create` — **`update` เปลี่ยนสีไอคอนไม่ได้**
+
+### 11.2 `[V]` 🔴 รับชื่อไอคอนที่ไม่มีจริงไปเงียบ ๆ
+
+`hap worksheet update --icon zz_not_a_real_icon_xyz` ตอบ **`true`** และเก็บ URL นั้นลง `iconUrl` จริง ⇒ ไอคอนบนไซด์บาร์กลายเป็นช่องว่าง **ไม่มี error ที่ไหนเลย** (ตระกูลเดียวกับ §8.1 — ระบบรับ id ที่ไม่มีจริงไปเงียบ ๆ)
+
+**ตรวจก่อนใช้เสมอ** — ไฟล์ต้องมีอยู่จริง:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  "https://www.nocoly.com/file/mdpub/customIcon/<ชื่อ>.svg"   # 200 = ใช้ได้ · 400 = ไม่มี
+```
+
+🔴 **ตัวอย่างใน `hap worksheet update --help` เองก็ผิด** — ยกตัวอย่าง `shopping_cart` ซึ่งเช็คแล้วได้ **400** (ชื่อจริงคือ `sys_13_3_shopping_cart_loaded`)
+
+### 11.3 `[V]` ชื่อไอคอนเดาไม่ได้ — และวิธีดึงรายชื่อทั้งชุด (997 ชื่อ)
+
+คำอังกฤษธรรมดา (`calendar` `user` `money` `file` `chart` `clock`) **400 ทั้งหมด** · ชื่อจริงมี 3 ทรง:
+
+| ทรง | ตัวอย่าง |
+|---|---|
+| `sys_<กลุ่ม>_<ลำดับ>_<คำ>` | `sys_4_1_calendar` · `sys_1_10_people` |
+| `sys_<คำ>_<หมวด>` | `sys_wallet_finance` · `sys_interview_people` · `sys_gear1_office` |
+| ชื่อลอย | `table` · `8_4_folder` |
+
+> ตัวแปรของไอคอนเดียวกันใช้ได้หลายชื่อ: `4_1_calendar` · `sys_4_1_calendar` · `sys_4_1_calendar_line` ล้วน 200
+
+**ไม่มีคำสั่ง CLI ที่ลิสต์ไอคอนได้** และ endpoint `POST /wwwapi/AppManagement/GetIcon` ตอบ `Service exception` เมื่อยิง body ว่าง · `/file/mdpub/customIcon/icon.json` = 404
+
+**วิธีที่ใช้ได้จริง — ดึงจาก DOM ของ icon picker** (เปิดจากไซด์บาร์ → เมนู `...` ของ worksheet → **Edit Name and Icon** → แท็บ **Default**) แล้วรันใน console ของหน้านั้น:
+
+```js
+[...document.querySelectorAll('.contentCon li > span')].map(s => s.className.trim())
+// → 997 ชื่อ · className ของ span = ชื่อไฟล์ .svg ตรงตัว
+```
+
+หมวดใน picker: Basic · Office · Finance · Object · Character · Symbol · Natural · Clothing · Diet · Activity · Transportation · Location
+
+**ชุดที่ใช้ได้ดีกับงานธุรกิจ (ตรวจแล้ว 200 ทุกตัว):**
+
+| งาน | ชื่อไอคอน |
+|---|---|
+| ปฏิทิน / เวลา / นาฬิกาปลุก | `sys_4_1_calendar` · `sys_4_2_clock` · `sys_4_3_alarm_clock` |
+| คน / กลุ่มคน / ค้นหาคน / สัมภาษณ์ | `sys_1_10_people` · `sys_6_1_user_group` · `sys_search_people` · `sys_interview_people` |
+| เงิน / กระเป๋าเงิน / บิล / เช็ค / เปอร์เซ็นต์ | `sys_3_1_coins` · `sys_wallet_finance` · `sys_bill_finance` · `sys_cheque_office` · `sys_percentage_finance` |
+| เอกสาร / ใบรับรอง / ลายเซ็น / รายการ | `sys_1_6_document` · `sys_certificate_object` · `sys_signature_symbol` · `sys_bullet-list_office` |
+| กราฟ / สถิติ / โครงสร้าง / ไทม์ไลน์ | `sys_2_1_bar_chart` · `sys_2_3_statistics` · `sys_hierarchy_symbol` · `sys_timeline_symbol` |
+| อนุมัติ / ตั้งค่า / ความปลอดภัย / กระเป๋าเอกสาร | `sys_1_7_approval` · `sys_gear1_office` · `sys_10_3_security_checked` · `sys_8_3_briefcase` |
+| สวัสดิการ / ของขวัญ / ดาว / หนังสือ | `sys_14_1_gift` · `sys_10_5_star` · `sys_12_2_book` |
+
+### 11.4 สคริปต์ที่ใช้จริง (ตรวจก่อน แล้วค่อยยิง)
+
+```bash
+# ไฟล์ icons.tsv: <worksheet_id>\t<ชื่อตาราง>\t<ชื่อไอคอน>
+while IFS=$'\t' read -r id name ic; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' \
+    "https://www.nocoly.com/file/mdpub/customIcon/$ic.svg")
+  [ "$code" = 200 ] || echo "❌ $ic ($name)"
+done < icons.tsv        # ต้องไม่มี ❌ ก่อนจึงยิงจริง
+
+while IFS=$'\t' read -r id name ic; do
+  hap worksheet update "$id" --icon "$ic" -a "$APP"
+done < icons.tsv
+
+# verify: อ่าน iconUrl กลับมาเทียบกับ icons.tsv ทีละตัว (อย่าเชื่อ "true")
+hap --json app info -a "$APP"
+```
+
+---
+
 ## ที่มา
 
 - ยิงจริงบนแอป `API-Lab` (24 + 26 ส.ค. 2569) — รายละเอียดใน `nocoly-api-lab/03-RTM-Status.md` §E
